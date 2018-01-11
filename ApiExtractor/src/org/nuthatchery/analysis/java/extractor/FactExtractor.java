@@ -1,10 +1,6 @@
 package org.nuthatchery.analysis.java.extractor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,7 +10,6 @@ import java.util.Stack;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Handle;
@@ -22,68 +17,13 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.ModuleVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.util.Printer;
 
 public class FactExtractor extends ClassVisitor {
 
-	public static final String CLASS = "class";
-	public static final String EXTENDS = "extends";
-	public static final String IMPLEMENTS = "implements";
-	public static final String PUBLIC = "public";
-	public static final String ACCESS = "access";
-	public static final String THROWS = "throws";
-	public static final String METHOD = "method";
-	public static final String GENERIC = "generic";
-	public static final String CALLS = "calls";
-	public static final String VIRTUAL = "virtual";
-	public static final String SPECIAL = "special";
-	public static final String STATIC = "static";
-	public static final String INTERFACE = "interface";
-	public static final String DYNAMIC = "dynamic";
-	public static final String CREATES = "creates";
-	public static final String USES_TYPE = "usesType";
-	public static final String FIELD = "field";
-	public static final String READS = "reads";
-	public static final String WRITES = "writes";
-	public static final String SIGNATURE = "signature";
-	public static final String CONSTRUCTOR = "constructor";
-	public static final String CONSTRUCTS = "constructs";
-	public static final String DECLARES_THROW = "declaresThrow";
-	public static final String SOURCE = "source";
-	public static final String DEBUG = "debug";
-	public static final String INITIAL_VALUE = "initialValue";
 	private static PrintWriter output;
 
-	public static void main(String[] args) throws IOException {
-		try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
-			output = new PrintWriter(new OutputStreamWriter(stream, Charset.forName("UTF-8")));
-			FactExtractor ea = new FactExtractor();
-			ClassReader cr = new ClassReader(FactExtractor.class.getResourceAsStream("ImmutablePosition.class"));
-			cr.accept(ea, ClassReader.EXPAND_FRAMES);
-			cr = new ClassReader(FactExtractor.class.getResourceAsStream("MutablePosition.class"));
-			cr.accept(ea, ClassReader.EXPAND_FRAMES);
-			cr = new ClassReader(FactExtractor.class.getResourceAsStream("Test.class"));
-			cr.accept(ea, ClassReader.EXPAND_FRAMES);
-			// cr = new
-			// ClassReader(ExtractApi.class.getResourceAsStream("ExtractApi.class"));
-			// cr.accept(ea, 0);
-			if (output != null) {
-				output.close();
-				stream.close();
-				byte[] bs = stream.toByteArray();
-				String s = new String(bs, Charset.forName("UTF-8"));
-				String[] lines = s.split("\n");
-				Arrays.sort(lines);
-				try (PrintWriter writer = new PrintWriter("/tmp/data.pl")) {
-					for (String l : lines) {
-						writer.println(l);
-					}
-				}
-			}
-		}
-	}
 
 	protected String context;
 	protected final Stack<String> currentClass = new Stack<>();
@@ -96,54 +36,9 @@ public class FactExtractor extends ClassVisitor {
 
 	protected Set<String> seen = new HashSet<>();
 
-	public FactExtractor() {
+	public FactExtractor(String context) {
 		super(Opcodes.ASM6);
-		context = "C";
-	}
-
-	private String decodeDescriptor(String desc) {
-		return decodeDescriptor(null, desc);
-	}
-
-	private String decodeDescriptor(String name, String desc) {
-		StringBuilder b = new StringBuilder();
-		decodeDescriptor(name, Type.getType(desc), b);
-		return b.toString();
-	}
-
-	private String decodeDescriptor(String owner, String name, String desc) {
-		StringBuilder b = new StringBuilder();
-
-		decodeDescriptor(owner + "::" + name, Type.getType(desc), b);
-		return b.toString();
-	}
-
-	private void decodeDescriptor(String name, Type type, StringBuilder b) {
-		if (type.getSort() == Type.METHOD) {
-			decodeDescriptor(null, type.getReturnType(), b);
-			if (name != null) {
-				b.append(" ");
-				b.append(name);
-			}
-			b.append("(");
-			String sep = "";
-			for (Type t : type.getArgumentTypes()) {
-				b.append(sep);
-				decodeDescriptor(null, t, b);
-				sep = ", ";
-			}
-			b.append(")");
-		} else if (type.getSort() == Type.ARRAY) {
-			decodeDescriptor(null, type.getElementType(), b);
-			for (int i = type.getDimensions(); i > 0; i--)
-				b.append("[]");
-		} else {
-			b.append(type.getClassName());
-			if (name != null) {
-				b.append(" ");
-				b.append(name);
-			}
-		}
+		this.context = context;
 	}
 
 	private String getClassName() {
@@ -198,55 +93,55 @@ public class FactExtractor extends ClassVisitor {
 	}
 
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-		logln("\n" + indent() + "class " + name + " {");
+		JavaUtil.logln("\n" + indent() + "class " + name + " {");
 		// logf("\n\n" + indent() + "visit(version=%d, access=%d,
 		// name=%s, signature=%s, superName=%s, interfaces=%s)%n", version,
 		// access, name, signature, superName, Arrays.toString(interfaces));
 		currentClass.push(name);
-		put(CLASS, name);
-		put(SIGNATURE, name, name);
+		put(JavaFacts.CLASS, name);
+		put(JavaFacts.SIGNATURE, name, name);
 		if (superName != null)
-			put(EXTENDS, name, superName);
+			put(JavaFacts.EXTENDS, name, superName);
 		if (interfaces != null)
 			for (String s : interfaces)
-				put(IMPLEMENTS, name, s);
+				put(JavaFacts.IMPLEMENTS, name, s);
 		if ((access & Opcodes.ACC_PUBLIC) != 0)
-			put(ACCESS, name, PUBLIC);
+			put(JavaFacts.ACCESS, name, JavaFacts.PUBLIC);
 	}
 
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		logf(indent() + "visitAnnotation(desc=%s, visible=%b)%n", desc, visible);
+		JavaUtil.logf(indent() + "visitAnnotation(desc=%s, visible=%b)%n", desc, visible);
 		return null;
 	}
 
 	public void visitAttribute(Attribute attr) {
-		logf(indent() + "visitAttribue(attr=%s)%n", attr);
+		JavaUtil.logf(indent() + "visitAttribue(attr=%s)%n", attr);
 	}
 
 	public void visitEnd() {
 		String s = getClassName();
 		currentClass.pop();
-		logln(indent() + "} // end of " + s + "\n");
+		JavaUtil.logln(indent() + "} // end of " + s + "\n");
 	}
 
 	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
 		// logf(indent() + "visitField(access=%s, name=%s, desc=%s,
 		// signature=%s, value=%s)%n", Printer.OPCODES[access],
 		// name, desc, signature, value);
-		logln("\n" + indent() + "field " + decodeDescriptor(getClassName(), name, desc));
+		JavaUtil.logln("\n" + indent() + "field " + JavaUtil.decodeDescriptor(getClassName(), name, desc));
 		String fullName = getMemberName(name, desc);
 		currentMethod.push(fullName);
-		put(FIELD, fullName);
-		put(SIGNATURE, fullName, decodeDescriptor(getClassName(), name, desc));
+		put(JavaFacts.FIELD, fullName);
+		put(JavaFacts.SIGNATURE, fullName, JavaUtil.decodeDescriptor(getClassName(), name, desc));
 		if (value != null) {
-			put(INITIAL_VALUE, fullName, value.toString());
+			put(JavaFacts.INITIAL_VALUE, fullName, value.toString());
 		}
 		currentMethod.pop();
 		return null;
 	}
 
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-		logf(indent() + "visitOuterClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name, outerName, innerName,
+		JavaUtil.logf(indent() + "visitOuterClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name, outerName, innerName,
 				Printer.OPCODES[access]);
 	}
 
@@ -258,22 +153,22 @@ public class FactExtractor extends ClassVisitor {
 		// Arrays.toString(exceptions));
 		System.out.flush();
 		System.err.flush();
-		logln("\n" + indent() + "method " + decodeDescriptor(getClassName(), name, desc));
+		JavaUtil.logln("\n" + indent() + "method " + JavaUtil.decodeDescriptor(getClassName(), name, desc));
 		String fullName = getMemberName(name, desc);
 		currentMethod.push(fullName);
-		put(METHOD, fullName);
+		put(JavaFacts.METHOD, fullName);
 		if (name.equals("<init>")) {
-			put(CONSTRUCTOR, fullName);
-			put(CONSTRUCTS, fullName, getClassName());
+			put(JavaFacts.CONSTRUCTOR, fullName);
+			put(JavaFacts.CONSTRUCTS, fullName, getClassName());
 		}
-		put(SIGNATURE, fullName, decodeDescriptor(getClassName(), name, desc));
+		put(JavaFacts.SIGNATURE, fullName, JavaUtil.decodeDescriptor(getClassName(), name, desc));
 		if (signature != null)
-			put(GENERIC, fullName, signature);
+			put(JavaFacts.GENERIC, fullName, signature);
 		if (exceptions != null)
 			for (String s : exceptions)
-				put(DECLARES_THROW, fullName, s);
+				put(JavaFacts.DECLARES_THROW, fullName, s);
 		if ((access & Opcodes.ACC_PUBLIC) != 0)
-			put(PUBLIC, fullName); // or put(ACCESS, fullName, PUBLIC);
+			put(JavaFacts.PUBLIC, fullName); // or put(JF.ACCESS, fullName, PUBLIC);
 		return new MethodVisitor(Opcodes.ASM6) {
 
 			public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
@@ -285,12 +180,12 @@ public class FactExtractor extends ClassVisitor {
 			}
 
 			public void visitAttribute(Attribute attr) {
-				logf(indent() + "visitAttribue(attr=%s)%n", attr);
+				JavaUtil.logf(indent() + "visitAttribue(attr=%s)%n", attr);
 				super.visitAttribute(attr);
 			}
 
 			public void visitCode() {
-				logln(indent() + "{");
+				JavaUtil.logln(indent() + "{");
 				localInfo.clear();
 				stackInfo.clear();
 				super.visitCode();
@@ -301,7 +196,7 @@ public class FactExtractor extends ClassVisitor {
 				String s = getMethodName();
 				currentMethod.pop();
 				currentLine = -1;
-				logln(indent() + "} // end of " + s);
+				JavaUtil.logln(indent() + "} // end of " + s);
 			}
 
 			@Override
@@ -309,20 +204,20 @@ public class FactExtractor extends ClassVisitor {
 				// logln(indent() + "" + Printer.OPCODES[opcode] +
 				// " " +
 				// owner + "." + name + " [" + desc + "]");
-				logln(indent() + "# access field: " + decodeDescriptor(owner, name, desc));
-				put(USES_TYPE, getMethodName(), owner);
+				JavaUtil.logln(indent() + "# access field: " + JavaUtil.decodeDescriptor(owner, name, desc));
+				put(JavaFacts.USES_TYPE, getMethodName(), owner);
 				switch (opcode) {
 				case Opcodes.GETSTATIC:
-					put(READS, getMethodName(), getMemberName(owner, name, desc), STATIC);
+					put(JavaFacts.READS, getMethodName(), getMemberName(owner, name, desc), JavaFacts.STATIC);
 					break;
 				case Opcodes.PUTSTATIC:
-					put(WRITES, getMethodName(), getMemberName(owner, name, desc), STATIC);
+					put(JavaFacts.WRITES, getMethodName(), getMemberName(owner, name, desc), JavaFacts.STATIC);
 					break;
 				case Opcodes.GETFIELD:
-					put(READS, getMethodName(), getMemberName(owner, name, desc), FIELD);
+					put(JavaFacts.READS, getMethodName(), getMemberName(owner, name, desc), JavaFacts.FIELD);
 					break;
 				case Opcodes.PUTFIELD:
-					put(WRITES, getMethodName(), getMemberName(owner, name, desc), FIELD);
+					put(JavaFacts.WRITES, getMethodName(), getMemberName(owner, name, desc), JavaFacts.FIELD);
 					break;
 				default:
 					throw new RuntimeException();
@@ -331,7 +226,7 @@ public class FactExtractor extends ClassVisitor {
 			}
 
 			public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
-				logf(indent() + "visitFrame(type=%d, nLocal=%d, local=%s, nStack=%d, stack=%s)%n", type, nLocal,
+				JavaUtil.logf(indent() + "visitFrame(type=%d, nLocal=%d, local=%s, nStack=%d, stack=%s)%n", type, nLocal,
 						Arrays.toString(local), nStack, Arrays.toString(stack));
 				if (type == Opcodes.F_NEW) {
 					loadFrame(localInfo, nLocal, local);
@@ -358,8 +253,8 @@ public class FactExtractor extends ClassVisitor {
 
 			@Override
 			public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
-				put(CALLS, getMethodName(), getMemberName(name, desc), DYNAMIC);
-				logln(indent() + "INVOKEDYNAMIC " + name + " [" + desc + "]" + " " + bsm + " "
+				put(JavaFacts.CALLS, getMethodName(), getMemberName(name, desc), JavaFacts.DYNAMIC);
+				JavaUtil.logln(indent() + "INVOKEDYNAMIC " + name + " [" + desc + "]" + " " + bsm + " "
 						+ Arrays.toString(bsmArgs));
 				super.visitInvokeDynamicInsn(fullName, desc, bsm, bsmArgs);
 			}
@@ -369,7 +264,7 @@ public class FactExtractor extends ClassVisitor {
 			}
 
 			public void visitLabel(Label label) {
-				logln(indent() + label + ":");
+				JavaUtil.logln(indent() + label + ":");
 				super.visitLabel(label);
 			}
 
@@ -378,15 +273,15 @@ public class FactExtractor extends ClassVisitor {
 			}
 
 			public void visitLineNumber(int line, Label start) {
-				logln(indent() + currentSource.peek() + ":" + line + "\tlabel=" + start);
+				JavaUtil.logln(indent() + currentSource.peek() + ":" + line + "\tlabel=" + start);
 				currentLine = line;
 				super.visitLineNumber(line, start);
 			}
 
 			public void visitLocalVariable(String name, String desc, String signature, Label start, Label end,
 					int index) {
-				logf(indent() + "visitLocalVariable(name=%s, desc=%s, signature=%s, start=%s, end=%s, index=%d)%n",
-						decodeDescriptor(name, desc), desc, signature, start, end, index);
+				JavaUtil.logf(indent() + "visitLocalVariable(name=%s, desc=%s, signature=%s, start=%s, end=%s, index=%d)%n",
+						JavaUtil.decodeDescriptor(name, desc), desc, signature, start, end, index);
 				super.visitLocalVariable(fullName, desc, signature, start, end, index);
 			}
 
@@ -408,36 +303,36 @@ public class FactExtractor extends ClassVisitor {
 				// logln(indent() + "" + Printer.OPCODES[opcode] +
 				// " " +
 				// owner + "." + name + " [" + desc + "]");
-				logln(indent() + "# call method: " + decodeDescriptor(owner, name, desc));
-				logln(indent() + "  Stack: " + stackInfo);
+				JavaUtil.logln(indent() + "# call method: " + JavaUtil.decodeDescriptor(owner, name, desc));
+				JavaUtil.logln(indent() + "  Stack: " + stackInfo);
 				String modifier;
 				switch (opcode) {
 				case Opcodes.INVOKEVIRTUAL:
-					modifier = VIRTUAL;
+					modifier = JavaFacts.VIRTUAL;
 					break;
 				case Opcodes.INVOKESPECIAL:
-					modifier = SPECIAL;
+					modifier = JavaFacts.SPECIAL;
 					break;
 				case Opcodes.INVOKESTATIC:
-					modifier = STATIC;
+					modifier = JavaFacts.STATIC;
 					break;
 				case Opcodes.INVOKEINTERFACE:
-					modifier = INTERFACE;
+					modifier = JavaFacts.INTERFACE;
 					break;
 				default:
 					throw new RuntimeException();
 				}
-				put(CALLS, getMethodName(), getMemberName(owner, name, desc), modifier);
+				put(JavaFacts.CALLS, getMethodName(), getMemberName(owner, name, desc), modifier);
 				super.visitMethodInsn(opcode, owner, fullName, desc, itf);
 			}
 
 			public void visitMultiANewArrayInsn(String desc, int dims) {
-				logf(indent() + "visitMultiANewArrayInsn(desc=%s, dims=%d)%n", desc, dims);
+				JavaUtil.logf(indent() + "visitMultiANewArrayInsn(desc=%s, dims=%d)%n", desc, dims);
 				super.visitMultiANewArrayInsn(desc, dims);
 			}
 
 			public void visitParameter(String name, int access) {
-				logf(indent() + "visitParameter(name=%s, access=%d)%n", name, access);
+				JavaUtil.logf(indent() + "visitParameter(name=%s, access=%d)%n", name, access);
 				super.visitParameter(fullName, access);
 			}
 
@@ -467,16 +362,16 @@ public class FactExtractor extends ClassVisitor {
 				// logln(indent() + "" + Printer.OPCODES[opcode] +
 				// " " +
 				// type);
-				put(USES_TYPE, getMethodName(), type);
+				put(JavaFacts.USES_TYPE, getMethodName(), type);
 				switch (opcode) {
 				case Opcodes.NEW:
-					put(CREATES, getMethodName(), type);
+					put(JavaFacts.CREATES, getMethodName(), type);
 					break;
 				case Opcodes.NEWARRAY:
-					put(CREATES, getMethodName(), "[" + type);
+					put(JavaFacts.CREATES, getMethodName(), "[" + type);
 					break;
 				case Opcodes.ANEWARRAY:
-					put(CREATES, getMethodName(), "[" + type);
+					put(JavaFacts.CREATES, getMethodName(), "[" + type);
 					break;
 				case Opcodes.CHECKCAST:
 					break;
@@ -517,43 +412,31 @@ public class FactExtractor extends ClassVisitor {
 	}
 
 	public ModuleVisitor visitModule(String name, int access, String version) {
-		logf(indent() + "visitModule(name=%s, access=%d, version=%d)%n", name, access, version);
+		JavaUtil.logf(indent() + "visitModule(name=%s, access=%d, version=%d)%n", name, access, version);
 		return null;
 	}
 
 	public void visitOuterClass(String owner, String name, String desc) {
-		logf(indent() + "visitOuterClass(owner=%s, name=%s, desc=%s)%n", owner, name, desc);
+		JavaUtil.logf(indent() + "visitOuterClass(owner=%s, name=%s, desc=%s)%n", owner, name, desc);
 	}
 
 	public void visitSource(String source, String debug) {
 		if (source != null) {
-			put(SOURCE, getClassName(), source);
+			put(JavaFacts.SOURCE, getClassName(), source);
 			currentSource.push(source);
 		} else {
 			currentSource.push("");
 		}
 		if (debug != null)
-			put(DEBUG, getClassName(), source);
+			put(JavaFacts.DEBUG, getClassName(), source);
 		// logf(indent() + "visitSource(source=%s, debug=%s)%n",
 		// source,
 		// debug);
 	}
 
 	public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
-		logf(indent() + "visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n", typeRef,
+		JavaUtil.logf(indent() + "visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n", typeRef,
 				typePath.toString(), desc, visible);
 		return null;
-	}
-
-	public void logln(String s) {
-		System.out.flush();
-		System.err.println(s);
-		System.err.flush();
-	}
-
-	public void logf(String s, Object... args) {
-		System.out.flush();
-		System.err.printf(s, args);
-		System.err.flush();
 	}
 }

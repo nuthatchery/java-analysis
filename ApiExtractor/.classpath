@@ -12,5 +12,10 @@
 			<attribute name="javadoc_location" value="file:/home/anya/code/asm-6.0/doc/javadoc/user/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/anya/code/asm-6.0/lib/asm-commons-6.0.jar" sourcepath="/home/anya/code/asm-6.0/src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/anya/code/asm-6.0/doc/javadoc/user/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
