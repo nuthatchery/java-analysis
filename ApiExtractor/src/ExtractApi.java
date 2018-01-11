@@ -1,6 +1,12 @@
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
@@ -35,7 +41,7 @@ public class ExtractApi extends ClassVisitor {
 	public static final String INTERFACE = "interface";
 	public static final String DYNAMIC = "dynamic";
 	public static final String CREATES = "creates";
-	public static final String USES = "uses";
+	public static final String USES_TYPE = "usesType";
 	public static final String FIELD = "field";
 	public static final String READS = "reads";
 	public static final String WRITES = "writes";
@@ -46,23 +52,43 @@ public class ExtractApi extends ClassVisitor {
 	public static final String SOURCE = "source";
 	public static final String DEBUG = "debug";
 	public static final String INITIAL_VALUE = "initialValue";
+	private static PrintWriter output;
 
 	public static void main(String[] args) throws IOException {
-		ExtractApi ea = new ExtractApi();
-		ClassReader cr = new ClassReader(ExtractApi.class.getResourceAsStream("ImmutablePosition.class"));
-		cr.accept(ea, 0);
-		cr = new ClassReader(ExtractApi.class.getResourceAsStream("MutablePosition.class"));
-		cr.accept(ea, 0);
-		cr = new ClassReader(ExtractApi.class.getResourceAsStream("Test.class"));
-		cr.accept(ea, 0);
-		cr = new ClassReader(ExtractApi.class.getResourceAsStream("ExtractApi.class"));
-		cr.accept(ea, 0);
+		try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+			output = new PrintWriter(new OutputStreamWriter(stream, Charset.forName("UTF-8")));
+			ExtractApi ea = new ExtractApi();
+			ClassReader cr = new ClassReader(ExtractApi.class.getResourceAsStream("ImmutablePosition.class"));
+			cr.accept(ea, ClassReader.EXPAND_FRAMES);
+			cr = new ClassReader(ExtractApi.class.getResourceAsStream("MutablePosition.class"));
+			cr.accept(ea, ClassReader.EXPAND_FRAMES);
+			cr = new ClassReader(ExtractApi.class.getResourceAsStream("Test.class"));
+			cr.accept(ea, ClassReader.EXPAND_FRAMES);
+			// cr = new
+			// ClassReader(ExtractApi.class.getResourceAsStream("ExtractApi.class"));
+			// cr.accept(ea, 0);
+			if (output != null) {
+				output.close();
+				stream.close();
+				byte[] bs = stream.toByteArray();
+				String s = new String(bs, Charset.forName("UTF-8"));
+				String[] lines = s.split("\n");
+				Arrays.sort(lines);
+				try (PrintWriter writer = new PrintWriter("/tmp/data.pl")) {
+					for (String l : lines) {
+						writer.println(l);
+					}
+				}
+			}
+		}
 	}
 
 	protected String context;
-	protected Stack<String> currentClass = new Stack<>();
-	protected Stack<String> currentMethod = new Stack<>();
-	protected Stack<String> currentSource = new Stack<>();
+	protected final Stack<String> currentClass = new Stack<>();
+	protected final Stack<String> currentMethod = new Stack<>();
+	protected final Stack<String> currentSource = new Stack<>();
+	protected final List<String> localInfo = new ArrayList<>();
+	protected final List<String> stackInfo = new ArrayList<>();
 
 	protected int currentLine = -1;
 
@@ -107,7 +133,6 @@ public class ExtractApi extends ClassVisitor {
 			b.append(")");
 		} else if (type.getSort() == Type.ARRAY) {
 			decodeDescriptor(null, type.getElementType(), b);
-			System.err.println(type.getDimensions());
 			for (int i = type.getDimensions(); i > 0; i--)
 				b.append("[]");
 		} else {
@@ -151,6 +176,8 @@ public class ExtractApi extends ClassVisitor {
 		if (!seen.contains(s)) {
 			System.err.flush();
 			System.out.println(indent() + s);
+			if (output != null)
+				output.println(s);
 			System.out.flush();
 			seen.add(s);
 		}
@@ -169,8 +196,8 @@ public class ExtractApi extends ClassVisitor {
 	}
 
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-		System.err.println("\n" + indent() + "class " + name + " {");
-		// System.err.printf("\n\n" + indent() + "visit(version=%d, access=%d,
+		logln("\n" + indent() + "class " + name + " {");
+		// logf("\n\n" + indent() + "visit(version=%d, access=%d,
 		// name=%s, signature=%s, superName=%s, interfaces=%s)%n", version,
 		// access, name, signature, superName, Arrays.toString(interfaces));
 		currentClass.push(name);
@@ -186,25 +213,25 @@ public class ExtractApi extends ClassVisitor {
 	}
 
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		System.err.printf(indent() + "visitAnnotation(desc=%s, visible=%b)%n", desc, visible);
+		logf(indent() + "visitAnnotation(desc=%s, visible=%b)%n", desc, visible);
 		return null;
 	}
 
 	public void visitAttribute(Attribute attr) {
-		System.err.printf(indent() + "visitAttribue(attr=%s)%n", attr);
+		logf(indent() + "visitAttribue(attr=%s)%n", attr);
 	}
 
 	public void visitEnd() {
 		String s = getClassName();
 		currentClass.pop();
-		System.err.println(indent() + "} // end of " + s + "\n");
+		logln(indent() + "} // end of " + s + "\n");
 	}
 
 	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
-		// System.err.printf(indent() + "visitField(access=%s, name=%s, desc=%s,
+		// logf(indent() + "visitField(access=%s, name=%s, desc=%s,
 		// signature=%s, value=%s)%n", Printer.OPCODES[access],
 		// name, desc, signature, value);
-		System.err.println("\n" + indent() + "field " + decodeDescriptor(getClassName(), name, desc));
+		logln("\n" + indent() + "field " + decodeDescriptor(getClassName(), name, desc));
 		String fullName = getMemberName(name, desc);
 		currentMethod.push(fullName);
 		put(FIELD, fullName);
@@ -217,17 +244,19 @@ public class ExtractApi extends ClassVisitor {
 	}
 
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-		System.err.printf(indent() + "visitOuterClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name,
-				outerName, innerName, Printer.OPCODES[access]);
+		logf(indent() + "visitOuterClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name, outerName, innerName,
+				Printer.OPCODES[access]);
 	}
 
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		// System.err.printf(indent() + "visitMethod(access=%s, name=%s,
+		// logf(indent() + "visitMethod(access=%s, name=%s,
 		// desc=%s,
 		// signature=%s, exceptions=%s)%n",
 		// Printer.OPCODES[access], name, desc, signature,
 		// Arrays.toString(exceptions));
-		System.err.println("\n" + indent() + "method " + decodeDescriptor(getClassName(), name, desc));
+		System.out.flush();
+		System.err.flush();
+		logln("\n" + indent() + "method " + decodeDescriptor(getClassName(), name, desc));
 		String fullName = getMemberName(name, desc);
 		currentMethod.push(fullName);
 		put(METHOD, fullName);
@@ -254,12 +283,14 @@ public class ExtractApi extends ClassVisitor {
 			}
 
 			public void visitAttribute(Attribute attr) {
-				System.err.printf(indent() + "visitAttribue(attr=%s)%n", attr);
+				logf(indent() + "visitAttribue(attr=%s)%n", attr);
 				super.visitAttribute(attr);
 			}
 
 			public void visitCode() {
-				System.err.println(indent() + "{");
+				logln(indent() + "{");
+				localInfo.clear();
+				stackInfo.clear();
 				super.visitCode();
 			}
 
@@ -268,16 +299,16 @@ public class ExtractApi extends ClassVisitor {
 				String s = getMethodName();
 				currentMethod.pop();
 				currentLine = -1;
-				System.err.println(indent() + "} // end of " + s);
+				logln(indent() + "} // end of " + s);
 			}
 
 			@Override
 			public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-				// System.err.println(indent() + "" + Printer.OPCODES[opcode] +
+				// logln(indent() + "" + Printer.OPCODES[opcode] +
 				// " " +
 				// owner + "." + name + " [" + desc + "]");
-				System.err.println(indent() + "# access field: " + decodeDescriptor(owner, name, desc));
-				put(USES, getMethodName(), owner);
+				logln(indent() + "# access field: " + decodeDescriptor(owner, name, desc));
+				put(USES_TYPE, getMethodName(), owner);
 				switch (opcode) {
 				case Opcodes.GETSTATIC:
 					put(READS, getMethodName(), getMemberName(owner, name, desc), STATIC);
@@ -298,6 +329,12 @@ public class ExtractApi extends ClassVisitor {
 			}
 
 			public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
+				logf(indent() + "visitFrame(type=%d, nLocal=%d, local=%s, nStack=%d, stack=%s)%n", type, nLocal,
+						Arrays.toString(local), nStack, Arrays.toString(stack));
+				if (type == Opcodes.F_NEW) {
+					loadFrame(localInfo, nLocal, local);
+					loadFrame(stackInfo, nStack, stack);
+				}
 				super.visitFrame(type, nLocal, local, nStack, stack);
 			}
 
@@ -320,7 +357,7 @@ public class ExtractApi extends ClassVisitor {
 			@Override
 			public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
 				put(CALLS, getMethodName(), getMemberName(name, desc), DYNAMIC);
-				System.err.println(indent() + "INVOKEDYNAMIC " + name + " [" + desc + "]" + " " + bsm + " "
+				logln(indent() + "INVOKEDYNAMIC " + name + " [" + desc + "]" + " " + bsm + " "
 						+ Arrays.toString(bsmArgs));
 				super.visitInvokeDynamicInsn(fullName, desc, bsm, bsmArgs);
 			}
@@ -330,6 +367,7 @@ public class ExtractApi extends ClassVisitor {
 			}
 
 			public void visitLabel(Label label) {
+				logln(indent() + label + ":");
 				super.visitLabel(label);
 			}
 
@@ -338,13 +376,15 @@ public class ExtractApi extends ClassVisitor {
 			}
 
 			public void visitLineNumber(int line, Label start) {
-				System.err.println(indent() + currentSource.peek() + ":" + line + "\tlabel=" + start);
+				logln(indent() + currentSource.peek() + ":" + line + "\tlabel=" + start);
 				currentLine = line;
 				super.visitLineNumber(line, start);
 			}
 
 			public void visitLocalVariable(String name, String desc, String signature, Label start, Label end,
 					int index) {
+				logf(indent() + "visitLocalVariable(name=%s, desc=%s, signature=%s, start=%s, end=%s, index=%d)%n",
+						decodeDescriptor(name, desc), desc, signature, start, end, index);
 				super.visitLocalVariable(fullName, desc, signature, start, end, index);
 			}
 
@@ -363,10 +403,11 @@ public class ExtractApi extends ClassVisitor {
 
 			@Override
 			public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-				// System.err.println(indent() + "" + Printer.OPCODES[opcode] +
+				// logln(indent() + "" + Printer.OPCODES[opcode] +
 				// " " +
 				// owner + "." + name + " [" + desc + "]");
-				System.err.println(indent() + "# call method: " + decodeDescriptor(owner, name, desc));
+				logln(indent() + "# call method: " + decodeDescriptor(owner, name, desc));
+				logln(indent() + "  Stack: " + stackInfo);
 				String modifier;
 				switch (opcode) {
 				case Opcodes.INVOKEVIRTUAL:
@@ -384,17 +425,17 @@ public class ExtractApi extends ClassVisitor {
 				default:
 					throw new RuntimeException();
 				}
-				put(CALLS, getMethodName(), getMemberName(name, desc), modifier);
+				put(CALLS, getMethodName(), getMemberName(owner, name, desc), modifier);
 				super.visitMethodInsn(opcode, owner, fullName, desc, itf);
 			}
 
 			public void visitMultiANewArrayInsn(String desc, int dims) {
-				System.err.printf(indent() + "visitMultiANewArrayInsn(desc=%s, dims=%d)%n", desc, dims);
+				logf(indent() + "visitMultiANewArrayInsn(desc=%s, dims=%d)%n", desc, dims);
 				super.visitMultiANewArrayInsn(desc, dims);
 			}
 
 			public void visitParameter(String name, int access) {
-				System.err.printf(indent() + "visitParameter(name=%s, access=%d)%n", name, access);
+				logf(indent() + "visitParameter(name=%s, access=%d)%n", name, access);
 				super.visitParameter(fullName, access);
 			}
 
@@ -403,6 +444,7 @@ public class ExtractApi extends ClassVisitor {
 			}
 
 			public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
+				super.visitTableSwitchInsn(min, max, dflt, labels);
 			}
 
 			public AnnotationVisitor visitTryCatchAnnotation(int typeRef, TypePath typePath, String desc,
@@ -420,10 +462,10 @@ public class ExtractApi extends ClassVisitor {
 
 			@Override
 			public void visitTypeInsn(int opcode, String type) {
-				// System.err.println(indent() + "" + Printer.OPCODES[opcode] +
+				// logln(indent() + "" + Printer.OPCODES[opcode] +
 				// " " +
 				// type);
-				put(USES, getMethodName(), type);
+				put(USES_TYPE, getMethodName(), type);
 				switch (opcode) {
 				case Opcodes.NEW:
 					put(CREATES, getMethodName(), type);
@@ -450,13 +492,35 @@ public class ExtractApi extends ClassVisitor {
 		};
 	}
 
+	protected void loadFrame(List<String> frame, int nLocal, Object[] local) {
+		for (int i = 0; i < nLocal; i++) {
+			Object o = local[i];
+			if (o == Opcodes.TOP)
+				frame.add("/top");
+			else if (o == Opcodes.INTEGER)
+				frame.add("/int");
+			else if (o == Opcodes.FLOAT)
+				frame.add("/float");
+			else if (o == Opcodes.DOUBLE)
+				frame.add("/double");
+			else if (o == Opcodes.LONG)
+				frame.add("/long");
+			else if (o == Opcodes.NULL)
+				frame.add("/null");
+			else if (o == Opcodes.UNINITIALIZED_THIS)
+				frame.add("/uthis");
+			else
+				frame.add(o.toString());
+		}
+	}
+
 	public ModuleVisitor visitModule(String name, int access, String version) {
-		System.err.printf(indent() + "visitModule(name=%s, access=%d, version=%d)%n", name, access, version);
+		logf(indent() + "visitModule(name=%s, access=%d, version=%d)%n", name, access, version);
 		return null;
 	}
 
 	public void visitOuterClass(String owner, String name, String desc) {
-		System.err.printf(indent() + "visitOuterClass(owner=%s, name=%s, desc=%s)%n", owner, name, desc);
+		logf(indent() + "visitOuterClass(owner=%s, name=%s, desc=%s)%n", owner, name, desc);
 	}
 
 	public void visitSource(String source, String debug) {
@@ -468,14 +532,26 @@ public class ExtractApi extends ClassVisitor {
 		}
 		if (debug != null)
 			put(DEBUG, getClassName(), source);
-		// System.err.printf(indent() + "visitSource(source=%s, debug=%s)%n",
+		// logf(indent() + "visitSource(source=%s, debug=%s)%n",
 		// source,
 		// debug);
 	}
 
 	public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
-		System.err.printf(indent() + "visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n", typeRef,
+		logf(indent() + "visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n", typeRef,
 				typePath.toString(), desc, visible);
 		return null;
+	}
+
+	public void logln(String s) {
+		System.out.flush();
+		System.err.println(s);
+		System.err.flush();
+	}
+
+	public void logf(String s, Object... args) {
+		System.out.flush();
+		System.err.printf(s, args);
+		System.err.flush();
 	}
 }
