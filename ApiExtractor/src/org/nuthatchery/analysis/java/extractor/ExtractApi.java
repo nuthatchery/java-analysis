@@ -1,3 +1,5 @@
+package org.nuthatchery.analysis.java.extractor;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
