@@ -1,0 +1,5 @@
+
+
+CLASSPATH="./bin:$(grep '\.jar"' .classpath | sed -e 's/^.*"\([^"]*\.jar\)".*/\1:/'|tr -d '\n')"
+
+java -classpath "$CLASSPATH" org.nuthatchery.analysis.java.extractor.ExtractApi "$@"
