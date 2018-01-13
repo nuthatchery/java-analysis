@@ -112,7 +112,7 @@ public abstract class Id {
 				String[] rawPath = uri.getRawPath().split("/");
 				if(rawPath.length < 1)
 					throw new IllegalStateException();
-				String lang = JavaUtil.percentDecode(rawPath[0]);
+				String lang = UriEncoding.percentDecode(rawPath[0]);
 				rawPath = Arrays.copyOfRange(rawPath, 1, rawPath.length);
 				return JavaUtil.quote(String.join("/", rawPath))+"@"+lang;
 			}
@@ -120,7 +120,7 @@ public abstract class Id {
 				String[] rawPath = uri.getRawPath().split("/");
 				if(rawPath.length < 1)
 					throw new IllegalStateException();
-				String type = JavaUtil.percentDecode(rawPath[0]);
+				String type = UriEncoding.percentDecode(rawPath[0]);
 				rawPath = Arrays.copyOfRange(rawPath, 1, rawPath.length);
 				return JavaUtil.quote(String.join("/", rawPath))+"^^"+type;
 			}
@@ -164,28 +164,37 @@ public abstract class Id {
 				this.uri = uri;
 		}
 
+		private static URI createUri(String uri) {
+			try {
+				return new URI(uri);
+			} catch (URISyntaxException e) {
+				throw new IllegalArgumentException(uri, e);
+			}
+		}
 		public UriId(Id parent, String uri) {
-			this(parent, URI.create(uri));
+			this(parent, createUri(uri));
 		}
 
 		public UriId(String uri) {
-			this(null, URI.create(uri));
+			this(null, createUri(uri));
 		}
 
 		public Id resolve(String path) {
 			try {
 				if (path.startsWith("/"))
 					return new UriId(getModelId(), new URI(path));
+				else if(path.startsWith("?"))
+					return new UriId(this, new URI(uri.toString() + path));
 				else
-					return new UriId(this, new URI(path));
+					return new UriId(this, getURIFolder().resolve(new URI(path)));
 			} catch (URISyntaxException e) {
-				return null;
+				throw new IllegalArgumentException(path, e);
 			}
 		}
 
 		@Override
 		protected String getPathName() {
-			return "";
+			return uri.getPath();
 		}
 
 		@Override
@@ -196,18 +205,28 @@ public abstract class Id {
 		public URI getURI() {
 			return uri;
 		}
+		
+		private URI getURIFolder() {
+			if(uri.isOpaque())
+				return uri;
+			String s = uri.toString();
+			if(s.endsWith("/"))
+				return uri;
+			else
+				return createUri(s + "/");
+		}
 	}
 
 	private static class StringId extends UriId {
 		private String value;
 
 		public StringId(String value) {
-			super(STRINGS, JavaUtil.percentEncode(value));
+			super(STRINGS, UriEncoding.percentEncode(value));
 			this.value = value;
 		}
 
 		public StringId(Id parent, String value) {
-			super(parent, JavaUtil.percentEncode(value));
+			super(parent, UriEncoding.percentEncode(value));
 			this.value = value;
 		}
 
@@ -224,7 +243,7 @@ public abstract class Id {
 		private String value;
 
 		public CharId(String value) {
-			super(STRINGS, JavaUtil.percentEncode(value));
+			super(STRINGS, UriEncoding.percentEncode(value));
 			this.value = value;
 		}
 
@@ -375,9 +394,7 @@ public abstract class Id {
 
 		@Override
 		public Id resolve(String path) {
-			// TODO Auto-generated method stub
-			return null;
-		}
+throw new UnsupportedOperationException();		}
 	}
 
 }

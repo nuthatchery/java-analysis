@@ -1,10 +1,18 @@
 package org.nuthatchery.analysis.java.extractor;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.zip.GZIPOutputStream;
 
 public class FactsDb {
 	public static IFactsWriter prologFactsWriter(String fileName, String context) {
@@ -16,9 +24,13 @@ public class FactsDb {
 	}
 
 	public static abstract class AbstractFactsWriter implements IFactsWriter {
-		protected final String context;
+		protected String context;
 
 		public AbstractFactsWriter(String context) {
+			this.context = context;
+		}
+
+		public void setContext(String context) {
 			this.context = context;
 		}
 
@@ -27,8 +39,78 @@ public class FactsDb {
 		}
 	}
 
-	public static class NTripleFactsWriter extends AbstractFactsWriter {
-		private final String fileName;
+	public static abstract class AbstractTextFactsWriter extends AbstractFactsWriter {
+
+		protected final String fileName;
+		protected final List<String> todo = new ArrayList<>();
+		private PrintWriter output;
+		protected final boolean zipIt = true;
+
+		public AbstractTextFactsWriter(String context, String fileName) {
+			super(context);
+			this.fileName = fileName;
+		}
+
+		@Override
+		public void precheck() throws IOException {
+			try (PrintWriter tmp = getWriter("")) {
+			}
+		}
+
+		protected PrintWriter getWriter(String s) throws IOException {
+			if (zipIt)
+				return new PrintWriter(new GZIPOutputStream(new FileOutputStream(fileName + s + ".gz"), true));
+			else
+				return new PrintWriter(new FileOutputStream(fileName + s));
+		}
+
+		@Override
+		public boolean checkpoint() {
+			try {
+				if (output == null) {
+					output = getWriter(".log");
+				}
+				todo.stream().forEachOrdered((String line) -> {
+					output.println(line);
+				});
+				todo.clear();
+				output.flush();
+				return true;
+			} catch (IOException e) {
+				return false;
+			}
+		}
+
+		protected PrintWriter open() throws IOException {
+			if (output != null)
+				output.close();
+			return getWriter(fileName);
+		}
+
+		protected void store() throws IOException {
+			if (output == null) {
+				try (PrintWriter pw = getWriter("")) {
+					todo.stream().forEachOrdered((String line) -> {
+						output.println(pw);
+					});
+					todo.clear();
+				}
+			} else {
+				output.close();
+				File file = new File(fileName + ".log.gz");
+				file.renameTo(new File(fileName + ".gz"));
+			}
+		}
+
+		protected void saved() {
+			try {
+				Files.deleteIfExists(new File(fileName + ".log").toPath());
+			} catch (IOException e) {
+			}
+		}
+	}
+
+	public static class NTripleFactsWriter extends AbstractTextFactsWriter {
 		private final Set<String> facts;
 
 		public NTripleFactsWriter(String fileName, String context) {
@@ -36,8 +118,7 @@ public class FactsDb {
 		}
 
 		public NTripleFactsWriter(String fileName, String context, Set<String> facts) {
-			super(context);
-			this.fileName = fileName;
+			super(context, fileName);
 			this.facts = facts;
 		}
 
@@ -46,7 +127,8 @@ public class FactsDb {
 		}
 
 		private void put(String factString) {
-			facts.add(factString);
+			//if (facts.add(factString))
+				todo.add(factString);
 		}
 
 		public void put(Id obj, Id relation, Id tgt) {
@@ -56,10 +138,10 @@ public class FactsDb {
 		public void put(Id obj, Id relation, Id tgt, Id mod) {
 			URI relUri = relation.getURI();
 			URI modUri = mod.getURI();
-			
+
 			modUri = relUri.resolve("").relativize(modUri);
 			relUri = URI.create(relUri.toString() + "?" + modUri);
-			
+
 			put(String.format("%s <%s> %s .", obj.getRDF(), relUri, tgt.getRDF()));
 		}
 
@@ -68,31 +150,28 @@ public class FactsDb {
 			URI relUri = relation.getURI();
 			URI mod1Uri = mod1.getURI();
 			URI mod2Uri = mod2.getURI();
-			
+
 			mod1Uri = relUri.resolve("").relativize(mod1Uri);
 			mod2Uri = relUri.resolve("").relativize(mod2Uri);
 			relUri = URI.create(relUri.toString() + "?" + mod1Uri + "&" + mod2Uri);
-			
+
 			put(String.format("%s <%s> %s .", obj.getRDF(), relUri, tgt.getRDF()));
 		}
 
 		@Override
-		public IFactsWriter newContext(String context) {
-			return new PrologFactsWriter(fileName, context, facts);
-		}
-
-		@Override
-		public void save() throws FileNotFoundException {
-			try (PrintWriter writer = new PrintWriter("/tmp/data.pl")) {
+		public void save() throws IOException {
+			super.store();
+/*			try (PrintWriter writer = open()) {
 				facts.stream().sorted().forEach((String l) -> {
 					writer.println(l);
 				});
-			}
+				writer.close();
+				saved();
+			}*/
 		}
 	}
 
-	public static class PrologFactsWriter extends AbstractFactsWriter {
-		private final String fileName;
+	public static class PrologFactsWriter extends AbstractTextFactsWriter {
 		private final Set<String> facts;
 
 		public PrologFactsWriter(String fileName, String context) {
@@ -100,8 +179,7 @@ public class FactsDb {
 		}
 
 		public PrologFactsWriter(String fileName, String context, Set<String> facts) {
-			super(context);
-			this.fileName = fileName;
+			super(context, fileName);
 			this.facts = facts;
 		}
 
@@ -110,7 +188,8 @@ public class FactsDb {
 		}
 
 		private void put(String factString) {
-			facts.add(factString);
+			if (facts.add(factString))
+				todo.add(factString);
 		}
 
 		public void put(Id obj, Id relation, Id tgt) {
@@ -128,29 +207,90 @@ public class FactsDb {
 		}
 
 		@Override
-		public IFactsWriter newContext(String context) {
-			return new PrologFactsWriter(fileName, context, facts);
+		public void setContext(String context) {
+			this.context = context;
+
 		}
 
 		@Override
-		public void save() throws FileNotFoundException {
-			try (PrintWriter writer = new PrintWriter("/tmp/data.pl")) {
+		public void save() throws IOException {
+			try (PrintWriter writer = open()) {
 				facts.stream().sorted().forEach((String l) -> {
 					writer.println(l);
 				});
+				writer.close();
+				saved();
 			}
 		}
 	}
 
 	public static interface IFactsWriter {
-		public IFactsWriter newContext(String context);
+		/**
+		 * Switch to a new context.
+		 * 
+		 * @param context
+		 */
+		public void setContext(String context);
 
-		void save() throws FileNotFoundException;
+		/**
+		 * Save contents of database.
+		 * 
+		 * @throws FileNotFoundException
+		 * @throws IOException 
+		 */
+		void save() throws FileNotFoundException, IOException;
 
+		/**
+		 * Try to open the output, if any.
+		 * 
+		 * Will throw an exception if this fails.
+		 * 
+		 * @throws FileNotFoundException
+		 * @throws IOException 
+		 */
+		void precheck() throws FileNotFoundException, IOException;
+
+		/**
+		 * Temporarily save the current database.
+		 * 
+		 * @return
+		 */
+		boolean checkpoint();
+
+		/**
+		 * Add a fact.
+		 * 
+		 * @param from
+		 *            The subject of the relation
+		 * @param label
+		 *            The relation's label
+		 */
 		public void put(Id from, Id label);
 
+		/**
+		 * Add a fact.
+		 * 
+		 * @param from
+		 *            The subject of the relation
+		 * @param label
+		 *            The relation's label
+		 * @param to
+		 *            The object of the relation
+		 */
 		public void put(Id from, Id label, Id to);
 
+		/**
+		 * Add a fact.
+		 * 
+		 * @param from
+		 *            The subject of the relation
+		 * @param label
+		 *            The relation's label
+		 * @param to
+		 *            The object of the relation
+		 * @param modifier
+		 *            An extra modifier to the relation
+		 */
 		public void put(Id from, Id label, Id to, Id modifier);
 
 		/**

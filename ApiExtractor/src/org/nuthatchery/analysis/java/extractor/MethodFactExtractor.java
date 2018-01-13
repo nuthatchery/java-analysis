@@ -50,6 +50,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		log.log("{");
 		parent.localInfo.clear();
 		parent.stackInfo.clear();
+		parent.currentLine = -1;
 		super.visitCode();
 	}
 
@@ -115,6 +116,56 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	}
 
 	public void visitJumpInsn(int opcode, Label label) {
+		switch (opcode) {
+		case Opcodes.IF_ICMPEQ:
+		case Opcodes.IF_ICMPNE:
+		case Opcodes.IF_ICMPGT:
+		case Opcodes.IF_ICMPLT:
+		case Opcodes.IF_ICMPGE:
+		case Opcodes.IF_ICMPLE:
+			// compare two ints
+			break;
+		case Opcodes.IFEQ:
+		case Opcodes.IFNE:
+		case Opcodes.IFGT:
+		case Opcodes.IFLT:
+		case Opcodes.IFGE:
+		case Opcodes.IFLE:
+			// compare a single int with zero
+			break;
+		case Opcodes.IF_ACMPEQ:
+		case Opcodes.IF_ACMPNE: {
+			// compare two references
+			Id methodId = parent.getMethodId();
+			if (parent.currentLine > 0)
+				methodId = methodId.resolve("?line=" + parent.currentLine);
+			Id type1 = JavaUtil.frameTypeToId(stack != null ? stack.get(stack.size() - 1) : "java/lang/Object");
+			Id type2 = JavaUtil.frameTypeToId(stack != null ? stack.get(stack.size() - 1) : "java/lang/Object");
+			log.logf("* ref equals on type %s with %s", type1, type2);
+			parent.put(JavaFacts.USES_REF_EQUALS, methodId, type1);
+			parent.put(JavaFacts.USES_REF_EQUALS, methodId, type2);
+			break;
+		}
+		case Opcodes.IFNONNULL:
+		case Opcodes.IFNULL: {
+			// compare a single reference with null
+			Id methodId = parent.getMethodId();
+			if (parent.currentLine > 0)
+				methodId = methodId.resolve("?line=" + parent.currentLine);
+			Id type = JavaUtil.frameTypeToId(stack != null ? stack.get(stack.size() - 1) : "java/lang/Object");
+			log.logf("* nullcheck on type %s", type);
+			parent.put(JavaFacts.USES_REF_NULLCHECK, methodId, type);
+			break;
+		}
+		case Opcodes.GOTO:
+			// jump to an instruction within the same method
+			break;
+		case Opcodes.JSR:
+			// jump to subroutine within same method
+			parent.put(JavaFacts.USES_JSR, parent.getMethodId());
+			return;
+		// break;
+		}
 		super.visitJumpInsn(opcode, label);
 	}
 
@@ -157,38 +208,42 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		// logln(indent() + "" + Printer.OPCODES[opcode] +
 		// " " +
 		// owner + "." + name + " [" + desc + "]");
-		
-		// NOTE: Example of finding the types of actual arguments and formal parameters
+
+		// NOTE: Example of finding the types of actual arguments and formal
+		// parameters
 		Type objType = Type.getObjectType(owner);
 		int objParam = 1;
-		if(opcode == Opcodes.INVOKESTATIC) {
+		if (opcode == Opcodes.INVOKESTATIC) {
 			objType = null;
 			objParam = 0;
 		}
-			
-		List<String> stackTypes = stack.stream().map(JavaUtil::frameTypeToString).collect(Collectors.toList());
-		log.log("# INVOKE METHOD: " + JavaUtil.decodeDescriptor(owner, name, desc));
-		log.log("  Environment:");
-		log.log("   * Stack: " +  stackTypes + " <- top of stack");
-		log.log("   * Locals: "
-				+ locals.stream().map(JavaUtil::frameTypeToString).collect(Collectors.toList()));
-		log.log("   * Uninitialized: " + uninitializedTypes);
 		Type methType = Type.getType(desc);
-		List<String> paramTypes = Arrays.stream(methType.getArgumentTypes()).map((Type t) -> JavaUtil.typeToString(t)).collect(Collectors.toList());
-		String retType = JavaUtil.typeToString(methType.getReturnType());
-		List<String> actuals = stackTypes.subList(stackTypes.size()-paramTypes.size()-objParam, stackTypes.size());
-		log.logf("  Method is %s%s -> %s, stack arguments are %s", objType != null ? objType.getClassName() + "." : "static ", paramTypes, retType, actuals);
-		actuals.clear();
-		if(!retType.equals("void"))
-			stackTypes.add(retType);
-		log.logf("  Stack after return will be: %s <- top of stack", stackTypes);
 
-		
-		int[] i = {0};
+		if (stack != null) {
+			List<String> stackTypes = stack.stream().map(JavaUtil::frameTypeToString).collect(Collectors.toList());
+			log.log("# INVOKE METHOD: " + JavaUtil.decodeDescriptor(owner, name, desc));
+			log.log("  Environment:");
+			log.log("   * Stack: " + stackTypes + " <- top of stack");
+			log.log("   * Locals: " + locals.stream().map(JavaUtil::frameTypeToString).collect(Collectors.toList()));
+			log.log("   * Uninitialized: " + uninitializedTypes);
+			List<String> paramTypes = Arrays.stream(methType.getArgumentTypes())
+					.map((Type t) -> JavaUtil.typeToString(t)).collect(Collectors.toList());
+			String retType = JavaUtil.typeToString(methType.getReturnType());
+			List<String> actuals = stackTypes.subList(stackTypes.size() - paramTypes.size() - objParam,
+					stackTypes.size());
+			log.logf("  Method is %s%s -> %s, stack arguments are %s",
+					objType != null ? objType.getClassName() + "." : "static ", paramTypes, retType, actuals);
+			actuals.clear();
+			if (!retType.equals("void"))
+				stackTypes.add(retType);
+			log.logf("  Stack after return will be: %s <- top of stack", stackTypes);
+		}
+
+		int[] i = { 0 };
 		Arrays.stream(methType.getArgumentTypes()).map((Type t) -> JavaUtil.typeToId(t)).forEachOrdered((Id id) -> {
 			parent.put(Id.string("ACTUAL_ARGUMENT_TYPE" + i[0]++), Id.string(fullName), id);
 		});
-		
+
 		Id modifier;
 		switch (opcode) {
 		case Opcodes.INVOKEVIRTUAL:
@@ -267,7 +322,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	}
 
 	public void visitVarInsn(int opcode, int var) {
-		super.visitVarInsn(opcode, var);
+		if (opcode != Opcodes.RET)
+			super.visitVarInsn(opcode, var);
 	}
 
 }

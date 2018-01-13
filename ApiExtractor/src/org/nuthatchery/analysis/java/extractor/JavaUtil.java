@@ -1,15 +1,13 @@
 package org.nuthatchery.analysis.java.extractor;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 public class JavaUtil {
+	public static final String JAVA_EXTRA_URI_PATH_CHARS = "/()";
 	public static ILogger stdLogger = new StdoutLogger();
+	public static ILogger nullLogger = new NullLogger();
 
 	public static String decodeDescriptor(String name, String desc) {
 		StringBuilder b = new StringBuilder();
@@ -56,12 +54,22 @@ public class JavaUtil {
 		}
 	}
 
-	public static void logf(String s, Object... args) {
-		stdLogger.logf(s, args);
-	}
+	public static class NullLogger implements ILogger {
 
-	public static void logln(String s) {
-		stdLogger.log(s);
+		@Override
+		public void logf(String s, Object... args) {
+			// do nothing
+		}
+
+		@Override
+		public void log(String s) {
+			// do nothing
+		}
+
+		@Override
+		public ILogger indent(Supplier<Integer> indentation) {
+			return this;
+		}
 	}
 
 	public static class StdoutLogger implements ILogger {
@@ -113,149 +121,6 @@ public class JavaUtil {
 		public ILogger indent(Supplier<Integer> indentation);
 	}
 
-	/**
-	 * Percent-decodes a string.
-	 * 
-	 * Percent encoding (aka URL-encoding) replaces all reserved characters as
-	 * well as all non-unreserved characters with the UTF-8 representation of
-	 * the character as a sequence of %xx bytes.
-	 * 
-	 * Percent encoding is specified in
-	 * <a href="https://tools.ietf.org/html/rfc3986#page-12">RFC 3986</a>:
-	 * 
-	 * @param s
-	 *            A %-encoded string
-	 * @return A decoded version of the string
-	 * @throws IllegalArgumentException
-	 *             if the string contains non-encoded unicode characters past
-	 *             code point 255.
-	 * @see #percentEncodingProperty(IString)
-	 */
-	public static String percentDecode(String s) {
-		ByteBuffer bytes = ByteBuffer.allocate(s.length());
-		for (int i = 0; i < s.length(); i++) {
-			int c = s.charAt(i);
-			if (c == '%') {
-				System.out.println(Integer.valueOf(s.substring(i + 1, i + 3), 16).byteValue());
-				bytes.put(Integer.valueOf(s.substring(i + 1, i + 3), 16).byteValue());
-				i += 2;
-			} else if (c < 256) {
-				bytes.put((byte) c);
-			} else {
-				throw new IllegalArgumentException("Unencoded character in string: " + c);
-			}
-		}
-		bytes.limit(bytes.position());
-		bytes.rewind();
-		return StandardCharsets.UTF_8.decode(bytes).toString();
-	}
-
-	public static boolean percentEncodingProperty(String s) {
-		return percentDecode(percentEncode(s)).equals(s);
-	}
-
-	/**
-	 * Percent-encodes a string.
-	 * 
-	 * Percent encoding (aka URL-encoding) replaces all reserved characters as
-	 * well as all non-unreserved characters with the UTF-8 representation of
-	 * the character as a sequence of %xx bytes.
-	 * 
-	 * Percent encoding is specified in
-	 * <a href="https://tools.ietf.org/html/rfc3986#page-12">RFC 3986</a>:
-	 * 
-	 * This method will also handle multi-word characters correctly (i.e.,
-	 * Unicode characters beyond 65535). Example:
-	 * 
-	 * <li>percentEncode("føø") = "f%C3%B8%C3%B8"
-	 * <li>percentEncode("\ud801\udc00") = "%F0%90%90%80"
-	 * 
-	 * @param s
-	 *            A string
-	 * @return A %-encoded version of the string
-	 * @see #percentEncodingProperty(String)
-	 */
-	public static String percentEncode(String s) {
-		byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
-		StringBuilder result = new StringBuilder(s.length());
-		for (byte b : bytes) {
-			switch (b) {
-			case 'A':
-			case 'B':
-			case 'C':
-			case 'D':
-			case 'E':
-			case 'F':
-			case 'G':
-			case 'H':
-			case 'I':
-			case 'J':
-			case 'K':
-			case 'L':
-			case 'M':
-			case 'N':
-			case 'O':
-			case 'P':
-			case 'Q':
-			case 'R':
-			case 'S':
-			case 'T':
-			case 'U':
-			case 'V':
-			case 'W':
-			case 'X':
-			case 'Y':
-			case 'Z':
-			case 'a':
-			case 'b':
-			case 'c':
-			case 'd':
-			case 'e':
-			case 'f':
-			case 'g':
-			case 'h':
-			case 'i':
-			case 'j':
-			case 'k':
-			case 'l':
-			case 'm':
-			case 'n':
-			case 'o':
-			case 'p':
-			case 'q':
-			case 'r':
-			case 's':
-			case 't':
-			case 'u':
-			case 'v':
-			case 'w':
-			case 'x':
-			case 'y':
-			case 'z':
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-			case '8':
-			case '9':
-			case '-':
-			case '_':
-			case '~':
-			case '.':
-				result.append((char) b);
-				break;
-			default:
-				result.append("%");
-				result.append(String.format("%02X", b));
-			}
-		}
-		return result.toString();
-	}
-
 	public static String quote(String s) {
 		return "\"" + s.replaceAll("([\\\"\'])", "\\\\$1").replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r") + "\"";
 	}
@@ -285,19 +150,70 @@ public class JavaUtil {
 			return "uinit_this";
 		else
 			return o.toString();
-	
 	}
-	public static Id frameTypeToId(Object t) {
-		return Id.string(frameTypeToString(t)); // TODO: decide on encoding of types as Ids
+
+	public static Id frameTypeToId(Object o) {
+		if (o == Opcodes.TOP)
+			return JavaFacts.Types.TOP;
+		else if (o == Opcodes.INTEGER)
+			return JavaFacts.Types.INT;
+		else if (o == Opcodes.FLOAT)
+			return JavaFacts.Types.FLOAT;
+		else if (o == Opcodes.DOUBLE)
+			return JavaFacts.Types.DOUBLE;
+		else if (o == Opcodes.LONG)
+			return JavaFacts.Types.LONG;
+		else if (o == Opcodes.NULL)
+			return JavaFacts.Types.VOID;
+		else if (o == Opcodes.UNINITIALIZED_THIS)
+			return JavaFacts.Types.UNINITIALIZED_THIS;
+		else if(o instanceof String)
+			return typeToId(Type.getObjectType((String) o));
+        throw new IllegalArgumentException("" + o);
 	}
 
 	public static String typeToString(Type t) {
-		if(t.getSort() == Type.ARRAY || t.getSort() == Type.OBJECT)
+		if (t.getSort() == Type.OBJECT)
+			return t.getInternalName();
+		else if (t.getSort() == Type.ARRAY)
 			return t.getInternalName();
 		else
 			return t.getClassName();
 	}
+
 	public static Id typeToId(Type t) {
-		return Id.string(typeToString(t)); // TODO: decide on encoding of types as Ids
+        switch (t.getSort()) {
+        case Type.VOID:
+            return JavaFacts.Types.VOID;
+        case Type.BOOLEAN:
+            return JavaFacts.Types.BOOLEAN;
+        case Type.CHAR:
+            return JavaFacts.Types.CHAR;
+        case Type.BYTE:
+            return JavaFacts.Types.BYTE;
+        case Type.SHORT:
+            return JavaFacts.Types.SHORT;
+        case Type.INT:
+            return JavaFacts.Types.INT;
+        case Type.FLOAT:
+            return JavaFacts.Types.FLOAT;
+        case Type.LONG:
+            return JavaFacts.Types.LONG;
+        case Type.DOUBLE:
+            return JavaFacts.Types.DOUBLE;
+        case Type.ARRAY:
+        	return JavaFacts.Types.array(t.getDimensions(), typeToId(t.getElementType()));
+        case Type.OBJECT:
+            return JavaFacts.Types.object(t.getInternalName());
+        default:
+            throw new IllegalArgumentException("" + t + t.getSort());
+        }
+	}
+
+	public static ILogger logger(int logLevel) {
+		if (logLevel == 0)
+			return nullLogger;
+		else
+			return stdLogger;
 	}
 }

@@ -133,7 +133,7 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
 		log.logf("visitOuterClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name, outerName,
-				innerName, Printer.OPCODES[access]);
+				innerName, access);
 	}
 
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
@@ -192,5 +192,12 @@ public class ClassFactExtractor extends ClassVisitor {
 		log.logf("visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n", typeRef,
 				typePath.toString(), desc, visible);
 		return null;
+	}
+
+	public Id getMethodId() {
+		return JavaFacts.JAVA_METHODS.resolve(UriEncoding.percentEncode(getMethodName(), "/"));
+	}
+	public Id getClassId() {
+		return JavaFacts.JAVA_TYPES.resolve(UriEncoding.percentEncode(getClassName(), "/"));
 	}
 }
