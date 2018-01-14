@@ -33,6 +33,9 @@ public class UriEncoding {
 	public static final String URI_UNRESERVED = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._~";
 	public static final String URI_GEN_DELIMS = ":/?#[]@";
 	public static final String URI_SUB_DELIMS = "!$&'()*+,;=";
+	public static final String URI_EXTRA_CHARS_PCHAR = URI_SUB_DELIMS + ":@";
+	public static final String URI_EXTRA_CHARS_QUERY = URI_EXTRA_CHARS_PCHAR + "/?";
+	public static final String URI_EXTRA_CHARS_FRAGMENT = URI_EXTRA_CHARS_PCHAR + "/?";
 	/**
 	 * Extra characters allowed in paths, in addition to {@link #URI_UNRESERVED}
 	 * and encode characters.

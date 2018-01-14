@@ -24,7 +24,7 @@ import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
 	private static final List<String> DEFAULT_CLASSES = Arrays.asList("../../../../../ImmutablePosition.class",
-			"../../../../../MutablePosition.class", "../../../../../Test.class");
+			"../../../../../MutablePosition.class", "../../../../../PdfWriter.class");
 
 	public static void main(String[] args) throws IOException {
 		boolean openAsResource = args.length == 0;

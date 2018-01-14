@@ -1,400 +1,566 @@
 package org.nuthatchery.analysis.java.extractor;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Spliterator;
-import java.util.WeakHashMap;
-import java.util.stream.Stream;
+import java.util.regex.Pattern;
 
-public abstract class Id {
-	public static final Map<Object, Id> cache = new WeakHashMap<>();
-	public static final Id STRINGS = new UriId("literal://string/");
-	public static final Id TEXT = new UriId("literal://text/");
-	public static final Id CHARACTERS = new UriId("literal://character/");
-	public static final Id NUMBERS = new UriId("literal://number/");
-	public static final Id INTEGERS = new UriId(NUMBERS, "/integer/");
-	public static final Id ORDINALS = new UriId(NUMBERS, "/ordinal/");
-	public static final Id RATIONALS = new UriId(NUMBERS, "/rational/");
-	public static final Id DECIMALS = new UriId(NUMBERS, "/decimal/");
-	public static final Id FLOATS = new UriId(NUMBERS, "/float/");
+public interface Id {
+	static final Id TRUE = new LiteralId(true);
+	static final Id FALSE = new LiteralId(false);
+	static final Id ZERO = new LiteralId(0);
+	static final Id ONE = new LiteralId(1);
+	static final Id TYPE_BOOLEAN = new RootId("xsd", "boolean");
+	static final Id TYPE_INTEGER= new RootId("xsd", "integer");
+	static final Id TYPE_DECIMAL = new RootId("xsd", "decimal");
+	static final Id TYPE_FLOAT = new RootId("xsd", "float");
+	static final Id TYPE_DOUBLE = new RootId("xsd", "double");
+	static final Id TYPE_STRING = new RootId("xsd", "string");
 
-	public static Id id(String name) {
-		Id id = cache.get(name);
-		if(id == null) {
-			id = new UriId(name);
-			cache.put(name, id);
-		}
-		return id;
+	public static Id string(String s) { return new LiteralId(s);}
+	public static Id literal(Object s) { return new LiteralId(s);}
+	public static Id id(String scheme, String auth, String...path) {
+		return new RootId(scheme, auth).addPathSegments(path);
+	}
+	public static Id id(Id root, String...path) {
+		return root.addPathSegments(path);
+	}
+	
+	List<String> getPath();
+
+	default Id removeParam(Id paramKey) {
+		throw new UnsupportedOperationException("does not support parameters");
 	}
 
-	public static Id id(Id parent, String name) {
-		return new UriId(parent, name);
+	default boolean hasParam(Id paramKey) {
+		return false;
 	}
 
-	public static Id integer(long i) {
-		return new NumberId<Long>(INTEGERS, i);
+	default boolean hasParams() {
+		return false;
 	}
 
-	public static Id integer(BigInteger i) {
-		return new NumberId<BigInteger>(INTEGERS, i);
+	String getScheme();
+
+	String getAuthority();
+
+	default Id addPathSegments(String... pathSegments) {
+		return new PathId(this, pathSegments);
+	}
+	default Id addSubPath(String subPath) {
+		return new PathId(this, subPath.split("/"));
+	}
+	default Id addSubPath(List<String> subPath) {
+		return new PathId(this, subPath);
 	}
 
-	public static Id decimal(BigDecimal i) {
-		return new NumberId<BigDecimal>(DECIMALS, i);
+	default List<Id> getParams() {
+		throw new UnsupportedOperationException("does not support parameters");
 	}
 
-	public static Id floating(double i) {
-		return new NumberId<Double>(FLOATS, i);
+	default Map<Id, Id> getParamMap() {
+		throw new UnsupportedOperationException("does not support parameters");
 	}
 
-	public static Id string(String s) {
-		return new StringId(s);
+	default Id getParam(Id paramKey) {
+		throw new UnsupportedOperationException("does not support parameters");
 	}
 
-	public static Id text(String s, String language) {
-		return new StringId(TEXT.resolve(language), s);
+	default Id addParam(Id paramKey) {
+		return new ParamId(this, paramKey);
 	}
 
-	public static Id character(char c) {
-		return new CharId(String.valueOf(c));
+	default Id addParam(Id paramKey, Id paramValue) {
+		return new ParamId(this, paramKey, paramValue);
 	}
 
-	public static Id character(int codePoint) {
-		return new CharId(String.valueOf(Character.toChars(codePoint)));
+	default String getFragment() {
+		throw new UnsupportedOperationException("does not support parameters");
 	}
 
-	public static Id character(String c) {
-		if (c.codePointCount(0, c.length()) != 1) {
-			throw new IllegalArgumentException("Argument should contain a single Unicode codepoint: " + c);
-		}
-		return null;
+	Id getParent();
+
+	String toString();
+
+	String toUriString();
+
+	String toRdfString();
+
+	boolean isRoot();
+
+	boolean isContainer();
+
+	default boolean hasFragment() {
+		return false;
 	}
 
-	public boolean isAdaptableTo(Class<?> type) {
-		return type == String.class || type == URI.class || type.isAssignableFrom(getClass());
+	public static Id root(String scheme, String authority) {
+		return new RootId(scheme, authority);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> T as(Class<T> type) {
-		Object result = null;
-		if (type.isAssignableFrom(getClass()))
-			result = this;
-		else if (type == String.class)
-			result = toString();
-		else if (type == URI.class)
-			result = getURI();
-		return (T) result;
-	}
+	public static class RootId implements Id {
+		protected static final Pattern SCHEME_PAT = Pattern.compile("[A-Za-z][A-Za-z0-9+.\\-]*");
+		protected static final Pattern AUTHORITY_PAT = Pattern
+				.compile("(//)?([A-Za-z0-9~_.\\-]|%[0-9A-Fa-f][0-9A-Fa-f]|[!$\\&'()*+,;=])+(:[0-9]*)?");
 
-	public URI getURI() {
-		return getModelId().getURI().resolve(getPathName());
-	}
-
-	public abstract Id getModelId();
-
-	public abstract Id resolve(String path);
-
-	protected abstract String getPathName();
-
-	public String getRDF() {
-		URI uri = getURI();
-		if (uri.getScheme().equals("literal")) {
-			switch (uri.getAuthority()) {
-			case "string":
-				return JavaUtil.quote(uri.getPath().substring(1));	
-			case "text": {
-				String[] rawPath = uri.getRawPath().split("/");
-				if(rawPath.length < 1)
-					throw new IllegalStateException();
-				String lang = UriEncoding.percentDecode(rawPath[0]);
-				rawPath = Arrays.copyOfRange(rawPath, 1, rawPath.length);
-				return JavaUtil.quote(String.join("/", rawPath))+"@"+lang;
-			}
-			case "number": {
-				String[] rawPath = uri.getRawPath().split("/");
-				if(rawPath.length < 1)
-					throw new IllegalStateException();
-				String type = UriEncoding.percentDecode(rawPath[0]);
-				rawPath = Arrays.copyOfRange(rawPath, 1, rawPath.length);
-				return JavaUtil.quote(String.join("/", rawPath))+"^^"+type;
-			}
-			case "character":
-				return JavaUtil.quote(uri.getPath());	
-			default:
-			}
-		}
-		return "<" + getURI().toString() + ">"; // TODO: whatever
-	}
-
-	public String getJSON() {
-		return getURI().toString(); // TODO: quote it!
-	}
-
-	public static abstract class AbstractId extends Id {
-		private final Id modelId;
-
-		public AbstractId(Id parent) {
-			modelId = parent;
-		}
-
-		public Id getModelId() {
-			return modelId;
-		}
-
-	}
-
-	private static class UriId extends AbstractId {
-		private final URI uri;
-
-		public UriId(URI uri) {
-			this(null, uri);
-		}
-
-		public UriId(Id parent, URI uri) {
-			super(parent);
-			if (parent != null)
-				this.uri = parent.getURI().resolve(uri);
-			else
-				this.uri = uri;
-		}
-
-		private static URI createUri(String uri) {
-			try {
-				return new URI(uri);
-			} catch (URISyntaxException e) {
-				throw new IllegalArgumentException(uri, e);
-			}
-		}
-		public UriId(Id parent, String uri) {
-			this(parent, createUri(uri));
-		}
-
-		public UriId(String uri) {
-			this(null, createUri(uri));
-		}
-
-		public Id resolve(String path) {
-			try {
-				if (path.startsWith("/"))
-					return new UriId(getModelId(), new URI(path));
-				else if(path.startsWith("?"))
-					return new UriId(this, new URI(uri.toString() + path));
-				else
-					return new UriId(this, getURIFolder().resolve(new URI(path)));
-			} catch (URISyntaxException e) {
-				throw new IllegalArgumentException(path, e);
-			}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((authority == null) ? 0 : authority.hashCode());
+			result = prime * result + ((scheme == null) ? 0 : scheme.hashCode());
+			return result;
 		}
 
 		@Override
-		protected String getPathName() {
-			return uri.getPath();
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (!(obj instanceof RootId)) {
+				return false;
+			}
+			RootId other = (RootId) obj;
+			if (authority == null) {
+				if (other.authority != null) {
+					return false;
+				}
+			} else if (!authority.equals(other.authority)) {
+				return false;
+			}
+			if (scheme == null) {
+				if (other.scheme != null) {
+					return false;
+				}
+			} else if (!scheme.equals(other.scheme)) {
+				return false;
+			}
+			return true;
+		}
+
+		private final String scheme;
+		private final String authority;
+
+		public RootId(String scheme, String authority) {
+			if (!SCHEME_PAT.matcher(scheme).matches())
+				throw new IllegalArgumentException(scheme);
+			if (!AUTHORITY_PAT.matcher(authority).matches())
+				throw new IllegalArgumentException(authority);
+			this.scheme = scheme.toLowerCase();
+			this.authority = authority.toLowerCase();
 		}
 
 		@Override
-		public Id getModelId() {
-			return this;
+		public List<String> getPath() {
+			return Collections.emptyList();
 		}
 
-		public URI getURI() {
-			return uri;
-		}
-		
-		private URI getURIFolder() {
-			if(uri.isOpaque())
-				return uri;
-			String s = uri.toString();
-			if(s.endsWith("/"))
-				return uri;
-			else
-				return createUri(s + "/");
-		}
-	}
-
-	private static class StringId extends UriId {
-		private String value;
-
-		public StringId(String value) {
-			super(STRINGS, UriEncoding.percentEncode(value));
-			this.value = value;
+		@Override
+		public String getScheme() {
+			return scheme;
 		}
 
-		public StringId(Id parent, String value) {
-			super(parent, UriEncoding.percentEncode(value));
-			this.value = value;
+		@Override
+		public String getAuthority() {
+			return authority;
 		}
 
-		@SuppressWarnings("unchecked")
-		public <T> T as(Class<T> type) {
-			if (type == String.class)
-				return (T) value;
-			else
-				return super.as(type);
-		}
-	}
-
-	private static class CharId extends UriId {
-		private String value;
-
-		public CharId(String value) {
-			super(STRINGS, UriEncoding.percentEncode(value));
-			this.value = value;
+		@Override
+		public Id getParent() {
+			return null;
 		}
 
-		@SuppressWarnings("unchecked")
-		public <T> T as(Class<T> type) {
-			if (type == String.class)
-				return (T) value;
-			else if (type == Character.class && value.length() == 1)
-				return (T) Character.valueOf(value.charAt(0));
-			else if (type == Integer.class)
-				return (T) Integer.valueOf(value.codePointAt(0));
-			else
-				return super.as(type);
-		}
-	}
-
-	private static class NumberId<T extends Number> extends UriId {
-
-		private T value;
-
-		public NumberId(Id parent, T val) {
-			super(parent, val.toString());
-			this.value = val;
+		@Override
+		public String toUriString() {
+			return scheme + ":" + authority;
 		}
 
+		@Override
+		public String toRdfString() {
+			return "<" + toUriString() + ">";
+		}
+
+		@Override
 		public String toString() {
-			return value.toString();
+			return toUriString();
 		}
 
-		public String getJSON() {
-			return value.toString();
+		@Override
+		public boolean isRoot() {
+			return true;
 		}
 
-		public boolean isAdaptableTo(Class<?> otherType) {
-			return super.isAdaptableTo(otherType) || otherType.isAssignableFrom(value.getClass());
+		@Override
+		public boolean isContainer() {
+			return true;
 		}
 
-		@SuppressWarnings("unchecked")
-		public <U> U as(Class<U> otherType) {
-			U result = super.as(otherType);
-			if (result == null) {
-				if (otherType.isAssignableFrom(value.getClass())) {
-					result = (U) value;
-				} else if (Number.class.isAssignableFrom(otherType)) {
-					try {
-						Method method = otherType.getMethod("valueOf", String.class);
-						if (Modifier.isStatic(method.getModifiers())) {
-							Object o = method.invoke(null, value.toString());
-							if (otherType.isInstance(o))
-								result = (U) o;
-						}
-					} catch (Exception e) {
-						// fine if this fails – just means it's not compatible
-					}
+	}
+
+	public static class PathId implements Id {
+		// protected static final Pattern SEGMENT_PAT = Pattern.compile(
+		// "([A-Za-z0-9~_.\\-]|[\u00a1-\u167f\u1681-\u180d\u180f-\u1fff\u200b-\u2027\u202a-\u202e\u2030-\u205e\2060-\2fff\u3001-\ufffd]|%[0-9A-Fa-f][0-9A-Fa-f]|[!$\\&'()*+,;=:@])*");
+
+		private final List<String> path;
+		private final Id parent;
+
+		public PathId(Id parent, String... pathSegments) {
+			this(parent, Arrays.asList(pathSegments));
+		}
+
+		public PathId(Id parent, List<String> pathSegments) {
+			if (parent == null || !parent.isContainer())
+				throw new IllegalArgumentException();
+
+			this.parent = parent;
+			List<String> path = new ArrayList<>(parent.getPath().size() + pathSegments.size());
+			path.addAll(parent.getPath());
+			boolean first = true;
+			for (String p : pathSegments) {
+				if (first && p.equals("/")) {
+					path.clear();
+				} else if (p.equals(".")) {
+				} else if (p.equals("..")) {
+					if (!path.isEmpty())
+						path.remove(path.size() - 1);
+				} else {
+					path.add(UriEncoding.percentEncodeIri(p, "", true));
 				}
 			}
-			return null;
+			this.path = Collections.unmodifiableList(path);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((parent == null) ? 0 : parent.hashCode());
+			result = prime * result + ((path == null) ? 0 : path.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (!(obj instanceof PathId)) {
+				return false;
+			}
+			PathId other = (PathId) obj;
+			if (parent == null) {
+				if (other.parent != null) {
+					return false;
+				}
+			} else if (!parent.equals(other.parent)) {
+				return false;
+			}
+			if (path == null) {
+				if (other.path != null) {
+					return false;
+				}
+			} else if (!path.equals(other.path)) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public List<String> getPath() {
+			return path;
+		}
+
+		@Override
+		public String getScheme() {
+			return parent.getScheme();
+		}
+
+		@Override
+		public String getAuthority() {
+			return parent.getAuthority();
+		}
+
+		@Override
+		public Id getParent() {
+			return parent;
+		}
+
+		@Override
+		public String toUriString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(getScheme());
+			sb.append(":");
+			sb.append(getAuthority());
+			for (String p : path) {
+				sb.append("/");
+				sb.append(p);
+			}
+			return sb.toString();
+		}
+
+		@Override
+		public String toRdfString() {
+			return "<" + toUriString() + ">";
+		}
+
+		@Override
+		public String toString() {
+			return toUriString();
+		}
+
+		@Override
+		public boolean isRoot() {
+			return false;
+		}
+
+		@Override
+		public boolean isContainer() {
+			return true;
 		}
 	}
 
-	@SuppressWarnings("unused")
-	@Deprecated
-	private static class DecOrFracId extends AbstractId {
-		private final BigDecimal numerator;
-		private final BigDecimal denominator;
+	public static class ParamId implements Id {
+		private final Id parent;
+		private final List<Id> params;
+		private final Map<Id, Id> paramMap;
 
-		public DecOrFracId(Id parent, long value) {
-			this(parent, BigInteger.valueOf(value), BigInteger.ONE);
+		public ParamId(Id parent, Id key) {
+			this(parent, key, Id.TRUE, new ArrayList<>(), new HashMap<>());
 		}
 
-		public DecOrFracId(Id parent, long num, long denom) {
-			this(parent, BigInteger.valueOf(num), BigInteger.valueOf(denom));
+		public ParamId(Id parent, Id key, Id value) {
+			this(parent, key, value, new ArrayList<>(), new HashMap<>());
 		}
 
-		public DecOrFracId(Id parent, BigInteger num, BigInteger denom) {
-			super(parent);
+		private ParamId(Id parent, Id key, Id value, List<Id> params, Map<Id, Id> paramMap) {
+			if (parent == null || !parent.isContainer())
+				throw new IllegalArgumentException();
+			this.parent = parent;
 
-			if (denom.compareTo(BigInteger.ZERO) < 0) {
-				num = num.negate();
-				denom = denom.negate();
+			if (key != null) {
+				params.add(key);
+				paramMap.put(key, value != null ? value : Id.TRUE);
 			}
-
-			BigInteger gcd = num.gcd(denom);
-			if (gcd != BigInteger.ZERO && gcd != BigInteger.ONE) {
-				num = num.divide(gcd);
-				denom = denom.divide(gcd);
-			} else if (denom == BigInteger.ZERO && num != BigInteger.ZERO) {
-				num = num.divide(num.gcd(num));
-			}
-
-			this.numerator = new BigDecimal(num).stripTrailingZeros();
-			this.denominator = new BigDecimal(denom).stripTrailingZeros();
-
-		}
-
-		public DecOrFracId(Id parent, BigDecimal value) {
-			super(parent);
-			value = value.stripTrailingZeros();
-			this.numerator = value;
-			this.denominator = BigDecimal.ONE;
+			this.params = Collections.unmodifiableList(params);
+			this.paramMap = Collections.unmodifiableMap(paramMap);
 		}
 
 		@Override
-		protected String getPathName() {
-			return numerator.toString();
+		public List<String> getPath() {
+			return parent.getPath();
 		}
 
-		public boolean isAdaptableTo(Class<?> type) {
-			return super.isAdaptableTo(type) || as(type) != null;
+		@Override
+		public String getScheme() {
+			return parent.getScheme();
 		}
 
-		@SuppressWarnings("unchecked")
-		public <T> T as(Class<T> type) {
-			try {
-				if (type == String.class)
-					return (T) toString();
-				else if (type == URI.class)
-					return (T) getURI();
-				else if (type.isAssignableFrom(getClass()))
-					return (T) this;
-				else if (denominator != BigDecimal.ZERO) {
-					BigDecimal tmp = numerator.divide(denominator, BigDecimal.ROUND_HALF_EVEN);
-					if (type.isAssignableFrom(BigDecimal.class))
-						return (T) tmp;
-					else if (type == BigInteger.class)
-						return (T) tmp.toBigInteger();
-					else if (type == Integer.class)
-						return (T) Integer.valueOf(tmp.intValueExact());
-					else if (type == Long.class)
-						return (T) Long.valueOf(tmp.longValueExact());
-					else if (type == Short.class)
-						return (T) Short.valueOf(tmp.shortValueExact());
-					else if (type == Byte.class)
-						return (T) Byte.valueOf(tmp.byteValueExact());
-					else if (type == Double.class)
-						return (T) Double.valueOf(tmp.doubleValue());
-					else if (type == Float.class)
-						return (T) Float.valueOf(tmp.floatValue());
-				} else if (type == Double.class) {
-					return (T) Double.valueOf((numerator.doubleValue() / denominator.doubleValue()));
-				} else if (type == Float.class) {
-					return (T) Double.valueOf((numerator.floatValue() / denominator.floatValue()));
+		@Override
+		public String getAuthority() {
+			return parent.getAuthority();
+		}
+
+		@Override
+		public Id getParent() {
+			return parent;
+		}
+
+		@Override
+		public String toUriString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(parent.toUriString());
+			sb.append("?");
+			for (Id key : params) {
+				sb.append(UriEncoding.percentEncodeIri(key.toUriString(), UriEncoding.URI_EXTRA_CHARS_QUERY, true));
+				if (paramMap.get(key) != Id.TRUE) {
+					sb.append("=");
+					sb.append(UriEncoding.percentEncodeIri(paramMap.get(key).toUriString(),
+							UriEncoding.URI_EXTRA_CHARS_QUERY, true));
 				}
-			} catch (ArithmeticException e) {
 			}
+			return sb.toString();
+		}
+
+		@Override
+		public String toRdfString() {
+			return "<" + toUriString() + ">";
+		}
+
+		@Override
+		public String toString() {
+			return toUriString();
+		}
+
+		@Override
+		public boolean isRoot() {
+			return false;
+		}
+
+		@Override
+		public boolean isContainer() {
+			return false;
+		}
+
+		@Override
+		public List<Id> getParams() {
+			return params;
+		}
+
+		@Override
+		public Map<Id, Id> getParamMap() {
+			return paramMap;
+		}
+
+		@Override
+		public Id getParam(Id paramKey) {
+			return paramMap.get(paramKey);
+		}
+
+		@Override
+		public boolean hasParam(Id paramKey) {
+			return paramMap.containsKey(paramKey);
+		}
+
+		@Override
+		public String getFragment() {
 			return null;
 		}
 
 		@Override
-		public Id resolve(String path) {
-throw new UnsupportedOperationException();		}
+		public boolean hasParams() {
+			return true;
+		}
+
+		@Override
+		public boolean hasFragment() {
+			return false;
+		}
+
+		@Override
+		public Id addParam(Id paramKey) {
+			return new ParamId(parent, paramKey, Id.TRUE, new ArrayList<>(params), new HashMap<>(paramMap));
+		}
+
+		@Override
+		public Id removeParam(Id paramKey) {
+			ArrayList<Id> pl = new ArrayList<>(params);
+			HashMap<Id, Id> pm = new HashMap<>(paramMap);
+			pl.remove(paramKey);
+			pm.remove(paramKey);
+			return new ParamId(parent, null, null, pl, pm);
+		}
+
+		@Override
+		public Id addParam(Id paramKey, Id paramValue) {
+			return new ParamId(parent, paramKey, paramValue, new ArrayList<>(params), new HashMap<>(paramMap));
+		}
+
+		public Id addPathSegments(String... pathSegments) {
+			return new ParamId(parent.addPathSegments(pathSegments), null, null, params, paramMap); 
+		}
+
+	}
+
+
+	public static class LiteralId implements Id {
+
+		private final Id type;
+		private final String stringRep;
+		private final String uriString;
+		
+		public LiteralId(Object obj) {
+			String uriString  = null;
+			if(obj instanceof Boolean) {
+				this.type = Id.TYPE_BOOLEAN;
+				this.stringRep = obj.toString();				
+			}
+			else if(obj instanceof Integer || obj instanceof Short || obj instanceof Byte || obj instanceof Long || obj instanceof BigInteger) {
+				this.type = Id.TYPE_INTEGER;
+				this.stringRep = obj.toString();				
+			}
+			else if(obj instanceof Double) {
+				this.type = Id.TYPE_DOUBLE;
+				this.stringRep = obj.toString();				
+			}
+			else if(obj instanceof Float) {
+				this.type = Id.TYPE_FLOAT;
+				this.stringRep = obj.toString();				
+			}
+			else if(obj instanceof BigDecimal) {
+				this.type = Id.TYPE_DECIMAL;
+				this.stringRep = obj.toString();				
+			}
+			else if(obj instanceof String) {
+				this.type = Id.TYPE_STRING;
+				this.stringRep = JavaUtil.quote(obj.toString());		
+				uriString = UriEncoding.percentEncodeIri(obj.toString(), UriEncoding.URI_EXTRA_CHARS_PATH, true);
+			}
+			else {
+				throw new IllegalArgumentException("type not found for: " + obj);
+			}
+			if(uriString == null)
+				this.uriString = UriEncoding.percentEncodeIri(obj.toString(), UriEncoding.URI_EXTRA_CHARS_PATH, true);
+			else
+				this.uriString = uriString;
+		}
+
+
+		@Override
+		public List<String> getPath() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public String getScheme() {
+			return type.getScheme();
+		}
+
+		@Override
+		public String getAuthority() {
+			return type.getAuthority();
+		}
+
+		@Override
+		public Id getParent() {
+			return type;
+		}
+
+		@Override
+		public String toUriString() {
+			return "values://" + type.toString() + "/" + uriString;
+		}
+
+		@Override
+		public String toRdfString() {
+			return stringRep + "^^" + type.toUriString();
+		}
+
+		@Override
+		public String toString() {
+			return stringRep;
+		}
+
+		@Override
+		public boolean isRoot() {
+			return false;
+		}
+
+		@Override
+		public boolean isContainer() {
+			return false;
+		}
+
 	}
 
 }

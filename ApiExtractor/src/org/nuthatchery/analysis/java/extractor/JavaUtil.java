@@ -5,20 +5,35 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 public class JavaUtil {
-	public static final String JAVA_EXTRA_URI_PATH_CHARS = "/()";
+	public static final String JAVA_EXTRA_URI_PATH_CHARS = "/()'$";
 	public static ILogger stdLogger = new StdoutLogger();
 	public static ILogger nullLogger = new NullLogger();
 
+	/**
+	 * @param name Name of the entity this is the descriptor for
+	 * @param desc The descriptor
+	 * @return Readable presentation of the descriptor
+	 */
 	public static String decodeDescriptor(String name, String desc) {
 		StringBuilder b = new StringBuilder();
 		JavaUtil.decodeDescriptor(name, Type.getType(desc), b);
 		return b.toString();
 	}
 
+	/**
+	 * @param desc The descriptor
+	 * @return Readable presentation of the descriptor
+	 */
 	public static String decodeDescriptor(String desc) {
 		return decodeDescriptor(null, desc);
 	}
 
+	/**
+	 * @param owner Name of the entity (i.e., class) that owns <code>name</code>
+	 * @param name Name of the entity this is the descriptor for
+	 * @param desc The descriptor
+	 * @return Readable presentation of the descriptor
+	 */
 	public static String decodeDescriptor(String owner, String name, String desc) {
 		StringBuilder b = new StringBuilder();
 
@@ -26,7 +41,7 @@ public class JavaUtil {
 		return b.toString();
 	}
 
-	public static void decodeDescriptor(String name, Type type, StringBuilder b) {
+	private static void decodeDescriptor(String name, Type type, StringBuilder b) {
 		if (type.getSort() == Type.METHOD) {
 			decodeDescriptor(null, type.getReturnType(), b);
 			if (name != null) {

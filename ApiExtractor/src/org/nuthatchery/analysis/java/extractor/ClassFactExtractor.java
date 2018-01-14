@@ -21,7 +21,6 @@ import org.objectweb.asm.util.Printer;
 public class ClassFactExtractor extends ClassVisitor {
 	protected String context;
 	protected final Stack<String> currentClass = new Stack<>();
-	protected final Stack<String> currentMethod = new Stack<>();
 	protected final Stack<String> currentSource = new Stack<>();
 	protected final List<String> localInfo = new ArrayList<>();
 	protected final List<String> stackInfo = new ArrayList<>();
@@ -33,6 +32,7 @@ public class ClassFactExtractor extends ClassVisitor {
 	private final IFactsWriter fw;
 
 	private final ILogger log;
+	private Id memberId;
 
 	public ClassFactExtractor(IFactsWriter fw, ILogger logger) {
 		super(Opcodes.ASM6);
@@ -41,24 +41,21 @@ public class ClassFactExtractor extends ClassVisitor {
 	}
 
 	protected Integer indentLevel() {
-		return currentClass.size() + currentMethod.size();
+		return currentClass.size();
 	}
 	
 	String getClassName() {
 		return currentClass.peek();
 	}
 
-	String getMemberName(String name, String desc) {
-		return String.format("%s::%s%s", currentClass.peek(), name, desc);
+	Id getMemberName(String name, String desc) {
+		return JavaFacts.method(JavaFacts.Types.object(currentClass.peek()), name, desc); 
 	}
 
-	String getMemberName(String owner, String name, String desc) {
-		return String.format("%s::%s%s", owner, name, desc);
+	Id getMemberId(String owner, String name, String desc) {
+		return JavaFacts.method(JavaFacts.Types.object(owner), name, desc); 
 	}
 
-	String getMethodName() {
-		return currentMethod.peek();
-	}
 
 	protected void put(Id relation, String obj) {
 		fw.put(Id.string(obj), relation);
@@ -120,14 +117,12 @@ public class ClassFactExtractor extends ClassVisitor {
 		// signature=%s, value=%s)%n", Printer.OPCODES[access],
 		// name, desc, signature, value);
 		log.log("\n" + "field " + JavaUtil.decodeDescriptor(getClassName(), name, desc));
-		String fullName = getMemberName(name, desc);
-		currentMethod.push(fullName);
-		put(JavaFacts.FIELD, fullName);
-		put(JavaFacts.SIGNATURE, fullName, JavaUtil.decodeDescriptor(getClassName(), name, desc));
+		memberId = JavaFacts.method(getClassId(), name, desc);
+		put(JavaFacts.FIELD, memberId);
 		if (value != null) {
-			put(JavaFacts.INITIAL_VALUE, fullName, value.toString());
+			put(JavaFacts.INITIAL_VALUE, memberId, Id.literal(value));
 		}
-		currentMethod.pop();
+		memberId = null;
 		return null;
 	}
 
@@ -145,23 +140,21 @@ public class ClassFactExtractor extends ClassVisitor {
 		System.out.flush();
 		System.err.flush();
 		log.log("\n" + "method " + JavaUtil.decodeDescriptor(getClassName(), name, desc));
-		String fullName = getMemberName(name, desc);
-		currentMethod.push(fullName);
-		put(JavaFacts.METHOD, fullName);
+		memberId = JavaFacts.method(getClassId(), name, desc);
+		put(JavaFacts.METHOD, memberId);
 		if (name.equals("<init>")) {
-			put(JavaFacts.CONSTRUCTOR, fullName);
-			put(JavaFacts.CONSTRUCTS, fullName, getClassName());
+			put(JavaFacts.CONSTRUCTOR, memberId);
+			put(JavaFacts.CONSTRUCTS, memberId, getClassId());
 		}
-		put(JavaFacts.SIGNATURE, fullName, JavaUtil.decodeDescriptor(getClassName(), name, desc));
 		if (signature != null)
-			put(JavaFacts.GENERIC, fullName, signature);
+			put(JavaFacts.GENERIC, memberId, Id.literal(signature));
 		if (exceptions != null)
 			for (String s : exceptions)
-				put(JavaFacts.DECLARES_THROW, fullName, s);
+				put(JavaFacts.DECLARES_THROW, memberId, JavaFacts.Types.object(s));
 		if ((access & Opcodes.ACC_PUBLIC) != 0)
-			put(JavaFacts.PUBLIC, fullName); // or put(JF.ACCESS, fullName,
+			put(JavaFacts.PUBLIC, memberId); // or put(JF.ACCESS, fullName,
 												// PUBLIC);
-		return new MethodFactExtractor(this, fullName, access, name, desc, log);
+		return new MethodFactExtractor(this, memberId, access, name, desc, log);
 	}
 
 
@@ -194,10 +187,8 @@ public class ClassFactExtractor extends ClassVisitor {
 		return null;
 	}
 
-	public Id getMethodId() {
-		return JavaFacts.JAVA_METHODS.resolve(UriEncoding.percentEncode(getMethodName(), "/"));
-	}
+
 	public Id getClassId() {
-		return JavaFacts.JAVA_TYPES.resolve(UriEncoding.percentEncode(getClassName(), "/"));
+		return JavaFacts.Types.object(getClassName());
 	}
 }

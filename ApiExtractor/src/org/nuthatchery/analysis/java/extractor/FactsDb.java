@@ -89,17 +89,17 @@ public class FactsDb {
 
 		protected void store() throws IOException {
 			if (output == null) {
-				try (PrintWriter pw = getWriter("")) {
-					todo.stream().forEachOrdered((String line) -> {
-						output.println(pw);
-					});
-					todo.clear();
-				}
-			} else {
-				output.close();
-				File file = new File(fileName + ".log.gz");
-				file.renameTo(new File(fileName + ".gz"));
+				output = getWriter(".log");
 			}
+			todo.stream().forEachOrdered((String line) -> {
+				output.println(line);
+			});
+			todo.clear();
+
+			output.close();
+			File file = new File(fileName +  (zipIt ? ".log.gz" : ".log"));
+			file.renameTo(new File(fileName + (zipIt ? ".gz" : "")));
+
 		}
 
 		protected void saved() {
@@ -123,51 +123,40 @@ public class FactsDb {
 		}
 
 		public void put(Id obj, Id relation) {
-			put(String.format("%s %s true .", obj.getRDF(), relation.getRDF()));
+			put(String.format("%s %s true .", obj.toRdfString(), relation.toRdfString()));
 		}
 
 		private void put(String factString) {
-			//if (facts.add(factString))
-				todo.add(factString);
+			// if (facts.add(factString))
+			todo.add(factString);
 		}
 
 		public void put(Id obj, Id relation, Id tgt) {
-			put(String.format("%s %s %s .", obj.getRDF(), relation.getRDF(), tgt.getRDF()));
+			put(String.format("%s %s %s .", obj.toRdfString(), relation.toRdfString(), tgt.toRdfString()));
 		}
 
 		public void put(Id obj, Id relation, Id tgt, Id mod) {
-			URI relUri = relation.getURI();
-			URI modUri = mod.getURI();
+			relation = relation.addParam(mod);
 
-			modUri = relUri.resolve("").relativize(modUri);
-			relUri = URI.create(relUri.toString() + "?" + modUri);
-
-			put(String.format("%s <%s> %s .", obj.getRDF(), relUri, tgt.getRDF()));
+			put(String.format("%s <%s> %s .", obj.toRdfString(), relation, tgt.toRdfString()));
 		}
 
 		@Override
 		public void put(Id obj, Id relation, Id tgt, Id mod1, Id mod2) {
-			URI relUri = relation.getURI();
-			URI mod1Uri = mod1.getURI();
-			URI mod2Uri = mod2.getURI();
+			relation = relation.addParam(mod1);
+			relation = relation.addParam(mod2);
 
-			mod1Uri = relUri.resolve("").relativize(mod1Uri);
-			mod2Uri = relUri.resolve("").relativize(mod2Uri);
-			relUri = URI.create(relUri.toString() + "?" + mod1Uri + "&" + mod2Uri);
-
-			put(String.format("%s <%s> %s .", obj.getRDF(), relUri, tgt.getRDF()));
+			put(String.format("%s <%s> %s .", obj.toRdfString(), relation, tgt.toRdfString()));
 		}
 
 		@Override
 		public void save() throws IOException {
 			super.store();
-/*			try (PrintWriter writer = open()) {
-				facts.stream().sorted().forEach((String l) -> {
-					writer.println(l);
-				});
-				writer.close();
-				saved();
-			}*/
+			/*
+			 * try (PrintWriter writer = open()) {
+			 * facts.stream().sorted().forEach((String l) -> {
+			 * writer.println(l); }); writer.close(); saved(); }
+			 */
 		}
 	}
 
@@ -184,7 +173,7 @@ public class FactsDb {
 		}
 
 		public void put(Id obj, Id relation) {
-			put(String.format("%s(\"%s\",\"%s\").", relation.getRDF(), context, obj));
+			put(String.format("%s(\"%s\",\"%s\").", relation.toRdfString(), context, obj));
 		}
 
 		private void put(String factString) {
@@ -193,16 +182,16 @@ public class FactsDb {
 		}
 
 		public void put(Id obj, Id relation, Id tgt) {
-			put(String.format("%s(\"%s\",\"%s\",\"%s\").", relation.getRDF(), context, obj, tgt));
+			put(String.format("%s(\"%s\",\"%s\",\"%s\").", relation.toRdfString(), context, obj, tgt));
 		}
 
 		public void put(Id obj, Id relation, Id tgt, Id mod) {
-			put(String.format("%s(\"%s\",\"%s\",\"%s\",\"%s\").", relation.getRDF(), context, obj, tgt, mod));
+			put(String.format("%s(\"%s\",\"%s\",\"%s\",\"%s\").", relation.toRdfString(), context, obj, tgt, mod));
 		}
 
 		@Override
 		public void put(Id from, Id label, Id to, Id modifier1, Id modifier2) {
-			put(String.format("%s(\"%s\",\"%s\",\"%s\",\"%s\", \"%s\").", label.getRDF(), context, from, to, modifier1,
+			put(String.format("%s(\"%s\",\"%s\",\"%s\",\"%s\", \"%s\").", label.toRdfString(), context, from, to, modifier1,
 					modifier2));
 		}
 
@@ -236,7 +225,7 @@ public class FactsDb {
 		 * Save contents of database.
 		 * 
 		 * @throws FileNotFoundException
-		 * @throws IOException 
+		 * @throws IOException
 		 */
 		void save() throws FileNotFoundException, IOException;
 
@@ -246,7 +235,7 @@ public class FactsDb {
 		 * Will throw an exception if this fails.
 		 * 
 		 * @throws FileNotFoundException
-		 * @throws IOException 
+		 * @throws IOException
 		 */
 		void precheck() throws FileNotFoundException, IOException;
 

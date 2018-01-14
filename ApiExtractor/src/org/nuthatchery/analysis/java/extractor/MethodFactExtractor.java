@@ -21,14 +21,14 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	 */
 	private final ClassFactExtractor parent;
 	// private ClassFactExtractor parent;
-	private String fullName;
+	private final Id currentMethodId;
 	private ILogger log;
 
-	public MethodFactExtractor(ClassFactExtractor parent, String fullName, int access, String name, String desc,
+	public MethodFactExtractor(ClassFactExtractor parent, Id methodId, int access, String name, String desc,
 			ILogger log) {
 		super(Opcodes.ASM6, parent.getClassName(), access, name, desc, null);
 		this.parent = parent;
-		this.fullName = fullName;
+		this.currentMethodId = methodId;
 		this.log = log;
 		// this.parent = parent;
 	}
@@ -56,10 +56,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitEnd() {
-		String s = parent.getMethodName();
-		parent.currentMethod.pop();
 		parent.currentLine = -1;
-		log.log("} // end of " + s);
+		log.log("} // end of " + currentMethodId);
 	}
 
 	@Override
@@ -68,28 +66,28 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		// " " +
 		// owner + "." + name + " [" + desc + "]");
 		log.log("# access field: " + JavaUtil.decodeDescriptor(owner, name, desc));
-		parent.put(JavaFacts.USES_TYPE, parent.getMethodName(), owner);
+		parent.put(JavaFacts.USES_TYPE, currentMethodId, JavaFacts.Types.object(owner));
 		switch (opcode) {
 		case Opcodes.GETSTATIC:
-			parent.put(JavaFacts.READS, parent.getMethodName(), parent.getMemberName(owner, name, desc),
+			parent.put(JavaFacts.READS, currentMethodId, parent.getMemberId(owner, name, desc),
 					JavaFacts.STATIC);
 			break;
 		case Opcodes.PUTSTATIC:
-			parent.put(JavaFacts.WRITES, parent.getMethodName(), parent.getMemberName(owner, name, desc),
+			parent.put(JavaFacts.WRITES, currentMethodId, parent.getMemberId(owner, name, desc),
 					JavaFacts.STATIC);
 			break;
 		case Opcodes.GETFIELD:
-			parent.put(JavaFacts.READS, parent.getMethodName(), parent.getMemberName(owner, name, desc),
+			parent.put(JavaFacts.READS, currentMethodId, parent.getMemberId(owner, name, desc),
 					JavaFacts.FIELD);
 			break;
 		case Opcodes.PUTFIELD:
-			parent.put(JavaFacts.WRITES, parent.getMethodName(), parent.getMemberName(owner, name, desc),
+			parent.put(JavaFacts.WRITES, currentMethodId, parent.getMemberId(owner, name, desc),
 					JavaFacts.FIELD);
 			break;
 		default:
 			throw new RuntimeException();
 		}
-		super.visitFieldInsn(opcode, owner, fullName, desc);
+		super.visitFieldInsn(opcode, owner, name, desc);
 	}
 
 	public void visitIincInsn(int var, int increment) {
@@ -110,9 +108,9 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
-		parent.put(JavaFacts.CALLS, parent.getMethodName(), parent.getMemberName(name, desc), JavaFacts.DYNAMIC);
+		parent.put(JavaFacts.CALLS, currentMethodId, parent.getMemberName(name, desc), JavaFacts.DYNAMIC);
 		log.log("INVOKEDYNAMIC " + name + " [" + desc + "]" + " " + bsm + " " + Arrays.toString(bsmArgs));
-		super.visitInvokeDynamicInsn(fullName, desc, bsm, bsmArgs);
+		super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
 	}
 
 	public void visitJumpInsn(int opcode, Label label) {
@@ -136,11 +134,11 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		case Opcodes.IF_ACMPEQ:
 		case Opcodes.IF_ACMPNE: {
 			// compare two references
-			Id methodId = parent.getMethodId();
+			Id methodId = currentMethodId;
 			if (parent.currentLine > 0)
-				methodId = methodId.resolve("?line=" + parent.currentLine);
-			Id type1 = JavaUtil.frameTypeToId(stack != null ? stack.get(stack.size() - 1) : "java/lang/Object");
-			Id type2 = JavaUtil.frameTypeToId(stack != null ? stack.get(stack.size() - 1) : "java/lang/Object");
+				methodId = methodId.addParam(Id.literal("line"), Id.literal(parent.currentLine));
+			Id type1 = JavaUtil.frameTypeToId(stackGetType(0, "java/lang/Object"));
+			Id type2 = JavaUtil.frameTypeToId(stackGetType(1, "java/lang/Object"));
 			log.logf("* ref equals on type %s with %s", type1, type2);
 			parent.put(JavaFacts.USES_REF_EQUALS, methodId, type1);
 			parent.put(JavaFacts.USES_REF_EQUALS, methodId, type2);
@@ -149,11 +147,11 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		case Opcodes.IFNONNULL:
 		case Opcodes.IFNULL: {
 			// compare a single reference with null
-			Id methodId = parent.getMethodId();
+			Id methodId = currentMethodId;
 			if (parent.currentLine > 0)
-				methodId = methodId.resolve("?line=" + parent.currentLine);
-			Id type = JavaUtil.frameTypeToId(stack != null ? stack.get(stack.size() - 1) : "java/lang/Object");
-			log.logf("* nullcheck on type %s", type);
+				methodId = methodId.addParam(Id.literal("line"), Id.literal(parent.currentLine));
+			System.out.printf("* nullcheck on type %s in %s%n%n", stackGetType(0), currentMethodId);
+			Id type = JavaUtil.frameTypeToId(stackGetType(0, "java/lang/Object"));
 			parent.put(JavaFacts.USES_REF_NULLCHECK, methodId, type);
 			break;
 		}
@@ -162,7 +160,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			break;
 		case Opcodes.JSR:
 			// jump to subroutine within same method
-			parent.put(JavaFacts.USES_JSR, parent.getMethodId());
+			parent.put(JavaFacts.USES_JSR, currentMethodId);
 			return;
 		// break;
 		}
@@ -187,7 +185,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
 		log.logf("visitLocalVariable(name=%s, desc=%s, signature=%s, start=%s, end=%s, index=%d)%n",
 				JavaUtil.decodeDescriptor(name, desc), desc, signature, start, end, index);
-		super.visitLocalVariable(fullName, desc, signature, start, end, index);
+		super.visitLocalVariable(name, desc, signature, start, end, index);
 	}
 
 	public AnnotationVisitor visitLocalVariableAnnotation(int typeRef, TypePath typePath, Label[] start, Label[] end,
@@ -208,7 +206,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		// logln(indent() + "" + Printer.OPCODES[opcode] +
 		// " " +
 		// owner + "." + name + " [" + desc + "]");
-
+		Id classId = JavaFacts.Types.object(owner);
+		Id methodId = JavaFacts.method(classId, name, desc);
 		// NOTE: Example of finding the types of actual arguments and formal
 		// parameters
 		Type objType = Type.getObjectType(owner);
@@ -218,31 +217,41 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			objParam = 0;
 		}
 		Type methType = Type.getType(desc);
-
+		Type[] argumentTypes = methType.getArgumentTypes();
 		if (stack != null) {
 			List<String> stackTypes = stack.stream().map(JavaUtil::frameTypeToString).collect(Collectors.toList());
+			int ars = methType.getArgumentsAndReturnSizes();
+			int argSize = (ars >>> 2) - (objType == null ? 1 : 0);
+			int retSize = ars & 3;
 			log.log("# INVOKE METHOD: " + JavaUtil.decodeDescriptor(owner, name, desc));
-			log.log("  Environment:");
+			log.logf("  Environment: argSize=%d, retSize=%d", argSize, retSize);
 			log.log("   * Stack: " + stackTypes + " <- top of stack");
 			log.log("   * Locals: " + locals.stream().map(JavaUtil::frameTypeToString).collect(Collectors.toList()));
 			log.log("   * Uninitialized: " + uninitializedTypes);
-			List<String> paramTypes = Arrays.stream(methType.getArgumentTypes())
+			List<String> paramTypes = Arrays.stream(argumentTypes)
 					.map((Type t) -> JavaUtil.typeToString(t)).collect(Collectors.toList());
 			String retType = JavaUtil.typeToString(methType.getReturnType());
-			List<String> actuals = stackTypes.subList(stackTypes.size() - paramTypes.size() - objParam,
+			List<String> actuals = stackTypes.subList(stackTypes.size() - argSize,
 					stackTypes.size());
 			log.logf("  Method is %s%s -> %s, stack arguments are %s",
 					objType != null ? objType.getClassName() + "." : "static ", paramTypes, retType, actuals);
 			actuals.clear();
+			if(retSize == 1)
+				stackTypes.add(retType);
+			else if(retSize == 2) {
+				stackTypes.add("TOP");
+				stackTypes.add(retType);
+			}
 			if (!retType.equals("void"))
 				stackTypes.add(retType);
 			log.logf("  Stack after return will be: %s <- top of stack", stackTypes);
 		}
 
-		int[] i = { 0 };
-		Arrays.stream(methType.getArgumentTypes()).map((Type t) -> JavaUtil.typeToId(t)).forEachOrdered((Id id) -> {
-			parent.put(Id.string("ACTUAL_ARGUMENT_TYPE" + i[0]++), Id.string(fullName), id);
-		});
+		for(int i = 0; i < argumentTypes.length; i++) {
+			Object type = stackGetType(i);
+			if(type != null)
+				parent.put(Id.string("ACTUAL_ARGUMENT_TYPE" + i), JavaUtil.frameTypeToId(type));
+		}
 
 		Id modifier;
 		switch (opcode) {
@@ -261,8 +270,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		default:
 			throw new RuntimeException();
 		}
-		parent.put(JavaFacts.CALLS, parent.getMethodName(), parent.getMemberName(owner, name, desc), modifier);
-		super.visitMethodInsn(opcode, owner, fullName, desc, itf);
+		parent.put(JavaFacts.CALLS, currentMethodId, methodId, modifier);
+		super.visitMethodInsn(opcode, owner, name, desc, itf);
 	}
 
 	public void visitMultiANewArrayInsn(String desc, int dims) {
@@ -272,7 +281,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	public void visitParameter(String name, int access) {
 		log.logf("visitParameter(name=%s, access=%d)%n", name, access);
-		super.visitParameter(fullName, access);
+		super.visitParameter(name, access);
 	}
 
 	public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
@@ -300,16 +309,16 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		// logln(indent() + "" + Printer.OPCODES[opcode] +
 		// " " +
 		// type);
-		parent.put(JavaFacts.USES_TYPE, parent.getMethodName(), type);
+		parent.put(JavaFacts.USES_TYPE, currentMethodId, JavaFacts.Types.object(type));
 		switch (opcode) {
 		case Opcodes.NEW:
-			parent.put(JavaFacts.CREATES, parent.getMethodName(), type);
+			parent.put(JavaFacts.CREATES, currentMethodId, JavaFacts.Types.object(type));
 			break;
 		case Opcodes.NEWARRAY:
-			parent.put(JavaFacts.CREATES, parent.getMethodName(), "[" + type);
+			parent.put(JavaFacts.CREATES, currentMethodId, JavaFacts.Types.array(1/*TODO: correct dim*/, JavaFacts.Types.object(type)));
 			break;
 		case Opcodes.ANEWARRAY:
-			parent.put(JavaFacts.CREATES, parent.getMethodName(), "[" + type);
+			parent.put(JavaFacts.CREATES, currentMethodId, JavaFacts.Types.array(1/*TODO: correct dim*/, JavaFacts.Types.object(type)));
 			break;
 		case Opcodes.CHECKCAST:
 			break;
@@ -326,4 +335,65 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			super.visitVarInsn(opcode, var);
 	}
 
+	/**
+	 * Return true if the stack has at least the given number of arguments
+	 * 
+	 * @param num
+	 * @return
+	 */
+	protected boolean stackHasArgument(int num) {
+		return stackFind(num) != null;
+	}
+
+	/**
+	 * Get an argument from the stack, with 0 referring to the top of the stack
+	 * 
+	 * @param argNum
+	 * @return The argument, or null if not found
+	 */
+	protected Object stackFind(int argNum) {
+		if (stack == null)
+			return null;
+
+		int i = stack.size() - 1;
+		for (; i >= 0; i--, argNum--) {
+			while (stack.get(i) == Opcodes.TOP) { // top half of a two-word
+													// piece of data
+				i--;
+			}
+			if (argNum == 0)
+				return stack.get(i);
+		}
+		return null;
+	}
+
+	/**
+	 * Get an argument from the stack, with 0 referring to the top of the stack
+	 * 
+	 * @param argNum
+	 * @return The argument, or null if not found
+	 */
+	protected Object stackGetType(int argNum) {
+		Object o = stackFind(argNum);
+		if (o instanceof Label)
+			return uninitializedTypes.get(o);
+		else
+			return o;
+	}
+
+	/**
+	 * Get an argument from the stack, with 0 referring to the top of the stack
+	 * 
+	 * @param argNum
+	 * @return The argument, or null if not found
+	 */
+	protected Object stackGetType(int argNum, String dflt) {
+		Object o = stackFind(argNum);
+		if (o instanceof Label)
+			return uninitializedTypes.get(o);
+		else if (o == null)
+			return dflt;
+		else
+			return o;
+	}
 }
