@@ -24,7 +24,7 @@ import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
 	private static final List<String> DEFAULT_CLASSES = Arrays.asList("../../../../../ImmutablePosition.class",
-			"../../../../../MutablePosition.class", "../../../../../PdfWriter.class");
+			"../../../../../MutablePosition.class", "../../../../../Image.class", "/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
 
 	public static void main(String[] args) throws IOException {
 		boolean openAsResource = args.length == 0;
@@ -59,6 +59,7 @@ public class ExtractApi {
 		}
 		IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
 		fw.precheck();
+		System.out.println(JavaFacts.Types.BOOLEAN);
 		ClassFactExtractor ea = new ClassFactExtractor(fw, JavaUtil.logger(logLevel));
 		ClassReader cr;
 		int i = 0;
@@ -68,9 +69,10 @@ public class ExtractApi {
 		String chk = "(checkpoint) ";
 		String msg = prc;
 		for (String file : files) {
+			IdFactory.push();
 			if (console != null)
 				console.printf("[%02d%%] %s%s\r", (i * 100) / n, msg, fill(file, 60, "…", true));
-			if (openAsResource) {
+			if (openAsResource && file.endsWith(".class")) {
 				cr = new ClassReader(ExtractApi.class.getResourceAsStream(file));
 				cr.accept(ea, ClassReader.EXPAND_FRAMES);
 			}
@@ -108,6 +110,7 @@ public class ExtractApi {
 			} else if (i % 10 == 5) {
 				msg = prc;
 			}
+			IdFactory.pop();
 		}
 		System.out.println();
 		fw.save();

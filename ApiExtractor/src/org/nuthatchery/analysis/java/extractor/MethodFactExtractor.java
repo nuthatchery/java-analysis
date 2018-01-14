@@ -26,7 +26,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	public MethodFactExtractor(ClassFactExtractor parent, Id methodId, int access, String name, String desc,
 			ILogger log) {
-		super(Opcodes.ASM6, parent.getClassName(), access, name, desc, null);
+		super(Opcodes.ASM6, parent.className, access, name, desc, null);
 		this.parent = parent;
 		this.currentMethodId = methodId;
 		this.log = log;
@@ -48,8 +48,6 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	public void visitCode() {
 		log.log("{");
-		parent.localInfo.clear();
-		parent.stackInfo.clear();
 		parent.currentLine = -1;
 		super.visitCode();
 	}
@@ -136,7 +134,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			// compare two references
 			Id methodId = currentMethodId;
 			if (parent.currentLine > 0)
-				methodId = methodId.addParam(Id.literal("line"), Id.literal(parent.currentLine));
+				methodId = methodId.setParam(IdFactory.literal("line"), IdFactory.literal(parent.currentLine));
 			Id type1 = JavaUtil.frameTypeToId(stackGetType(0, "java/lang/Object"));
 			Id type2 = JavaUtil.frameTypeToId(stackGetType(1, "java/lang/Object"));
 			log.logf("* ref equals on type %s with %s", type1, type2);
@@ -149,8 +147,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			// compare a single reference with null
 			Id methodId = currentMethodId;
 			if (parent.currentLine > 0)
-				methodId = methodId.addParam(Id.literal("line"), Id.literal(parent.currentLine));
-			System.out.printf("* nullcheck on type %s in %s%n%n", stackGetType(0), currentMethodId);
+				methodId = methodId.setParam(IdFactory.literal("line"), IdFactory.literal(parent.currentLine));
+			
 			Id type = JavaUtil.frameTypeToId(stackGetType(0, "java/lang/Object"));
 			parent.put(JavaFacts.USES_REF_NULLCHECK, methodId, type);
 			break;
@@ -211,10 +209,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		// NOTE: Example of finding the types of actual arguments and formal
 		// parameters
 		Type objType = Type.getObjectType(owner);
-		int objParam = 1;
 		if (opcode == Opcodes.INVOKESTATIC) {
 			objType = null;
-			objParam = 0;
 		}
 		Type methType = Type.getType(desc);
 		Type[] argumentTypes = methType.getArgumentTypes();
@@ -250,7 +246,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		for(int i = 0; i < argumentTypes.length; i++) {
 			Object type = stackGetType(i);
 			if(type != null)
-				parent.put(Id.string("ACTUAL_ARGUMENT_TYPE" + i), JavaUtil.frameTypeToId(type));
+				parent.put(IdFactory.literal("ACTUAL_ARGUMENT_TYPE" + i), JavaUtil.frameTypeToId(type));
 		}
 
 		Id modifier;

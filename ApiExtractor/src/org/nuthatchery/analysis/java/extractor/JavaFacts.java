@@ -5,63 +5,63 @@ import java.util.List;
 import org.objectweb.asm.Type;
 
 public abstract class JavaFacts {
-	public static final Id JAVA_FACTS = Id.id("http", "//nuthatchery.org", "javaFacts");
-	public static final Id CLASS = Id.id(JAVA_FACTS, "class");
-	public static final Id EXTENDS = Id.id(JAVA_FACTS, "extends");
-	public static final Id IMPLEMENTS = Id.id(JAVA_FACTS, "implements");
-	public static final Id PUBLIC = Id.id(JAVA_FACTS, "public");
-	public static final Id ACCESS = Id.id(JAVA_FACTS, "access");
-	public static final Id THROWS = Id.id(JAVA_FACTS, "throws");
-	public static final Id METHOD = Id.id(JAVA_FACTS, "method");
-	public static final Id GENERIC = Id.id(JAVA_FACTS, "generic");
-	public static final Id CALLS = Id.id(JAVA_FACTS, "calls");
-	public static final Id VIRTUAL = Id.id(JAVA_FACTS, "virtual");
-	public static final Id SPECIAL = Id.id(JAVA_FACTS, "special");
-	public static final Id STATIC = Id.id(JAVA_FACTS, "static");
-	public static final Id INTERFACE = Id.id(JAVA_FACTS, "interface");
-	public static final Id DYNAMIC = Id.id(JAVA_FACTS, "dynamic");
-	public static final Id CREATES = Id.id(JAVA_FACTS, "creates");
-	public static final Id USES_TYPE = Id.id(JAVA_FACTS, "usesType");
-	public static final Id USES_REF_NULLCHECK = Id.id(JAVA_FACTS, "usesRefNullCheck");
-	public static final Id USES_REF_EQUALS = Id.id(JAVA_FACTS, "usesRefEquals");
-	public static final Id USES_OBJ_EQUALS = Id.id(JAVA_FACTS, "usesObjEquals");
-	public static final Id USES_JSR = Id.id(JAVA_FACTS, "usesJsr");
-	public static final Id FIELD = Id.id(JAVA_FACTS, "field");
-	public static final Id READS = Id.id(JAVA_FACTS, "reads");
-	public static final Id WRITES = Id.id(JAVA_FACTS, "writes");
-	public static final Id SIGNATURE = Id.id(JAVA_FACTS, "signature");
-	public static final Id CONSTRUCTOR = Id.id(JAVA_FACTS, "constructor");
-	public static final Id CONSTRUCTS = Id.id(JAVA_FACTS, "constructs");
-	public static final Id DECLARES_THROW = Id.id(JAVA_FACTS, "declaresThrow");
-	public static final Id SOURCE = Id.id(JAVA_FACTS, "source");
-	public static final Id DEBUG = Id.id(JAVA_FACTS, "debug");
-	public static final Id INITIAL_VALUE = Id.id(JAVA_FACTS, "initialValue");
-	public static final Id JAVA_METHODS = Id.id("java", "//members");
-	public static final Id JAVA_TYPES = Id.id("java", "//types");
+	public static final Id JAVA_FACTS = IdFactory.id(IdFactory.root("http", "//nuthatchery.org"), "javaFacts");
+	public static final Id CLASS = IdFactory.id(JAVA_FACTS, "class");
+	public static final Id EXTENDS = IdFactory.id(JAVA_FACTS, "extends");
+	public static final Id IMPLEMENTS = IdFactory.id(JAVA_FACTS, "implements");
+	public static final Id PUBLIC = IdFactory.id(JAVA_FACTS, "public");
+	public static final Id ACCESS = IdFactory.id(JAVA_FACTS, "access");
+	public static final Id THROWS = IdFactory.id(JAVA_FACTS, "throws");
+	public static final Id METHOD = IdFactory.id(JAVA_FACTS, "method");
+	public static final Id GENERIC = IdFactory.id(JAVA_FACTS, "generic");
+	public static final Id CALLS = IdFactory.id(JAVA_FACTS, "calls");
+	public static final Id VIRTUAL = IdFactory.id(JAVA_FACTS, "virtual");
+	public static final Id SPECIAL = IdFactory.id(JAVA_FACTS, "special");
+	public static final Id STATIC = IdFactory.id(JAVA_FACTS, "static");
+	public static final Id INTERFACE = IdFactory.id(JAVA_FACTS, "interface");
+	public static final Id DYNAMIC = IdFactory.id(JAVA_FACTS, "dynamic");
+	public static final Id CREATES = IdFactory.id(JAVA_FACTS, "creates");
+	public static final Id USES_TYPE = IdFactory.id(JAVA_FACTS, "usesType");
+	public static final Id USES_REF_NULLCHECK = IdFactory.id(JAVA_FACTS, "usesRefNullCheck");
+	public static final Id USES_REF_EQUALS = IdFactory.id(JAVA_FACTS, "usesRefEquals");
+	public static final Id USES_OBJ_EQUALS = IdFactory.id(JAVA_FACTS, "usesObjEquals");
+	public static final Id USES_JSR = IdFactory.id(JAVA_FACTS, "usesJsr");
+	public static final Id FIELD = IdFactory.id(JAVA_FACTS, "field");
+	public static final Id READS = IdFactory.id(JAVA_FACTS, "reads");
+	public static final Id WRITES = IdFactory.id(JAVA_FACTS, "writes");
+	public static final Id SIGNATURE = IdFactory.id(JAVA_FACTS, "signature");
+	public static final Id CONSTRUCTOR = IdFactory.id(JAVA_FACTS, "constructor");
+	public static final Id CONSTRUCTS = IdFactory.id(JAVA_FACTS, "constructs");
+	public static final Id DECLARES_THROW = IdFactory.id(JAVA_FACTS, "declaresThrow");
+	public static final Id SOURCE = IdFactory.id(JAVA_FACTS, "source");
+	public static final Id DEBUG = IdFactory.id(JAVA_FACTS, "debug");
+	public static final Id INITIAL_VALUE = IdFactory.id(JAVA_FACTS, "initialValue");
+	public static final Id JAVA_METHODS = IdFactory.root("java", "//members");
+	public static final Id JAVA_TYPES = IdFactory.root("java", "//types");
 
 	public static class Types {
-		public static final Id VOID = JAVA_TYPES.addSubPath("void");
-		public static final Id BOOLEAN = JAVA_TYPES.addSubPath("boolean");
-		public static final Id CHAR = Id.id("java", "//types", "char");
-		public static final Id BYTE = JAVA_TYPES.addSubPath("byte");
-		public static final Id SHORT = JAVA_TYPES.addSubPath("short");
-		public static final Id INT = JAVA_TYPES.addSubPath("int");
-		public static final Id FLOAT = JAVA_TYPES.addSubPath("float");
-		public static final Id LONG = JAVA_TYPES.addSubPath("long");
-		public static final Id UNINITIALIZED_THIS = JAVA_TYPES.addSubPath("new-obj");
-		public static final Id TOP = JAVA_TYPES.addSubPath("top-half");
-		public static final Id DOUBLE = JAVA_TYPES.addSubPath("double");
-		private static final Id ARRAY = JAVA_TYPES.addSubPath("array/");
+		public static final Id VOID = JAVA_TYPES.addPath("void");
+		public static final Id BOOLEAN = JAVA_TYPES.addPath("boolean");
+		public static final Id CHAR = IdFactory.id(IdFactory.root("java", "//types"), "char");
+		public static final Id BYTE = JAVA_TYPES.addPath("byte");
+		public static final Id SHORT = JAVA_TYPES.addPath("short");
+		public static final Id INT = JAVA_TYPES.addPath("int");
+		public static final Id FLOAT = JAVA_TYPES.addPath("float");
+		public static final Id LONG = JAVA_TYPES.addPath("long");
+		public static final Id UNINITIALIZED_THIS = JAVA_TYPES.addPath("new-obj");
+		public static final Id TOP = JAVA_TYPES.addPath("top-half");
+		public static final Id DOUBLE = JAVA_TYPES.addPath("double");
+		private static final Id ARRAY = JAVA_TYPES.addPath("array");
 
 		public static Id array(int dim, Id type) {
-			return ARRAY.addSubPath(Integer.toString(dim)).addSubPath(type.getPath());
+			return ARRAY.addPath(Integer.toString(dim)).addPath(type.getPath());
 		}
 
 		public static Id object(String string) {
-			return OBJECT.addSubPath(string);
+			return OBJECT.addPath(string.split("/"));
 		}
 
-		private static final Id OBJECT = JAVA_TYPES.addSubPath("object/");
+		private static final Id OBJECT = JAVA_TYPES.addPath("object");
 	}
 
 	public static Id method(Id owner, String memberName, String memberDesc) {
@@ -101,7 +101,7 @@ public abstract class JavaFacts {
 		} else {
 			sb.append(type.getClassName());
 		}
-		return JAVA_METHODS.addSubPath(owner.getPath()).addPathSegments(sb.toString());
+		return JAVA_METHODS.addPath(owner.getPath()).addPath(sb.toString().split("/"));
 		// + UriEncoding.percentEncodeIri(methodName,
 		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true)
 		// + UriEncoding.percentEncodeIri(methodDesc,

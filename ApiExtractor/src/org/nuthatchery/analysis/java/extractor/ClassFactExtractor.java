@@ -20,10 +20,8 @@ import org.objectweb.asm.util.Printer;
 
 public class ClassFactExtractor extends ClassVisitor {
 	protected String context;
-	protected final Stack<String> currentClass = new Stack<>();
+	protected final Stack<Id> currentClass = new Stack<>();
 	protected final Stack<String> currentSource = new Stack<>();
-	protected final List<String> localInfo = new ArrayList<>();
-	protected final List<String> stackInfo = new ArrayList<>();
 
 	protected int currentLine = -1;
 
@@ -33,6 +31,7 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	private final ILogger log;
 	private Id memberId;
+	public static String className; // TODO
 
 	public ClassFactExtractor(IFactsWriter fw, ILogger logger) {
 		super(Opcodes.ASM6);
@@ -44,12 +43,12 @@ public class ClassFactExtractor extends ClassVisitor {
 		return currentClass.size();
 	}
 	
-	String getClassName() {
+	protected Id getClassId() {
 		return currentClass.peek();
 	}
 
 	Id getMemberName(String name, String desc) {
-		return JavaFacts.method(JavaFacts.Types.object(currentClass.peek()), name, desc); 
+		return JavaFacts.method(getClassId(), name, desc); 
 	}
 
 	Id getMemberId(String owner, String name, String desc) {
@@ -57,17 +56,6 @@ public class ClassFactExtractor extends ClassVisitor {
 	}
 
 
-	protected void put(Id relation, String obj) {
-		fw.put(Id.string(obj), relation);
-	}
-
-	protected void put(Id relation, String obj, String tgt) {
-		fw.put(Id.string(obj), relation, Id.string(tgt));
-	}
-
-	protected void put(Id relation, String obj, String tgt, Id field) {
-		fw.put(Id.string(obj), relation, Id.string(tgt), field);
-	}
 	protected void put(Id relation, Id obj) {
 		fw.put(obj, relation);
 	}
@@ -85,16 +73,17 @@ public class ClassFactExtractor extends ClassVisitor {
 		// logf("\n\n" + "visit(version=%d, access=%d,
 		// name=%s, signature=%s, superName=%s, interfaces=%s)%n", version,
 		// access, name, signature, superName, Arrays.toString(interfaces));
-		currentClass.push(name);
-		put(JavaFacts.CLASS, name);
-		put(JavaFacts.SIGNATURE, name, name);
+		className = name;
+		Id id = JavaFacts.Types.object(name);
+		currentClass.push(id);
+		put(JavaFacts.CLASS, id);
 		if (superName != null)
-			put(JavaFacts.EXTENDS, name, superName);
+			put(JavaFacts.EXTENDS, id, JavaFacts.Types.object(superName));
 		if (interfaces != null)
 			for (String s : interfaces)
-				put(JavaFacts.IMPLEMENTS, name, s);
+				put(JavaFacts.IMPLEMENTS, id, JavaFacts.Types.object(s));
 		if ((access & Opcodes.ACC_PUBLIC) != 0)
-			put(JavaFacts.ACCESS, Id.string(name), JavaFacts.PUBLIC);
+			put(JavaFacts.ACCESS, id, JavaFacts.PUBLIC);
 	}
 
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
@@ -107,7 +96,7 @@ public class ClassFactExtractor extends ClassVisitor {
 	}
 
 	public void visitEnd() {
-		String s = getClassName();
+		Id s = getClassId();
 		currentClass.pop();
 		log.log("} // end of " + s + "\n");
 	}
@@ -116,11 +105,11 @@ public class ClassFactExtractor extends ClassVisitor {
 		// logf("visitField(access=%s, name=%s, desc=%s,
 		// signature=%s, value=%s)%n", Printer.OPCODES[access],
 		// name, desc, signature, value);
-		log.log("\n" + "field " + JavaUtil.decodeDescriptor(getClassName(), name, desc));
+		log.log("\n" + "field " + JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(getClassId(), name, desc);
 		put(JavaFacts.FIELD, memberId);
 		if (value != null) {
-			put(JavaFacts.INITIAL_VALUE, memberId, Id.literal(value));
+			put(JavaFacts.INITIAL_VALUE, memberId, IdFactory.literal(value));
 		}
 		memberId = null;
 		return null;
@@ -139,7 +128,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		// Arrays.toString(exceptions));
 		System.out.flush();
 		System.err.flush();
-		log.log("\n" + "method " + JavaUtil.decodeDescriptor(getClassName(), name, desc));
+		log.log("\n" + "method " + JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(getClassId(), name, desc);
 		put(JavaFacts.METHOD, memberId);
 		if (name.equals("<init>")) {
@@ -147,7 +136,7 @@ public class ClassFactExtractor extends ClassVisitor {
 			put(JavaFacts.CONSTRUCTS, memberId, getClassId());
 		}
 		if (signature != null)
-			put(JavaFacts.GENERIC, memberId, Id.literal(signature));
+			put(JavaFacts.GENERIC, memberId, IdFactory.literal(signature));
 		if (exceptions != null)
 			for (String s : exceptions)
 				put(JavaFacts.DECLARES_THROW, memberId, JavaFacts.Types.object(s));
@@ -169,13 +158,13 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	public void visitSource(String source, String debug) {
 		if (source != null) {
-			put(JavaFacts.SOURCE, getClassName(), source);
+			put(JavaFacts.SOURCE, getClassId(), IdFactory.literal(source));
 			currentSource.push(source);
 		} else {
 			currentSource.push("");
 		}
 		if (debug != null)
-			put(JavaFacts.DEBUG, getClassName(), source);
+			put(JavaFacts.DEBUG, getClassId(), IdFactory.literal(source));
 		// logf("visitSource(source=%s, debug=%s)%n",
 		// source,
 		// debug);
@@ -188,7 +177,4 @@ public class ClassFactExtractor extends ClassVisitor {
 	}
 
 
-	public Id getClassId() {
-		return JavaFacts.Types.object(getClassName());
-	}
 }

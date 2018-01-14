@@ -53,7 +53,7 @@ public class FactsDb {
 
 		@Override
 		public void precheck() throws IOException {
-			try (PrintWriter tmp = getWriter("")) {
+			try (PrintWriter tmp = getWriter(".log")) {
 			}
 		}
 
@@ -129,6 +129,8 @@ public class FactsDb {
 		private void put(String factString) {
 			// if (facts.add(factString))
 			todo.add(factString);
+			if(todo.size() > 1000)
+				checkpoint();
 		}
 
 		public void put(Id obj, Id relation, Id tgt) {
@@ -136,15 +138,15 @@ public class FactsDb {
 		}
 
 		public void put(Id obj, Id relation, Id tgt, Id mod) {
-			relation = relation.addParam(mod);
+			relation = relation.setParam(mod);
 
 			put(String.format("%s <%s> %s .", obj.toRdfString(), relation, tgt.toRdfString()));
 		}
 
 		@Override
 		public void put(Id obj, Id relation, Id tgt, Id mod1, Id mod2) {
-			relation = relation.addParam(mod1);
-			relation = relation.addParam(mod2);
+			relation = relation.setParam(mod1);
+			relation = relation.setParam(mod2);
 
 			put(String.format("%s <%s> %s .", obj.toRdfString(), relation, tgt.toRdfString()));
 		}

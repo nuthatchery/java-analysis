@@ -1,5 +1,11 @@
 
 
 CLASSPATH="./bin:$(grep '\.jar"' .classpath | sed -e 's/^.*"\([^"]*\.jar\)".*/\1:/'|tr -d '\n')"
+JAVAOPTS=""
 
-java -classpath "$CLASSPATH" org.nuthatchery.analysis.java.extractor.ExtractApi "$@"
+if [ "$1" = "-ea" ]; then
+  shift
+  JAVAOPTS="-ea"
+fi
+
+java $JAVAOPTS -classpath "$CLASSPATH" org.nuthatchery.analysis.java.extractor.ExtractApi "$@"

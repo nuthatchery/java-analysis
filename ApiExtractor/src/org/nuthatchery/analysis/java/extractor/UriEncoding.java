@@ -38,22 +38,22 @@ public class UriEncoding {
 	public static final String URI_EXTRA_CHARS_FRAGMENT = URI_EXTRA_CHARS_PCHAR + "/?";
 	/**
 	 * Extra characters allowed in paths, in addition to {@link #URI_UNRESERVED}
-	 * and encode characters.
+	 * and encoded characters.
 	 */
 	public static final String URI_EXTRA_CHARS_PATH = ":@&=+$,";
 	/**
 	 * Extra characters allowed in the userinfo part, in addition to
-	 * {@link #URI_UNRESERVED} and encode characters.
+	 * {@link #URI_UNRESERVED} and encoded characters.
 	 */
 	public static final String URI_EXTRA_CHARS_USERINFO = ";:&=+$,";
 	/**
 	 * Extra characters allowed in a reg_name authority part, in addition to
-	 * {@link #URI_UNRESERVED} and encode characters.
+	 * {@link #URI_UNRESERVED} and encoded characters.
 	 */
 	public static final String URI_EXTRA_CHARS_REGNAME = ";:@&=+$,";
 	/**
 	 * Extra characters allowed in an opaque scheme-specific part, in addition
-	 * to {@link #URI_UNRESERVED} and encode characters.
+	 * to {@link #URI_UNRESERVED} and encoded characters.
 	 */
 	public static final String URI_EXTRA_CHARS_OPAQUE = "?;:@&=+$,";
 	public static final String URI_SCHEME_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+-.";
@@ -273,7 +273,7 @@ public class UriEncoding {
 	 */
 	public static String percentDecode(String s) {
 		byte[] inBytes = s.getBytes(StandardCharsets.UTF_8);
-		ByteBuffer outBytes = ByteBuffer.allocate(s.length());
+		ByteBuffer outBytes = ByteBuffer.allocate(inBytes.length);
 		for (int i = 0; i < inBytes.length; i++) {
 			int c = inBytes[i];
 			if (c == '%') {
