@@ -1,8 +1,6 @@
 package org.nuthatchery.analysis.java.extractor;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Console;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,15 +14,33 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarInputStream;
-import java.util.zip.ZipEntry;
-
 import org.nuthatchery.analysis.java.extractor.FactsDb.IFactsWriter;
 import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
 	private static final List<String> DEFAULT_CLASSES = Arrays.asList("../../../../../ImmutablePosition.class",
-			"../../../../../MutablePosition.class", "../../../../../Image.class", "/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
+			"../../../../../MutablePosition.class", "../../../../../Image.class",
+			"/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
+
+	public static String fill(String s, int size, String ellipsis, boolean flushRight) {
+		if (s.length() > size) {
+			if (flushRight)
+				return ellipsis + s.substring(s.length() - (size - ellipsis.length()), s.length());
+			else
+				return s.substring(0, s.length() - (size - ellipsis.length())) + ellipsis;
+		}
+		if (flushRight) {
+			for (; s.length() < size; s = " " + s) {
+				;
+			}
+		} else {
+			for (; s.length() < size; s = s + " ") {
+				;
+			}
+		}
+		return s;
+
+	}
 
 	public static void main(String[] args) throws IOException {
 		boolean openAsResource = args.length == 0;
@@ -70,43 +86,45 @@ public class ExtractApi {
 		String msg = prc;
 		for (String file : files) {
 			IdFactory.push();
-			if (console != null)
+			if (console != null) {
 				console.printf("[%02d%%] %s%s\r", (i * 100) / n, msg, fill(file, 60, "…", true));
+			}
 			if (openAsResource && file.endsWith(".class")) {
 				cr = new ClassReader(ExtractApi.class.getResourceAsStream(file));
 				cr.accept(ea, ClassReader.EXPAND_FRAMES);
-			}
-			else if(file.endsWith(".class")) {
-				try(InputStream stream = new FileInputStream(file)) {
-				cr = new ClassReader(stream);
-				cr.accept(ea, ClassReader.EXPAND_FRAMES);
+			} else if (file.endsWith(".class")) {
+				try (InputStream stream = new FileInputStream(file)) {
+					cr = new ClassReader(stream);
+					cr.accept(ea, ClassReader.EXPAND_FRAMES);
 				}
-			}
-			else if(file.endsWith(".jar")) {
-				try(JarFile jarFile = new JarFile(file)) {
+			} else if (file.endsWith(".jar")) {
+				try (JarFile jarFile = new JarFile(file)) {
 					int nEntries = jarFile.size();
 					int j = 0;
-					for(Enumeration<JarEntry> entries = jarFile.entries();
-							entries.hasMoreElements();) {
+					for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
 						JarEntry nextElement = entries.nextElement();
-						if(nextElement.getName().endsWith(".class")) {
-							try(InputStream stream = jarFile.getInputStream(nextElement)) {
-								
-								if (console != null)
-									console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j*100)/nEntries, fill(file, 60, "…", true));
+						if (nextElement.getName().endsWith(".class")) {
+							try (InputStream stream = jarFile.getInputStream(nextElement)) {
+
+								if (console != null) {
+									console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
+											fill(file, 60, "…", true));
+								}
 								cr = new ClassReader(stream);
-								cr.accept(ea, ClassReader.EXPAND_FRAMES);								
+								cr.accept(ea, ClassReader.EXPAND_FRAMES);
 							}
+						} else if (console != null) {
+							console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
+									fill("", 60, "…", true));
 						}
-						else if (console != null)
-							console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j*100)/nEntries, fill("", 60, "…", true));
 						j++;
 					}
 				}
 			}
 			if (i++ % 10 == 0) {
-				if (fw.checkpoint())
+				if (fw.checkpoint()) {
 					msg = chk;
+				}
 			} else if (i % 10 == 5) {
 				msg = prc;
 			}
@@ -114,23 +132,6 @@ public class ExtractApi {
 		}
 		System.out.println();
 		fw.save();
-	}
-
-	public static String fill(String s, int size, String ellipsis, boolean flushRight) {
-		if (s.length() > size) {
-			if (flushRight)
-				return ellipsis + s.substring(s.length() - (size - ellipsis.length()), s.length());
-			else
-				return s.substring(0, s.length() - (size - ellipsis.length())) + ellipsis;
-		}
-		if (flushRight)
-			for (; s.length() < size; s = " " + s)
-				;
-		else
-			for (; s.length() < size; s = s + " ")
-				;
-		return s;
-
 	}
 
 }

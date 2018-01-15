@@ -15,22 +15,15 @@ import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
 public class IdFactory {
-	
-	public static void push() {
-		HashedId.push();
-	}
 
-	public static void pop() {
-		HashedId.pop();
-	}
 	private static class AuthRootId extends HashedId {
-		protected static final Pattern SCHEME_PAT = Pattern.compile("^[A-Za-z][A-Za-z0-9+.\\-]*$");
 		protected static final Pattern AUTHORITY_PAT = Pattern
 				.compile("^(//|)(([a-z0-9~_.\\-]|%[0-9a-f][0-9a-f]|[!$\\&'()*+,;=])+)(:[0-9]*|)$");
+		protected static final Pattern SCHEME_PAT = Pattern.compile("^[A-Za-z][A-Za-z0-9+.\\-]*$");
 
-		private final String scheme;
 		private final String authority;
 		private final String hierPrefix;
+		private final String scheme;
 
 		public AuthRootId(String scheme, String authority, String hierPrefix) {
 			super(null);
@@ -61,7 +54,7 @@ public class IdFactory {
 			return true;
 		}
 
-
+		@Override
 		public boolean isOpaque() {
 			return authority == null;
 		}
@@ -85,6 +78,7 @@ public class IdFactory {
 			return "<" + toUriString() + ">";
 		}
 
+		@Override
 		protected String uriSep() {
 			if (authority != null)
 				return "/";
@@ -92,6 +86,7 @@ public class IdFactory {
 				return "";
 		}
 	}
+
 	private static class FragmentBaseId extends HashedId {
 		public FragmentBaseId(Id parent) {
 			super(parent);
@@ -144,6 +139,7 @@ public class IdFactory {
 			return toUriString();
 		}
 	}
+
 	private static class FragmentId extends HashedId {
 
 		private final String fragment;
@@ -201,13 +197,15 @@ public class IdFactory {
 			return toUriString();
 		}
 	}
+
 	private static abstract class HashedId implements Id {
 		protected static Map<String, Id> cache = new HashMap<>();
 		protected static Stack<Map<String, Id>> caches = new Stack<>();
+		private static final String CURRENT = ".".intern();
 		protected static final Map<String, Id> namespaceIds = new HashMap<>();
 		private static final String PARENT = "..".intern();
-		private static final String CURRENT = ".".intern();
 		private static final String ROOT = "/".intern();
+
 		protected static Id addParam(Id parent, Id key, Id value) {
 			String query = System.identityHashCode(parent) + "?" + System.identityHashCode(key) + "="
 					+ System.identityHashCode(value);
@@ -217,17 +215,6 @@ public class IdFactory {
 				cache.put(query, id);
 			}
 			return id;
-		}
-
-		public static void push() {
-			WeakHashMap<String,Id> map = new WeakHashMap<>(cache);
-			caches.push(cache);
-			cache = map;
-		}
-
-		public static void pop() {
-			if(!caches.isEmpty())
-				cache = caches.pop();
 		}
 
 		public static Id auth(String scheme, String authority) {
@@ -240,10 +227,12 @@ public class IdFactory {
 			String slashes = match.group(1);
 			String body = match.group(2);
 			String port = match.group(4);
-			if (UriSchemes.hasPort(scheme, port))
+			if (UriSchemes.hasPort(scheme, port)) {
 				port = "";
-			if (slashes.equals(""))
+			}
+			if (slashes.equals("")) {
 				slashes = UriSchemes.hierPartPrefix(scheme);
+			}
 			String hierPrefix = slashes.intern();
 			authority = (body + port).intern();
 
@@ -261,20 +250,22 @@ public class IdFactory {
 			String scheme = uri.getScheme().toLowerCase();
 
 			if (scheme.equals("values") && uri.getRawAuthority() != null && uri.getRawPath() != null) {
-				if (uri.getRawPath().length() > 0) {
+				if (uri.getRawPath().length() > 0)
 					return LiteralId.fromUri(uri.getAuthority(), uri.getRawPath());
-				}
 			}
 			if (uri.isOpaque()) {
 				String fragment = uri.getFragment();
 				String schemeSpecific = uri.getRawSchemeSpecificPart();
 				Id id = namespaceIds.get(scheme);
-				if (id == null)
+				if (id == null) {
 					id = opaque(scheme);
-				if (schemeSpecific != null)
+				}
+				if (schemeSpecific != null) {
 					id = id.resolve(schemeSpecific);
-				if (fragment != null)
+				}
+				if (fragment != null) {
 					id = id.setFragment(fragment);
+				}
 				return id;
 			} else {
 				String auth = uri.getAuthority();
@@ -290,15 +281,17 @@ public class IdFactory {
 				if (query != null) {
 					for (String q : query.split("&")) {
 						String[] p = q.split("=", 2);
-						if (p.length == 1)
+						if (p.length == 1) {
 							id = id.setParam(fromUriString(p[0]));
-						else if (p.length == 2)
+						} else if (p.length == 2) {
 							id = id.setParam(fromUriString(p[0]), fromUriString(p[1]));
+						}
 					}
 				}
 				String fragment = uri.getFragment();
-				if (fragment != null)
+				if (fragment != null) {
 					id = id.setFragment(fragment);
+				}
 				return id;
 			}
 		}
@@ -321,12 +314,12 @@ public class IdFactory {
 			}
 			return id;
 		}
+
 		public static Id namespace(Id id, String namespace) {
 			if (namespaceIds.containsKey(namespace)) {
-				if (namespaceIds.get(namespace) != id) {
+				if (namespaceIds.get(namespace) != id)
 					throw new IllegalArgumentException(
 							"Namespace " + namespace + " already defined as " + namespaceIds.get(namespace));
-				}
 				return id;
 			}
 			namespaceIds.put(namespace, id);
@@ -350,11 +343,23 @@ public class IdFactory {
 			return id;
 		}
 
+		public static void pop() {
+			if (!caches.isEmpty()) {
+				cache = caches.pop();
+			}
+		}
+
+		public static void push() {
+			WeakHashMap<String, Id> map = new WeakHashMap<>(cache);
+			caches.push(cache);
+			cache = map;
+		}
+
 		private String abbrv = null;
 
-		protected String uriString;
-
 		protected HashedId parent;
+
+		protected String uriString;
 
 		public HashedId(Id parent) {
 			this.parent = (HashedId) parent;
@@ -370,6 +375,7 @@ public class IdFactory {
 			return id;
 		}
 
+		@Override
 		public Id addPath(String segment) {
 			if (segment.equals(CURRENT) || segment.equals(""))
 				return this;
@@ -409,10 +415,12 @@ public class IdFactory {
 			return getParent().getAuthority();
 		}
 
+		@Override
 		public String getFragment() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Id getParam(Id id) {
 			return null;
 		}
@@ -432,6 +440,7 @@ public class IdFactory {
 			return getParent().getScheme();
 		}
 
+		@Override
 		public boolean hasFragment() {
 			return false;
 		}
@@ -441,6 +450,7 @@ public class IdFactory {
 			return System.identityHashCode(this);
 		}
 
+		@Override
 		public boolean hasParam(Id id) {
 			return false;
 		}
@@ -450,6 +460,7 @@ public class IdFactory {
 			return false;
 		}
 
+		@Override
 		public boolean isOpaque() {
 			if (parent == null)
 				return false;
@@ -462,10 +473,12 @@ public class IdFactory {
 			return false;
 		}
 
+		@Override
 		public Id removeFragment() {
 			return this;
 		}
 
+		@Override
 		public Id setFragment(String fragment) {
 			Id base;
 			if (this instanceof FragmentBaseId) {
@@ -478,9 +491,9 @@ public class IdFactory {
 					cache.put(query, base);
 				}
 			}
-			if (fragment.equals("")) {
+			if (fragment.equals(""))
 				return base;
-			} else {
+			else {
 				fragment = fragment.intern();
 				String query = System.identityHashCode(base) + "#" + System.identityHashCode(fragment);
 				Id id = cache.get(query);
@@ -492,10 +505,12 @@ public class IdFactory {
 			}
 		}
 
+		@Override
 		public Id setParam(Id key) {
 			return setParam(key, IdFactory.TRUE);
 		}
 
+		@Override
 		public Id setParam(Id key, Id value) {
 			return addParam(this, key, value);
 		}
@@ -505,23 +520,25 @@ public class IdFactory {
 			return toUriString();
 		}
 
+		@Override
+		@SuppressWarnings("unused")
 		public final String toUriString() {
 			if (abbrv != null)
 				return abbrv;
 			if (uriString == null) {
 				uriString = computeUriString().intern();
-				if(false) {
-				try {
-					URI uri = new URI(uriString);
-					Id id = HashedId.fromUri(uri);
-					if(this != id) {
-						System.err.println(ClassFactExtractor.className);
-						assert this == id : "Whoops: uri=" + uriString + ", this=" + this + " != id=" + id;
+				if (false) {
+					try {
+						URI uri = new URI(uriString);
+						Id id = HashedId.fromUri(uri);
+						if (this != id) {
+							System.err.println(ClassFactExtractor.className);
+							assert this == id : "Whoops: uri=" + uriString + ", this=" + this + " != id=" + id;
+						}
+					} catch (URISyntaxException e) {
+						System.err.println("Failed: " + uriString);
+						e.printStackTrace();
 					}
-				} catch (URISyntaxException e) {
-					System.err.println("Failed: " + uriString);
-					e.printStackTrace();
-				}
 				}
 			}
 			return uriString;
@@ -534,11 +551,13 @@ public class IdFactory {
 				return "/";
 		}
 	}
+
 	private static class LiteralId extends HashedId {
 
 		public static Id fromUri(String auth, String path) {
-			if(path.startsWith("/"))
+			if (path.startsWith("/")) {
 				path = path.substring(1);
+			}
 			path = UriEncoding.percentDecode(path);
 
 			switch (auth) {
@@ -558,27 +577,28 @@ public class IdFactory {
 				throw new IllegalArgumentException("type not found for: " + auth + path);
 			}
 		}
+
 		public static Id getType(Object obj) {
-			if (obj instanceof Boolean) {
+			if (obj instanceof Boolean)
 				return IdFactory.TYPE_BOOLEAN;
-			} else if (obj instanceof Integer || obj instanceof Short || obj instanceof Byte || obj instanceof Long
-					|| obj instanceof BigInteger) {
+			else if (obj instanceof Integer || obj instanceof Short || obj instanceof Byte || obj instanceof Long
+					|| obj instanceof BigInteger)
 				return IdFactory.TYPE_INTEGER;
-			} else if (obj instanceof Double) {
+			else if (obj instanceof Double)
 				return IdFactory.TYPE_DOUBLE;
-			} else if (obj instanceof Float) {
+			else if (obj instanceof Float)
 				return IdFactory.TYPE_FLOAT;
-			} else if (obj instanceof BigDecimal) {
+			else if (obj instanceof BigDecimal)
 				return IdFactory.TYPE_DECIMAL;
-			} else if (obj instanceof String) {
+			else if (obj instanceof String)
 				return IdFactory.TYPE_STRING;
-			} else {
+			else
 				return null;
-			}
 		}
-		private final Id type;
 
 		private final String stringRep;
+
+		private final Id type;
 
 		private final String uriPath;
 
@@ -602,16 +622,17 @@ public class IdFactory {
 				this.parent = (HashedId) IdFactory.ROOT_VALUES_STRING;
 				stringRep = JavaUtil.quote(obj.toString());
 				uriPath = UriEncoding.percentEncodeIri(obj.toString(), UriEncoding.URI_EXTRA_CHARS_PATH, true);
-			} else {
+			} else
 				throw new IllegalArgumentException("type not found for: " + obj);
-			}
 			this.stringRep = stringRep;
-			if (uriPath == null)
+			if (uriPath == null) {
 				this.uriPath = UriEncoding.percentEncodeIri(obj.toString(), UriEncoding.URI_EXTRA_CHARS_PATH, true);
-			else
+			} else {
 				this.uriPath = uriPath;
+			}
 		}
 
+		@Override
 		public Id addPath(String segment) {
 			throw new UnsupportedOperationException();
 		}
@@ -631,6 +652,7 @@ public class IdFactory {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Id setFragment(String fragment) {
 			throw new UnsupportedOperationException();
 		}
@@ -645,6 +667,7 @@ public class IdFactory {
 			return stringRep;
 		}
 	}
+
 	private static class ParamId extends HashedId {
 		private final Id paramKey;
 		private final Id paramVal;
@@ -660,31 +683,31 @@ public class IdFactory {
 			this.paramVal = value;
 		}
 
+		@Override
 		public Id addPath(String segment) {
 			return HashedId.addParam(parent.addPath(segment), paramKey, paramVal);
 		}
 
 		private Id changeParam(Id key, Id value) {
 			if (paramKey == key) {
-				if (paramVal == value) {
+				if (paramVal == value)
 					return this;
-				} else {
+				else
 					return HashedId.addParam(parent, key, value);
-				}
-			} else if (parent instanceof ParamId) {
+			} else if (parent instanceof ParamId)
 				return ((ParamId) parent).changeParam(key, value);
-			} else {
+			else
 				return null;
-			}
 		}
 
 		@Override
 		public String computeUriString() {
 			String base = parent.toUriString();
-			if (parent.hasParams())
+			if (parent.hasParams()) {
 				base += "&";
-			else
+			} else {
 				base += "?";
+			}
 
 			base += UriEncoding.percentEncodeIri(paramKey.toUriString(), UriEncoding.URI_EXTRA_CHARS_QUERY, true);
 
@@ -730,11 +753,12 @@ public class IdFactory {
 			Id id = this;
 			for (String q : part.split("&")) {
 				String p[] = q.split("=", 2);
-				if (p.length == 1)
+				if (p.length == 1) {
 					id = id.setParam(HashedId.fromUriString(UriEncoding.percentDecode(p[0])));
-				else if (p.length == 2)
+				} else if (p.length == 2) {
 					id = id.setParam(HashedId.fromUriString(UriEncoding.percentDecode(p[0])),
 							HashedId.fromUriString(UriEncoding.percentDecode(p[1])));
+				}
 			}
 			return id;
 		}
@@ -754,6 +778,7 @@ public class IdFactory {
 		}
 
 	}
+
 	private static class PathId extends HashedId {
 		// protected static final Pattern SEGMENT_PAT = Pattern.compile(
 		// "([A-Za-z0-9~_.\\-]|[\u00a1-\u167f\u1681-\u180d\u180f-\u1fff\u200b-\u2027\u202a-\u202e\u2030-\u205e\2060-\2fff\u3001-\ufffd]|%[0-9A-Fa-f][0-9A-Fa-f]|[!$\\&'()*+,;=:@])*");
@@ -810,39 +835,39 @@ public class IdFactory {
 			return "<" + toUriString() + ">";
 		}
 	}
-	static final Id TRUE = new LiteralId(true);
+
 	static final Id FALSE = new LiteralId(false);
-	static final Id ZERO = new LiteralId(0);
 	static final Id ONE = new LiteralId(1);
 	static final Id ROOT_W3 = HashedId.auth("http", "//www.w3.org");
 	static final Id ROOT_RDF = HashedId
 			.namespace(ROOT_W3.addPath("1999").addPath("02").addPath("22-rdf-syntax-ns").setFragment(""), "rdf");
 	static final Id ROOT_RDFS = HashedId
 			.namespace(ROOT_W3.addPath("2000").addPath("01").addPath("rdf-schema").setFragment(""), "rdfs");
-	static final Id ROOT_XSD = HashedId.namespace(ROOT_W3.addPath("2001").addPath("XMLSchema").setFragment(""), "xsd");
 	static final Id ROOT_VALUES_BOOLEAN = HashedId.auth("values", "//boolean");
-	static final Id ROOT_VALUES_INTEGER = HashedId.auth("values", "//integer");
 	static final Id ROOT_VALUES_DECIMAL = HashedId.auth("values", "//decimal");
-	static final Id ROOT_VALUES_FLOAT = HashedId.auth("values", "//float");
 	static final Id ROOT_VALUES_DOUBLE = HashedId.auth("values", "//double");
-
+	static final Id ROOT_VALUES_FLOAT = HashedId.auth("values", "//float");
+	static final Id ROOT_VALUES_INTEGER = HashedId.auth("values", "//integer");
 	static final Id ROOT_VALUES_STRING = HashedId.auth("values", "//string");
-
+	static final Id ROOT_XSD = HashedId.namespace(ROOT_W3.addPath("2001").addPath("XMLSchema").setFragment(""), "xsd");
+	static final Id TRUE = new LiteralId(true);
 	static final Id TYPE_BOOLEAN = ROOT_XSD.setFragment("boolean");
-
-	static final Id TYPE_INTEGER = ROOT_XSD.setFragment("integer");
-
 	static final Id TYPE_DECIMAL = ROOT_XSD.setFragment("decimal");
-
-	static final Id TYPE_FLOAT = ROOT_XSD.setFragment("float");
 
 	static final Id TYPE_DOUBLE = ROOT_XSD.setFragment("double");
 
+	static final Id TYPE_FLOAT = ROOT_XSD.setFragment("float");
+
+	static final Id TYPE_INTEGER = ROOT_XSD.setFragment("integer");
+
 	static final Id TYPE_STRING = ROOT_XSD.setFragment("string");
 
+	static final Id ZERO = new LiteralId(0);
+
 	public static Id id(Id root, String... path) {
-		for (String p : path)
+		for (String p : path) {
 			root = root.addPath(p);
+		}
 		return root;
 	}
 
@@ -850,7 +875,19 @@ public class IdFactory {
 		return HashedId.literal(s);
 	}
 
+	public static void pop() {
+		HashedId.pop();
+	}
+
+	public static void push() {
+		HashedId.push();
+	}
+
 	public static Id root(String scheme, String authority) {
 		return HashedId.auth(scheme, authority);
+	}
+	
+	public static Id namespace(Id id, String namespace) {
+		return HashedId.namespace(id, namespace);
 	}
 }

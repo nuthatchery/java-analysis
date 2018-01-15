@@ -1,22 +1,33 @@
 package org.nuthatchery.analysis.java.extractor;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public interface Id {
+	Id addPath(Stream<String> segments);
+
+	Id addPath(String segment);
+
+	default Id addPath(String[] split) {
+		Id id = this;
+		for (String s : split) {
+			id = id.addPath(s);
+		}
+		return id;
+	}
+
+	String getAuthority();
+
+	String getFragment();
+
+	Id getParam(Id paramKey);
+
+	Id getParent();
+
 	Stream<String> getPath();
 
-	default Id removeParam(Id paramKey) {
-		throw new UnsupportedOperationException("does not support parameters");
-	}
+	String getScheme();
+
+	boolean hasFragment();
 
 	default boolean hasParam(Id paramKey) {
 		return false;
@@ -26,48 +37,30 @@ public interface Id {
 		return false;
 	}
 
-	String getScheme();
+	boolean isContainer();
 
-	String getAuthority();
+	boolean isOpaque();
 
-	Id addPath(String segment);
+	boolean isRoot();
 
-	Id addPath(Stream<String> segments);
+	Id removeFragment();
 
-	Id getParam(Id paramKey);
+	default Id removeParam(Id paramKey) {
+		throw new UnsupportedOperationException("does not support parameters");
+	}
+
+	Id resolve(String rawSchemeSpecificPart);
+
+	Id setFragment(String s);
 
 	Id setParam(Id paramKey);
 
 	Id setParam(Id paramKey, Id paramValue);
 
-	String getFragment();
+	String toRdfString();
 
-	Id setFragment(String s);
-
-	Id removeFragment();
-
-	Id getParent();
-
+	@Override
 	String toString();
 
 	String toUriString();
-
-	String toRdfString();
-
-	boolean isRoot();
-
-	boolean isContainer();
-
-	boolean hasFragment();
-
-	boolean isOpaque();
-
-	default Id addPath(String[] split) {
-		Id id = this;
-		for(String s : split)
-			id = id.addPath(s);
-		return id;
-	}
-
-	Id resolve(String rawSchemeSpecificPart);
 }

@@ -5,49 +5,55 @@ import java.util.Map;
 
 /**
  * A mapping from URI schemes to port numbers.
- * 
+ *
  * <p>
  * Collected from <a href=
  * "https://gist.github.com/mahmoud/2fe281a8daaff26cfe9c15d2c5bf5c8b">scheme_port_map.json</a>
  * by <a href="https://github.com/mahmoud">Mahmoud Hashemi</a>:
- * 
- * <blockquote style="font-style: italic">
- * A big mapping url schemes to their protocols' default ports. See comments
- * below for notes. Painstakingly assembled by crossreferencing
- * <a href="https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml">IANA's URI Schemess</a> and
- * <a href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml">IANA's Service Names and Port Numbers</a>
- * <p>A null in the scheme_port_map indicates a protocol that uses a "//" but
- * does not use a (known) port.
- * <p>The schemes_without_netloc.json file is a short list of common URL
- * schemes that affirmatively do not use network location (no // in the URL).
- * <p>Note that the list is hand assembled, and not automatically generatable,
- * as the name in the IANA scheme registry does not always map well to the IANA
+ *
+ * <blockquote style="font-style: italic"> A big mapping url schemes to their
+ * protocols' default ports. See comments below for notes. Painstakingly
+ * assembled by crossreferencing <a href=
+ * "https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml">IANA's URI
+ * Schemess</a> and <a href=
+ * "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml">IANA's
+ * Service Names and Port Numbers</a>
+ * <p>
+ * A null in the scheme_port_map indicates a protocol that uses a "//" but does
+ * not use a (known) port.
+ * <p>
+ * The schemes_without_netloc.json file is a short list of common URL schemes
+ * that affirmatively do not use network location (no // in the URL).
+ * <p>
+ * Note that the list is hand assembled, and not automatically generatable, as
+ * the name in the IANA scheme registry does not always map well to the IANA
  * port registry. So this made mostly by hand looking up in the port registry,
  * or the linked RFC. Some schemes do not have RFCs linked, and some RFCs do not
  * mention the default port, so some independent research was also necessary.
- * <p>Anyways, hope I saved someone else the trouble! (Python versions of the
- * above can be imported from
+ * <p>
+ * Anyways, hope I saved someone else the trouble! (Python versions of the above
+ * can be imported from
  * <a href="https://pypi.python.org/pypi/boltons">boltons</a>'s urlutils
  * submodule). </blockquote>
  */
 public class UriSchemes {
+	public static final int NO_NETWORK_LOCATION = -1;
 	/**
 	 * A map from URI scheme names to known default ports.
-	 * 
+	 *
 	 * <p>
-	 * Lookup returns {@link #UNKNOWN_PORT} ({@value #UNKNOWN_PORT}) if the
-	 * scheme is known and uses a network location and a <code>//</code> prefix
-	 * but does not use a known port.
+	 * Lookup returns {@link #UNKNOWN_PORT} ({@value #UNKNOWN_PORT}) if the scheme
+	 * is known and uses a network location and a <code>//</code> prefix but does
+	 * not use a known port.
 	 * <p>
-	 * Lookup returns {@link #NO_NETWORK_LOCATION}
-	 * ({@value #NO_NETWORK_LOCATION}) if the scheme is known not to use a
-	 * network location (no <code>//</code> in URI).
+	 * Lookup returns {@link #NO_NETWORK_LOCATION} ({@value #NO_NETWORK_LOCATION})
+	 * if the scheme is known not to use a network location (no <code>//</code> in
+	 * URI).
 	 * <p>
 	 * Lookup return <code>null</code> if the scheme is unknown.
 	 */
 	public static final Map<String, Integer> SCHEME_MAP = new HashMap<>();
 	public static final int UNKNOWN_PORT = 0;
-	public static final int NO_NETWORK_LOCATION = -1;
 
 	static {
 		SCHEME_MAP.put("acap", 674);
@@ -111,22 +117,8 @@ public class UriSchemes {
 	}
 
 	/**
-	 * Returns "" or "//" for putting after the scheme in a URI.
-	 * 
-	 * @param scheme
-	 * @return "//" if the scheme is unknown or is known to use a network
-	 *         location
-	 */
-	public static String hierPartPrefix(String scheme) {
-		if (SCHEME_MAP.getOrDefault(scheme, UNKNOWN_PORT) == NO_NETWORK_LOCATION)
-			return "";
-		else
-			return "//";
-	}
-
-	/**
 	 * Check if the scheme has the given port as the default port
-	 * 
+	 *
 	 * @param scheme
 	 *            A scheme, in lowercase letters
 	 * @param portNum
@@ -139,20 +131,33 @@ public class UriSchemes {
 
 	/**
 	 * Check if the scheme has the given port as the default port
-	 * 
+	 *
 	 * @param scheme
 	 *            A scheme, in lowercase letters
 	 * @param portNum
-	 *            Port number as a string; must be a valid integer, may be
-	 *            prefixed with ":"
+	 *            Port number as a string; must be a valid integer, may be prefixed
+	 *            with ":"
 	 * @return True if portNum is default port for scheme
 	 */
 	public static boolean hasPort(String scheme, String portNum) {
 		if (portNum.startsWith(":"))
 			return hasPort(scheme, portNum.substring(1));
-		else if(portNum.equals(""))
+		else if (portNum.equals(""))
 			return false;
 		else
 			return hasPort(scheme, Integer.valueOf(portNum));
+	}
+
+	/**
+	 * Returns "" or "//" for putting after the scheme in a URI.
+	 *
+	 * @param scheme
+	 * @return "//" if the scheme is unknown or is known to use a network location
+	 */
+	public static String hierPartPrefix(String scheme) {
+		if (SCHEME_MAP.getOrDefault(scheme, UNKNOWN_PORT) == NO_NETWORK_LOCATION)
+			return "";
+		else
+			return "//";
 	}
 }
