@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,15 +28,16 @@ public class IdFactory {
 
 		public AuthRootId(String scheme, String authority, String hierPrefix) {
 			super(null);
-			if (!SCHEME_PAT.matcher(scheme).matches())
+			if (!SCHEME_PAT.matcher(scheme).matches()) {
 				throw new IllegalArgumentException(scheme);
+			}
 			this.scheme = scheme;
 			this.authority = authority;
 			this.hierPrefix = hierPrefix;
 		}
 
 		@Override
-		public String computeUriString() {
+		public String computeUriString(boolean full) {
 			return scheme + ":" + hierPrefix + authority;
 		}
 
@@ -80,18 +82,20 @@ public class IdFactory {
 
 		@Override
 		protected String uriSep() {
-			if (authority != null)
+			if (authority != null) {
 				return "/";
-			else
+			} else {
 				return "";
+			}
 		}
 	}
 
 	private static class FragmentBaseId extends HashedId {
 		public FragmentBaseId(Id parent) {
 			super(parent);
-			if (parent == null || parent instanceof FragmentBaseId || parent instanceof FragmentId)
+			if (parent == null || parent instanceof FragmentBaseId || parent instanceof FragmentId) {
 				throw new IllegalArgumentException();
+			}
 		}
 
 		@Override
@@ -100,8 +104,8 @@ public class IdFactory {
 		}
 
 		@Override
-		protected String computeUriString() {
-			return parent.toUriString() + "#";
+		protected String computeUriString(boolean full) {
+			return parent.toUriString(full) + "#";
 		}
 
 		@Override
@@ -121,12 +125,13 @@ public class IdFactory {
 
 		@Override
 		public Id setFragment(String f) {
-			if (f == null)
+			if (f == null) {
 				return removeFragment();
-			else if (f.equals(""))
+			} else if (f.equals("")) {
 				return this;
-			else
+			} else {
 				return super.setFragment(f);
+			}
 		}
 
 		@Override
@@ -146,8 +151,9 @@ public class IdFactory {
 
 		public FragmentId(Id parent, String fragment) {
 			super(parent);
-			if (fragment == null || !(parent instanceof FragmentBaseId))
+			if (fragment == null || !(parent instanceof FragmentBaseId)) {
 				throw new IllegalArgumentException();
+			}
 			this.fragment = fragment;
 		}
 
@@ -157,9 +163,10 @@ public class IdFactory {
 		}
 
 		@Override
-		protected String computeUriString() {
-			return parent.toUriString()
+		protected String computeUriString(boolean full) {
+			return parent.toUriString(full)
 					+ UriEncoding.percentEncodeIri(fragment, UriEncoding.URI_EXTRA_CHARS_FRAGMENT, true);
+
 		}
 
 		@Override
@@ -179,12 +186,13 @@ public class IdFactory {
 
 		@Override
 		public Id setFragment(String f) {
-			if (f == null)
+			if (f == null) {
 				return removeFragment();
-			else if (fragment.equals(f))
+			} else if (fragment.equals(f)) {
 				return this;
-			else
+			} else {
 				return parent.setFragment(f);
+			}
 		}
 
 		@Override
@@ -222,8 +230,9 @@ public class IdFactory {
 			authority = authority.toLowerCase();
 			Matcher match = AuthRootId.AUTHORITY_PAT.matcher(authority);
 
-			if (!match.matches())
+			if (!match.matches()) {
 				throw new IllegalArgumentException(authority);
+			}
 			String slashes = match.group(1);
 			String body = match.group(2);
 			String port = match.group(4);
@@ -250,8 +259,9 @@ public class IdFactory {
 			String scheme = uri.getScheme().toLowerCase();
 
 			if (scheme.equals("values") && uri.getRawAuthority() != null && uri.getRawPath() != null) {
-				if (uri.getRawPath().length() > 0)
+				if (uri.getRawPath().length() > 0) {
 					return LiteralId.fromUri(uri.getAuthority(), uri.getRawPath());
+				}
 			}
 			if (uri.isOpaque()) {
 				String fragment = uri.getFragment();
@@ -317,9 +327,10 @@ public class IdFactory {
 
 		public static Id namespace(Id id, String namespace) {
 			if (namespaceIds.containsKey(namespace)) {
-				if (namespaceIds.get(namespace) != id)
+				if (namespaceIds.get(namespace) != id) {
 					throw new IllegalArgumentException(
 							"Namespace " + namespace + " already defined as " + namespaceIds.get(namespace));
+				}
 				return id;
 			}
 			namespaceIds.put(namespace, id);
@@ -327,6 +338,7 @@ public class IdFactory {
 				HashedId hid = (HashedId) id;
 				if (hid.abbrv == null) {
 					hid.abbrv = namespace + ":";
+					System.err.println("Define namespace: " + namespace + " -> " + id);
 				}
 			}
 			return id;
@@ -355,6 +367,17 @@ public class IdFactory {
 			cache = map;
 		}
 
+		@Override
+		public String getNamespace() {
+			if (abbrv != null) {
+				return abbrv.substring(0, abbrv.length() - 1);
+			} else if (parent != null) {
+				return parent.getNamespace();
+			} else {
+				return null;
+			}
+		}
+
 		private String abbrv = null;
 
 		protected HashedId parent;
@@ -377,18 +400,20 @@ public class IdFactory {
 
 		@Override
 		public Id addPath(String segment) {
-			if (segment.equals(CURRENT) || segment.equals(""))
+			if (segment.equals(CURRENT) || segment.equals("")) {
 				return this;
-			else if (segment.equals(PARENT)) {
-				if (parent instanceof PathId)
+			} else if (segment.equals(PARENT)) {
+				if (parent instanceof PathId) {
 					return parent;
-				else
+				} else {
 					return this;
+				}
 			} else if (segment.equals(ROOT)) {
-				if (parent instanceof PathId)
+				if (parent instanceof PathId) {
 					return parent.addPath(segment);
-				else
+				} else {
 					return parent;
+				}
 			}
 
 			String query = System.identityHashCode(this) + "." + segment;
@@ -400,14 +425,15 @@ public class IdFactory {
 			return id;
 		}
 
-		protected abstract String computeUriString();
+		protected abstract String computeUriString(boolean full);
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof HashedId)
+			if (o instanceof HashedId) {
 				return this == o;
-			else
+			} else {
 				return false;
+			}
 		}
 
 		@Override
@@ -462,10 +488,11 @@ public class IdFactory {
 
 		@Override
 		public boolean isOpaque() {
-			if (parent == null)
+			if (parent == null) {
 				return false;
-			else
+			} else {
 				return parent.isOpaque();
+			}
 		}
 
 		@Override
@@ -491,9 +518,9 @@ public class IdFactory {
 					cache.put(query, base);
 				}
 			}
-			if (fragment.equals(""))
+			if (fragment.equals("")) {
 				return base;
-			else {
+			} else {
 				fragment = fragment.intern();
 				String query = System.identityHashCode(base) + "#" + System.identityHashCode(fragment);
 				Id id = cache.get(query);
@@ -519,14 +546,27 @@ public class IdFactory {
 		public String toString() {
 			return toUriString();
 		}
+		@Override
+		public final String toFullUriString() {
+			return computeUriString(true);
+		}
+
+		protected String toUriString(boolean full) {
+			if(full) {
+				return computeUriString(full);
+			} else {
+				return toUriString();
+			}
+		}
 
 		@Override
 		@SuppressWarnings("unused")
 		public final String toUriString() {
-			if (abbrv != null)
+			if (abbrv != null) {
 				return abbrv;
+			}
 			if (uriString == null) {
-				uriString = computeUriString().intern();
+				uriString = computeUriString(false);
 				if (false) {
 					try {
 						URI uri = new URI(uriString);
@@ -545,10 +585,11 @@ public class IdFactory {
 		}
 
 		protected String uriSep() {
-			if (abbrv != null)
+			if (abbrv != null) {
 				return "";
-			else
+			} else {
 				return "/";
+			}
 		}
 	}
 
@@ -579,21 +620,22 @@ public class IdFactory {
 		}
 
 		public static Id getType(Object obj) {
-			if (obj instanceof Boolean)
+			if (obj instanceof Boolean) {
 				return IdFactory.TYPE_BOOLEAN;
-			else if (obj instanceof Integer || obj instanceof Short || obj instanceof Byte || obj instanceof Long
-					|| obj instanceof BigInteger)
+			} else if (obj instanceof Integer || obj instanceof Short || obj instanceof Byte || obj instanceof Long
+					|| obj instanceof BigInteger) {
 				return IdFactory.TYPE_INTEGER;
-			else if (obj instanceof Double)
+			} else if (obj instanceof Double) {
 				return IdFactory.TYPE_DOUBLE;
-			else if (obj instanceof Float)
+			} else if (obj instanceof Float) {
 				return IdFactory.TYPE_FLOAT;
-			else if (obj instanceof BigDecimal)
+			} else if (obj instanceof BigDecimal) {
 				return IdFactory.TYPE_DECIMAL;
-			else if (obj instanceof String)
+			} else if (obj instanceof String) {
 				return IdFactory.TYPE_STRING;
-			else
+			} else {
 				return null;
+			}
 		}
 
 		private final String stringRep;
@@ -622,8 +664,9 @@ public class IdFactory {
 				this.parent = (HashedId) IdFactory.ROOT_VALUES_STRING;
 				stringRep = JavaUtil.quote(obj.toString());
 				uriPath = UriEncoding.percentEncodeIri(obj.toString(), UriEncoding.URI_EXTRA_CHARS_PATH, true);
-			} else
+			} else {
 				throw new IllegalArgumentException("type not found for: " + obj);
+			}
 			this.stringRep = stringRep;
 			if (uriPath == null) {
 				this.uriPath = UriEncoding.percentEncodeIri(obj.toString(), UriEncoding.URI_EXTRA_CHARS_PATH, true);
@@ -638,8 +681,8 @@ public class IdFactory {
 		}
 
 		@Override
-		protected String computeUriString() {
-			return parent.toUriString() + "/" + uriPath;
+		protected String computeUriString(boolean full) {
+			return parent.toUriString(full) + "/" + uriPath;
 		}
 
 		@Override
@@ -659,7 +702,11 @@ public class IdFactory {
 
 		@Override
 		public String toRdfString() {
-			return stringRep + "^^" + type.toUriString();
+			// if(stringRep.startsWith("\"")) {
+			// return stringRep + "^^" + type.toUriString();
+			// } else {
+			return stringRep;
+			// }
 		}
 
 		@Override
@@ -669,18 +716,20 @@ public class IdFactory {
 	}
 
 	private static class ParamId extends HashedId {
-		private final Id paramKey;
-		private final Id paramVal;
+		private final HashedId paramKey;
+		private final HashedId paramVal;
 
 		public ParamId(Id parent, Id key, Id value) {
 			super(parent);
-			if (parent == null)
+			if (parent == null) {
 				throw new IllegalArgumentException();
-			if (!(parent.isContainer() || parent.hasParams()))
+			}
+			if (!(parent.isContainer() || parent.hasParams())) {
 				throw new IllegalArgumentException();
+			}
 
-			this.paramKey = key;
-			this.paramVal = value;
+			this.paramKey = (HashedId) key;
+			this.paramVal = (HashedId) value;
 		}
 
 		@Override
@@ -690,38 +739,41 @@ public class IdFactory {
 
 		private Id changeParam(Id key, Id value) {
 			if (paramKey == key) {
-				if (paramVal == value)
+				if (paramVal == value) {
 					return this;
-				else
+				} else {
 					return HashedId.addParam(parent, key, value);
-			} else if (parent instanceof ParamId)
+				}
+			} else if (parent instanceof ParamId) {
 				return ((ParamId) parent).changeParam(key, value);
-			else
+			} else {
 				return null;
+			}
 		}
 
 		@Override
-		public String computeUriString() {
-			String base = parent.toUriString();
+		public String computeUriString(boolean full) {
+			String base = parent.toUriString(full);
 			if (parent.hasParams()) {
 				base += "&";
 			} else {
 				base += "?";
 			}
 
-			base += UriEncoding.percentEncodeIri(paramKey.toUriString(), UriEncoding.URI_EXTRA_CHARS_QUERY, true);
+			base += UriEncoding.percentEncodeIri(paramKey.computeUriString(full), UriEncoding.URI_EXTRA_CHARS_QUERY, true);
 
 			if (paramVal != IdFactory.TRUE) {
 				base += "=";
-				base += UriEncoding.percentEncodeIri(paramVal.toUriString(), UriEncoding.URI_EXTRA_CHARS_QUERY, true);
+				base += UriEncoding.percentEncodeIri(paramVal.computeUriString(full), UriEncoding.URI_EXTRA_CHARS_QUERY, true);
 			}
 			return base;
 		}
 
 		@Override
 		public Id getParam(Id paramKey) {
-			if (this.paramKey.equals(paramKey))
+			if (this.paramKey.equals(paramKey)) {
 				return paramVal;
+			}
 			return parent.getParam(paramKey);
 		}
 
@@ -742,10 +794,11 @@ public class IdFactory {
 
 		@Override
 		public Id removeParam(Id key) {
-			if (paramKey.equals(key))
+			if (paramKey.equals(key)) {
 				return parent;
-			else
+			} else {
 				return HashedId.addParam(parent.removeParam(key), paramKey, paramVal);
+			}
 		}
 
 		@Override
@@ -766,10 +819,11 @@ public class IdFactory {
 		@Override
 		public Id setParam(Id key, Id value) {
 			Id id = changeParam(key, value);
-			if (id == null) // it's really new
+			if (id == null) {
 				return HashedId.addParam(this, key, value);
-			else // we've changed it
+			} else {
 				return id;
+			}
 		}
 
 		@Override
@@ -788,17 +842,18 @@ public class IdFactory {
 		public PathId(Id parent, String segment) {
 			super(parent);
 
-			if (parent == null || !parent.isContainer())
+			if (parent == null || !parent.isContainer()) {
 				throw new IllegalArgumentException();
+			}
 
 			this.segment = segment;// UriEncoding.percentEncodeIri(segment,
-									// UriEncoding.URI_EXTRA_CHARS_PATH, true);
+			// UriEncoding.URI_EXTRA_CHARS_PATH, true);
 		}
 
 		@Override
-		public String computeUriString() {
-			return parent.toUriString() + parent.uriSep()
-					+ UriEncoding.percentEncodeIri(segment, UriEncoding.URI_EXTRA_CHARS_PATH + "()", true);
+		public String computeUriString(boolean full) {
+			return parent.toUriString(full) + parent.uriSep()
+			+ UriEncoding.percentEncodeIri(segment, UriEncoding.URI_EXTRA_CHARS_PATH + "()", true);
 		}
 
 		@Override
@@ -886,8 +941,12 @@ public class IdFactory {
 	public static Id root(String scheme, String authority) {
 		return HashedId.auth(scheme, authority);
 	}
-	
+
 	public static Id namespace(Id id, String namespace) {
 		return HashedId.namespace(id, namespace);
+	}
+
+	public static Id getNamespace(String ns) {
+		return HashedId.namespaceIds.get(ns);
 	}
 }

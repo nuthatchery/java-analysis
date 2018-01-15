@@ -19,15 +19,16 @@ import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
 	private static final List<String> DEFAULT_CLASSES = Arrays.asList("../../../../../ImmutablePosition.class",
-			"../../../../../MutablePosition.class", "../../../../../Image.class",
-			"/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
+			"../../../../../MutablePosition.class", "../../../../../Image.class");
+	//"/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
 
 	public static String fill(String s, int size, String ellipsis, boolean flushRight) {
 		if (s.length() > size) {
-			if (flushRight)
+			if (flushRight) {
 				return ellipsis + s.substring(s.length() - (size - ellipsis.length()), s.length());
-			else
+			} else {
 				return s.substring(0, s.length() - (size - ellipsis.length())) + ellipsis;
+			}
 		}
 		if (flushRight) {
 			for (; s.length() < size; s = " " + s) {

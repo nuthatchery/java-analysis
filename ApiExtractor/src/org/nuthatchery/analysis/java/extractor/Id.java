@@ -63,4 +63,8 @@ public interface Id {
 	String toString();
 
 	String toUriString();
+
+	String getNamespace();
+
+	String toFullUriString();
 }

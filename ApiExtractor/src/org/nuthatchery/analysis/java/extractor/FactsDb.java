@@ -61,10 +61,11 @@ public class FactsDb {
 		}
 
 		protected PrintWriter getWriter(String s) throws IOException {
-			if (zipIt)
+			if (zipIt) {
 				return new PrintWriter(new GZIPOutputStream(new FileOutputStream(fileName + s + ".gz"), true));
-			else
+			} else {
 				return new PrintWriter(new FileOutputStream(fileName + s));
+			}
 		}
 
 		protected PrintWriter open() throws IOException {
@@ -193,6 +194,7 @@ public class FactsDb {
 
 	public static class NTripleFactsWriter extends AbstractTextFactsWriter {
 		// private final Set<String> facts;
+		private final Set<String> namespaces = new HashSet<>();
 
 		public NTripleFactsWriter(String fileName, String context) {
 			this(fileName, context, new HashSet<>());
@@ -205,29 +207,49 @@ public class FactsDb {
 
 		@Override
 		public void put(Id obj, Id relation) {
+			ns(obj);
+			ns(relation);
+
 			put(String.format("%s %s true .", obj.toRdfString(), relation.toRdfString()));
 		}
 
 		@Override
 		public void put(Id obj, Id relation, Id tgt) {
+			ns(obj);
+			ns(relation);
+			ns(tgt);
 			put(String.format("%s %s %s .", obj.toRdfString(), relation.toRdfString(), tgt.toRdfString()));
 		}
 
 		@Override
 		public void put(Id obj, Id relation, Id tgt, Id mod) {
+			ns(obj);
+			ns(relation);
+			ns(mod);
 			relation = relation.setParam(mod);
 
-			put(String.format("%s <%s> %s .", obj.toRdfString(), relation, tgt.toRdfString()));
+			put(String.format("%s %s %s .", obj.toRdfString(), relation.toRdfString(), tgt.toRdfString()));
 		}
 
 		@Override
 		public void put(Id obj, Id relation, Id tgt, Id mod1, Id mod2) {
+			ns(obj);
+			ns(relation);
+			ns(tgt);
+			ns(mod1);
+			ns(mod2);
 			relation = relation.setParam(mod1);
 			relation = relation.setParam(mod2);
 
-			put(String.format("%s <%s> %s .", obj.toRdfString(), relation, tgt.toRdfString()));
+			put(String.format("%s %s %s .", obj.toRdfString(), relation.toRdfString(), tgt.toRdfString()));
 		}
-
+		private void ns(Id id) {
+			String ns = id.getNamespace();
+			if(ns != null && !namespaces.contains(ns)) {
+				namespaces.add(ns);
+				put(String.format("@prefix %s: <%s> .", ns, IdFactory.getNamespace(ns).toFullUriString()));
+			}
+		}
 		private void put(String factString) {
 			// if (facts.add(factString))
 			todo.add(factString);
