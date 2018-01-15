@@ -1,6 +1,6 @@
 
 
-CLASSPATH="./bin:$(grep '\.jar"' .classpath | sed -e 's/^.*"\([^"]*\.jar\)".*/\1:/'|tr -d '\n')"
+# CLASSPATH="./bin:$(grep '\.jar"' .classpath | sed -e 's/^.*"\([^"]*\.jar\)".*/\1:/'|tr -d '\n')"
 JAVAOPTS=""
 
 if [ "$1" = "-ea" ]; then
@@ -8,4 +8,4 @@ if [ "$1" = "-ea" ]; then
   JAVAOPTS="-ea"
 fi
 
-java $JAVAOPTS -classpath "$CLASSPATH" org.nuthatchery.analysis.java.extractor.ExtractApi "$@"
+java $JAVAOPTS -jar target/jvm-fact-extractor-0.0.1-SNAPSHOT.jar "$@"
