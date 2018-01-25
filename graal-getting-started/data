@@ -1,0 +1,4 @@
+@prefix jf: <http://justfacts/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<java://members/object/ImmutablePosition/-init-(int,int)void> <jf:method> xsd:true .
