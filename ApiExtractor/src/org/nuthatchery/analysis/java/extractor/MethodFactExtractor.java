@@ -333,7 +333,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		Id modifier;
 		switch (opcode) {
 		case Opcodes.INVOKEVIRTUAL:
-			modifier = JavaFacts.ACCESS_VIRTUAL;
+			modifier = JavaFacts.ACCESS_VIRTUAL; //vanlig dynamic dispatch 
 			break;
 		case Opcodes.INVOKESPECIAL:
 			modifier = JavaFacts.ACCESS_SPECIAL;

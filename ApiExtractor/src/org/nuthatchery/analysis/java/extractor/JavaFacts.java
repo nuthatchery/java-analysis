@@ -51,6 +51,10 @@ public abstract class JavaFacts {
 	public static final Id ACCESS_INTERFACE = JAVA_FACTS.addPath("interface");
 	public static final Id ACCESS_VIRTUAL = JAVA_FACTS.addPath("virtual");
 
+	/**
+	 * Copied from JVM specs: Flags
+	 * @author anna, anya
+	 */
 	public static final class Flags {
 		public static final Id INTERFACE = JAVA_FACTS.addPath("interface");
 		public static final Id FINAL = JAVA_FLAGS.addPath("final");
