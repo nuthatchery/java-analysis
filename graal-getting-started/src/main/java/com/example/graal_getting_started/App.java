@@ -29,33 +29,33 @@ import fr.lirmm.graphik.util.stream.CloseableIterator;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
 	public static void main(String[] args) throws Exception {
-		// 0 - Create a KBBuilder
-//		KBBuilder kbb = new KBBuilder();
-		// 1 - Add a rule
 		DefaultKnowledgeBase df = new DefaultKnowledgeBase(new RDF4jStore(new SailRepository(new MemoryStore())), new RDFParser(new File("data.n3"), RDFFormat.TURTLE));
-
 		RDFWriter writer = new RDFWriter(System.out, RDFFormat.TURTLE);
-
 		System.out.println(df.getFacts().toString().replaceAll(" ", "\n"));
-		
-		// Looking for <java://members/object/ImmutablePosition/getX()int> <jf:method> true .
-		// testing <java://types/object/MutablePosition> <jf:source> "MutablePosition.java" .
+
 		SparqlConjunctiveQueryParser sp = new SparqlConjunctiveQueryParser(
 				"PREFIX jf: <http://nuthatchery.org/javaFacts/> "
 				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
 				+ "SELECT ?x ?y "
 				+ "WHERE "
 				+ "{ "
-				+ "?x <jf:calls?jf:virtual> ?y ."
+				+ "?x <jf:calls?jf:virtual> ?y "
 				+ "}"
 				); 
+		/*made transitive by adding star: modeling chapter, pg 59 
+		SparqlConjunctiveQueryParser sp = new SparqlConjunctiveQueryParser(
+				"PREFIX jf: <http://nuthatchery.org/javaFacts/> "
+				+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> "
+				+ "SELECT ?x ?y "
+				+ "WHERE "
+				+ "{ "
+				+ "?x <jf:calls?jf:virtual>* ?y " 
+				+ "}"
+				); 
+		*/
 		ConjunctiveQuery query = sp.getConjunctiveQuery();
 		CloseableIterator<Substitution> results = df.query(query);
 		if (results.hasNext()) {

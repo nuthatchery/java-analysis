@@ -1,0 +1,27 @@
+2018-02-24 21:23:04,781 [Worker-1] INFO  c.g.t.t.d.PublishedGradleVersions - Gradle version information cache is out-of-date. Trying to update.
+2018-02-24 21:23:05,852 [Worker-1] INFO  c.g.t.t.d.PublishedGradleVersions - Updating Gradle version information cache failed. Using outdated cache.
+2018-02-24 21:23:51,029 [Worker-11] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: org.nuthatchery.analysis:jvm-fact-extractor:0.0.1-SNAPSHOT @ /Users/anna/Projects/java-analysis/ApiExtractor/pom.xml.
+2018-02-24 21:23:51,648 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:51,658 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-02-24 21:23:51,663 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:51,663 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/anna/Projects/java-analysis/ApiExtractor/src/test/resources
+2018-02-24 21:23:52,812 [Worker-12] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: org.nuthatchery.analysis:jvm-fact-extractor:0.0.1-SNAPSHOT @ /Users/anna/Projects/java-analysis/ApiExtractor/pom.xml.
+2018-02-24 21:23:53,226 [Worker-11] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: com.example:graal-getting-started:0.0.1-SNAPSHOT @ /Users/anna/Projects/java-analysis/graal-getting-started/pom.xml.
+2018-02-24 21:23:54,423 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:54,424 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/anna/Projects/java-analysis/graal-getting-started/src/main/resources
+2018-02-24 21:23:54,427 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:54,427 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/anna/Projects/java-analysis/graal-getting-started/src/test/resources
+2018-02-24 21:23:55,473 [Worker-5] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: org.nuthatchery.analysis:jvm-fact-extractor:0.0.1-SNAPSHOT @ /Users/anna/Projects/java-analysis/ApiExtractor/pom.xml.
+2018-02-24 21:23:55,927 [Worker-5] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: com.example:graal-getting-started:0.0.1-SNAPSHOT @ /Users/anna/Projects/java-analysis/graal-getting-started/pom.xml.
+2018-02-24 21:23:56,333 [Worker-8] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:56,333 [Worker-8] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/anna/Projects/java-analysis/graal-getting-started/src/main/resources
+2018-02-24 21:23:56,336 [Worker-8] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:56,336 [Worker-8] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/anna/Projects/java-analysis/graal-getting-started/src/test/resources
+2018-02-24 21:23:57,402 [Worker-14] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:57,407 [Worker-14] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-02-24 21:23:57,409 [Worker-14] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:57,410 [Worker-14] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/anna/Projects/java-analysis/ApiExtractor/src/test/resources
+2018-02-24 21:23:57,822 [Worker-14] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:57,822 [Worker-14] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/anna/Projects/java-analysis/graal-getting-started/src/main/resources
+2018-02-24 21:23:57,828 [Worker-14] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-02-24 21:23:57,828 [Worker-14] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory /Users/anna/Projects/java-analysis/graal-getting-started/src/test/resources
