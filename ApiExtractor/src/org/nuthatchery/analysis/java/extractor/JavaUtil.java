@@ -1,6 +1,8 @@
 package org.nuthatchery.analysis.java.extractor;
 
 import java.util.function.Supplier;
+
+import org.nuthatchery.ontology.Id;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 

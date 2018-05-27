@@ -1,4 +1,4 @@
-package org.nuthatchery.analysis.java.extractor;
+package org.nuthatchery.ontology;
 
 import java.util.stream.Stream;
 
@@ -7,7 +7,7 @@ public interface Id {
 
 	Id addPath(String segment);
 
-	default Id addPath(String[] split) {
+	default Id addPath(String... split) {
 		Id id = this;
 		for (String s : split) {
 			id = id.addPath(s);

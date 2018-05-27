@@ -1,4 +1,4 @@
-package org.nuthatchery.analysis.java.extractor;
+package org.nuthatchery.ontology;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
+import org.nuthatchery.ontology.Id;
+import org.nuthatchery.ontology.IdFactory;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;

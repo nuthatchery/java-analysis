@@ -4,8 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-import org.nuthatchery.analysis.java.extractor.FactsDb.IFactsWriter;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
+import org.nuthatchery.ontology.Id;
+import org.nuthatchery.ontology.IdFactory;
+import org.nuthatchery.ontology.FactsDb.IFactsWriter;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;

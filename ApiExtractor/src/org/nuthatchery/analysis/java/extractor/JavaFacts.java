@@ -1,5 +1,7 @@
 package org.nuthatchery.analysis.java.extractor;
 
+import org.nuthatchery.ontology.Id;
+import org.nuthatchery.ontology.IdFactory;
 import org.objectweb.asm.Type;
 
 public abstract class JavaFacts {

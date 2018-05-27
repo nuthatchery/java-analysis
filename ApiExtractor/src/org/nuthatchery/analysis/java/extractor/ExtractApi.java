@@ -14,7 +14,10 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.nuthatchery.analysis.java.extractor.FactsDb.IFactsWriter;
+
+import org.nuthatchery.ontology.FactsDb;
+import org.nuthatchery.ontology.IdFactory;
+import org.nuthatchery.ontology.FactsDb.IFactsWriter;
 import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {

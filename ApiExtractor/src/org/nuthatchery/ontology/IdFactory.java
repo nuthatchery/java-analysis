@@ -1,4 +1,4 @@
-package org.nuthatchery.analysis.java.extractor;
+package org.nuthatchery.ontology;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -15,9 +15,17 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import org.nuthatchery.analysis.java.extractor.ClassFactExtractor;
+import org.nuthatchery.analysis.java.extractor.JavaUtil;
+import org.nuthatchery.ontology.basic.Values;
+import org.nuthatchery.ontology.standard.RDF;
+import org.nuthatchery.ontology.standard.XSD;
+import org.nuthatchery.ontology.uri.UriEncoding;
+import org.nuthatchery.ontology.uri.UriSchemes;
+
 public class IdFactory {
 
-	private static class AuthRootId extends HashedId {
+	static class AuthRootId extends HashedId {
 		protected static final Pattern AUTHORITY_PAT = Pattern
 				.compile("^(//|)(([a-z0-9~_.\\-]|%[0-9a-f][0-9a-f]|[!$\\&'()*+,;=])+)(:[0-9]*|)$");
 		protected static final Pattern SCHEME_PAT = Pattern.compile("^[A-Za-z][A-Za-z0-9+.\\-]*$");
@@ -90,7 +98,7 @@ public class IdFactory {
 		}
 	}
 
-	private static class FragmentBaseId extends HashedId {
+	static class FragmentBaseId extends HashedId {
 		public FragmentBaseId(Id parent) {
 			super(parent);
 			if (parent == null || parent instanceof FragmentBaseId || parent instanceof FragmentId) {
@@ -145,7 +153,7 @@ public class IdFactory {
 		}
 	}
 
-	private static class FragmentId extends HashedId {
+	static class FragmentId extends HashedId {
 
 		private final String fragment;
 
@@ -206,13 +214,13 @@ public class IdFactory {
 		}
 	}
 
-	private static abstract class HashedId implements Id {
+	static abstract class HashedId implements Id {
 		protected static Map<String, Id> cache = new HashMap<>();
 		protected static Stack<Map<String, Id>> caches = new Stack<>();
-		private static final String CURRENT = ".".intern();
+		static final String CURRENT = ".".intern();
 		protected static final Map<String, Id> namespaceIds = new HashMap<>();
-		private static final String PARENT = "..".intern();
-		private static final String ROOT = "/".intern();
+		static final String PARENT = "..".intern();
+		static final String ROOT = "/".intern();
 
 		protected static Id addParam(Id parent, Id key, Id value) {
 			String query = System.identityHashCode(parent) + "?" + System.identityHashCode(key) + "="
@@ -534,7 +542,7 @@ public class IdFactory {
 
 		@Override
 		public Id setParam(Id key) {
-			return setParam(key, IdFactory.TRUE);
+			return setParam(key, RDF.LITERAL_TRUE);
 		}
 
 		@Override
@@ -593,7 +601,7 @@ public class IdFactory {
 		}
 	}
 
-	private static class LiteralId extends HashedId {
+	static class LiteralId extends HashedId {
 
 		public static Id fromUri(String auth, String path) {
 			if (path.startsWith("/")) {
@@ -621,18 +629,18 @@ public class IdFactory {
 
 		public static Id getType(Object obj) {
 			if (obj instanceof Boolean) {
-				return IdFactory.TYPE_BOOLEAN;
+				return XSD.TYPE_BOOLEAN;
 			} else if (obj instanceof Integer || obj instanceof Short || obj instanceof Byte || obj instanceof Long
 					|| obj instanceof BigInteger) {
-				return IdFactory.TYPE_INTEGER;
+				return XSD.TYPE_INTEGER;
 			} else if (obj instanceof Double) {
-				return IdFactory.TYPE_DOUBLE;
+				return XSD.TYPE_DOUBLE;
 			} else if (obj instanceof Float) {
-				return IdFactory.TYPE_FLOAT;
+				return XSD.TYPE_FLOAT;
 			} else if (obj instanceof BigDecimal) {
-				return IdFactory.TYPE_DECIMAL;
+				return XSD.TYPE_DECIMAL;
 			} else if (obj instanceof String) {
-				return IdFactory.TYPE_STRING;
+				return XSD.TYPE_STRING;
 			} else {
 				return null;
 			}
@@ -650,18 +658,18 @@ public class IdFactory {
 			this.type = getType(obj);
 			String stringRep = obj.toString();
 
-			if (type == IdFactory.TYPE_BOOLEAN) {
-				this.parent = (HashedId) IdFactory.ROOT_VALUES_BOOLEAN;
-			} else if (type == IdFactory.TYPE_INTEGER) {
-				this.parent = (HashedId) IdFactory.ROOT_VALUES_INTEGER;
-			} else if (type == IdFactory.TYPE_DOUBLE) {
-				this.parent = (HashedId) IdFactory.ROOT_VALUES_DOUBLE;
-			} else if (type == IdFactory.TYPE_FLOAT) {
-				this.parent = (HashedId) IdFactory.ROOT_VALUES_FLOAT;
-			} else if (type == IdFactory.TYPE_DECIMAL) {
-				this.parent = (HashedId) IdFactory.ROOT_VALUES_DECIMAL;
-			} else if (type == IdFactory.TYPE_STRING) {
-				this.parent = (HashedId) IdFactory.ROOT_VALUES_STRING;
+			if (type == XSD.TYPE_BOOLEAN) {
+				this.parent = (HashedId) Values.ROOT_VALUES_BOOLEAN;
+			} else if (type == XSD.TYPE_INTEGER) {
+				this.parent = (HashedId) Values.ROOT_VALUES_INTEGER;
+			} else if (type == XSD.TYPE_DOUBLE) {
+				this.parent = (HashedId) Values.ROOT_VALUES_DOUBLE;
+			} else if (type == XSD.TYPE_FLOAT) {
+				this.parent = (HashedId) Values.ROOT_VALUES_FLOAT;
+			} else if (type == XSD.TYPE_DECIMAL) {
+				this.parent = (HashedId) Values.ROOT_VALUES_DECIMAL;
+			} else if (type == XSD.TYPE_STRING) {
+				this.parent = (HashedId) Values.ROOT_VALUES_STRING;
 				stringRep = JavaUtil.quote(obj.toString());
 				uriPath = UriEncoding.percentEncodeIri(obj.toString(), UriEncoding.URI_EXTRA_CHARS_PATH, true);
 			} else {
@@ -715,7 +723,7 @@ public class IdFactory {
 		}
 	}
 
-	private static class ParamId extends HashedId {
+	static class ParamId extends HashedId {
 		private final HashedId paramKey;
 		private final HashedId paramVal;
 
@@ -762,7 +770,7 @@ public class IdFactory {
 
 			base += UriEncoding.percentEncodeIri(paramKey.computeUriString(full), UriEncoding.URI_EXTRA_CHARS_QUERY, true);
 
-			if (paramVal != IdFactory.TRUE) {
+			if (paramVal != RDF.LITERAL_TRUE) {
 				base += "=";
 				base += UriEncoding.percentEncodeIri(paramVal.computeUriString(full), UriEncoding.URI_EXTRA_CHARS_QUERY, true);
 			}
@@ -833,7 +841,7 @@ public class IdFactory {
 
 	}
 
-	private static class PathId extends HashedId {
+	static class PathId extends HashedId {
 		// protected static final Pattern SEGMENT_PAT = Pattern.compile(
 		// "([A-Za-z0-9~_.\\-]|[\u00a1-\u167f\u1681-\u180d\u180f-\u1fff\u200b-\u2027\u202a-\u202e\u2030-\u205e\2060-\2fff\u3001-\ufffd]|%[0-9A-Fa-f][0-9A-Fa-f]|[!$\\&'()*+,;=:@])*");
 
@@ -891,33 +899,6 @@ public class IdFactory {
 		}
 	}
 
-	static final Id FALSE = new LiteralId(false);
-	static final Id ONE = new LiteralId(1);
-	static final Id ROOT_W3 = HashedId.auth("http", "//www.w3.org");
-	static final Id ROOT_RDF = HashedId
-			.namespace(ROOT_W3.addPath("1999").addPath("02").addPath("22-rdf-syntax-ns").setFragment(""), "rdf");
-	static final Id ROOT_RDFS = HashedId
-			.namespace(ROOT_W3.addPath("2000").addPath("01").addPath("rdf-schema").setFragment(""), "rdfs");
-	static final Id ROOT_VALUES_BOOLEAN = HashedId.auth("values", "//boolean");
-	static final Id ROOT_VALUES_DECIMAL = HashedId.auth("values", "//decimal");
-	static final Id ROOT_VALUES_DOUBLE = HashedId.auth("values", "//double");
-	static final Id ROOT_VALUES_FLOAT = HashedId.auth("values", "//float");
-	static final Id ROOT_VALUES_INTEGER = HashedId.auth("values", "//integer");
-	static final Id ROOT_VALUES_STRING = HashedId.auth("values", "//string");
-	static final Id ROOT_XSD = HashedId.namespace(ROOT_W3.addPath("2001").addPath("XMLSchema").setFragment(""), "xsd");
-	static final Id TRUE = new LiteralId(true);
-	static final Id TYPE_BOOLEAN = ROOT_XSD.setFragment("boolean");
-	static final Id TYPE_DECIMAL = ROOT_XSD.setFragment("decimal");
-
-	static final Id TYPE_DOUBLE = ROOT_XSD.setFragment("double");
-
-	static final Id TYPE_FLOAT = ROOT_XSD.setFragment("float");
-
-	static final Id TYPE_INTEGER = ROOT_XSD.setFragment("integer");
-
-	static final Id TYPE_STRING = ROOT_XSD.setFragment("string");
-
-	static final Id ZERO = new LiteralId(0);
 
 	public static Id id(Id root, String... path) {
 		for (String p : path) {

@@ -1,4 +1,4 @@
-package org.nuthatchery.analysis.java.extractor;
+package org.nuthatchery.ontology.uri;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
