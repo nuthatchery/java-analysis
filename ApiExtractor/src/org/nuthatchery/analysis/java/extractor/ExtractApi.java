@@ -2,8 +2,10 @@ package org.nuthatchery.analysis.java.extractor;
 
 import java.io.Console;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -11,19 +13,33 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.apache.commons.rdf.jena.JenaDataset;
+import org.apache.commons.rdf.jena.JenaRDF;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.rdf.model.impl.NTripleWriter;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFWriter;
+import org.apache.jena.riot.RDFWriterBuilder;
 import org.nuthatchery.ontology.FactsDb;
-import org.nuthatchery.ontology.IdFactory;
+import org.nuthatchery.ontology.Model;
+import org.nuthatchery.ontology.ModelFactory;
 import org.nuthatchery.ontology.FactsDb.IFactsWriter;
+import org.nuthatchery.ontology.basic.CommonVocabulary;
+import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
 	private static final List<String> DEFAULT_CLASSES = Arrays.asList("../../../../../ImmutablePosition.class",
-			"../../../../../MutablePosition.class", "../../../../../Test.class", "../../../../../A.class", "../../../../../App.class");
-	//"/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
+			"../../../../../MutablePosition.class", "../../../../../Test.class");
+	// "/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
 
 	public static String fill(String s, int size, String ellipsis, boolean flushRight) {
 		if (s.length() > size) {
@@ -47,6 +63,12 @@ public class ExtractApi {
 	}
 
 	public static void main(String[] args) throws IOException {
+		ModelFactory.setFactory(() -> new JenaRDF());
+		ModelFactory mf = ModelFactory.getInstance();
+		RdfVocabulary rdfVocabulary = RdfVocabulary.getInstance();
+		JenaRDF jenaRDF = new JenaRDF();
+		Dataset dataset = DatasetFactory.create();
+
 		boolean openAsResource = args.length == 0;
 		int logLevel = args.length == 0 ? 10 : 0;
 		List<String> arguments = new ArrayList<>(openAsResource ? DEFAULT_CLASSES : Arrays.asList(args));
@@ -77,10 +99,9 @@ public class ExtractApi {
 			}
 			System.out.println("" + nClasses + " class files and " + nJars + " jars found.");
 		}
-		IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
-		fw.precheck();
+		// IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
+		Model model = mf.createModel(jenaRDF.asDataset(dataset), "this:");
 		System.out.println(JavaFacts.Types.BOOLEAN);
-		ClassFactExtractor ea = new ClassFactExtractor(fw, JavaUtil.logger(logLevel));
 		ClassReader cr;
 		int i = 0;
 		int n = files.size();
@@ -89,7 +110,8 @@ public class ExtractApi {
 		String chk = "(checkpoint) ";
 		String msg = prc;
 		for (String file : files) {
-			IdFactory.push();
+			Model m = model.model(file + "/", "this:");
+			ClassFactExtractor ea = new ClassFactExtractor(m, JavaUtil.logger(logLevel));
 			if (console != null) {
 				console.printf("[%02d%%] %s%s\r", (i * 100) / n, msg, fill(file, 60, "…", true));
 			}
@@ -126,16 +148,27 @@ public class ExtractApi {
 				}
 			}
 			if (i++ % 10 == 0) {
-				if (fw.checkpoint()) {
-					msg = chk;
-				}
+				// if (fw.checkpoint()) {
+				msg = chk;
+				// }
 			} else if (i % 10 == 5) {
 				msg = prc;
 			}
-			IdFactory.pop();
 		}
 		System.out.println();
-		fw.save();
+
+		dataset.getDefaultModel().setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
+		dataset.getDefaultModel().setNsPrefix("rdf", RdfVocabulary.RDF_PREFIX);
+		dataset.getDefaultModel().setNsPrefix("rdfs", RdfVocabulary.RDFS_PREFIX);
+		dataset.getDefaultModel().setNsPrefix("j", JavaFacts.javaPrefix);
+		dataset.getDefaultModel().setNsPrefix("jt", JavaFacts.javaTypesPrefix);
+		dataset.getDefaultModel().setNsPrefix("jf", JavaFacts.javaFlagsPrefix);
+		dataset.getDefaultModel().setNsPrefix("nh", CommonVocabulary.PREFIX);
+
+		try (OutputStream output = new FileOutputStream("/tmp/data.n3")) {
+			RDFDataMgr.write(output, dataset, Lang.TRIX);
+			//			jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
+		}
 	}
 
 }

@@ -15,15 +15,27 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import org.apache.commons.rdf.api.BlankNodeOrIRI;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.Literal;
+import org.apache.commons.rdf.api.RDFTerm;
+import org.apache.commons.rdf.simple.SimpleRDF;
+import org.apache.commons.rdf.simple.Types;
 import org.nuthatchery.analysis.java.extractor.ClassFactExtractor;
 import org.nuthatchery.analysis.java.extractor.JavaUtil;
 import org.nuthatchery.ontology.basic.Values;
-import org.nuthatchery.ontology.standard.RDF;
-import org.nuthatchery.ontology.standard.XSD;
+import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.nuthatchery.ontology.uri.UriEncoding;
 import org.nuthatchery.ontology.uri.UriSchemes;
 
+@Deprecated
 public class IdFactory {
+	public static final Id ROOT_VALUES_BOOLEAN = root("values", "//boolean");
+	public static final Id ROOT_VALUES_DECIMAL = root("values", "//decimal");
+	public static final Id ROOT_VALUES_DOUBLE = root("values", "//double");
+	public static final Id ROOT_VALUES_FLOAT = root("values", "//float");
+	public static final Id ROOT_VALUES_INTEGER = root("values", "//integer");
+	public static final Id ROOT_VALUES_STRING = root("values", "//string");
 
 	static class AuthRootId extends HashedId {
 		protected static final Pattern AUTHORITY_PAT = Pattern
@@ -542,7 +554,7 @@ public class IdFactory {
 
 		@Override
 		public Id setParam(Id key) {
-			return setParam(key, RDF.LITERAL_TRUE);
+			return setParam(key, literal(true));
 		}
 
 		@Override
@@ -554,13 +566,14 @@ public class IdFactory {
 		public String toString() {
 			return toUriString();
 		}
+
 		@Override
 		public final String toFullUriString() {
 			return computeUriString(true);
 		}
 
 		protected String toUriString(boolean full) {
-			if(full) {
+			if (full) {
 				return computeUriString(full);
 			} else {
 				return toUriString();
@@ -599,7 +612,29 @@ public class IdFactory {
 				return "/";
 			}
 		}
+
+		@Override
+		public RDFTerm asRDFTerm() {
+			return asIRI();
+		}
+
+		@Override
+		public Literal asLiteral() {
+			return null;
+		}
+
+		@Override
+		public IRI asIRI() {
+			return rdfFactory.createIRI(this.toFullUriString());
+		}
+
+		@Override
+		public BlankNodeOrIRI asBlankNodeOrIRI() {
+			return asIRI();
+		}
 	}
+
+	public static org.apache.commons.rdf.api.RDF rdfFactory = new SimpleRDF();
 
 	static class LiteralId extends HashedId {
 
@@ -629,18 +664,18 @@ public class IdFactory {
 
 		public static Id getType(Object obj) {
 			if (obj instanceof Boolean) {
-				return XSD.TYPE_BOOLEAN;
+				return id(Types.XSD_BOOLEAN);
 			} else if (obj instanceof Integer || obj instanceof Short || obj instanceof Byte || obj instanceof Long
 					|| obj instanceof BigInteger) {
-				return XSD.TYPE_INTEGER;
+				return id(Types.XSD_INTEGER);
 			} else if (obj instanceof Double) {
-				return XSD.TYPE_DOUBLE;
+				return id(Types.XSD_DOUBLE);
 			} else if (obj instanceof Float) {
-				return XSD.TYPE_FLOAT;
+				return id(Types.XSD_FLOAT);
 			} else if (obj instanceof BigDecimal) {
-				return XSD.TYPE_DECIMAL;
+				return id(Types.XSD_DECIMAL);
 			} else if (obj instanceof String) {
-				return XSD.TYPE_STRING;
+				return id(Types.XSD_STRING);
 			} else {
 				return null;
 			}
@@ -658,18 +693,18 @@ public class IdFactory {
 			this.type = getType(obj);
 			String stringRep = obj.toString();
 
-			if (type == XSD.TYPE_BOOLEAN) {
-				this.parent = (HashedId) Values.ROOT_VALUES_BOOLEAN;
-			} else if (type == XSD.TYPE_INTEGER) {
-				this.parent = (HashedId) Values.ROOT_VALUES_INTEGER;
-			} else if (type == XSD.TYPE_DOUBLE) {
-				this.parent = (HashedId) Values.ROOT_VALUES_DOUBLE;
-			} else if (type == XSD.TYPE_FLOAT) {
-				this.parent = (HashedId) Values.ROOT_VALUES_FLOAT;
-			} else if (type == XSD.TYPE_DECIMAL) {
-				this.parent = (HashedId) Values.ROOT_VALUES_DECIMAL;
-			} else if (type == XSD.TYPE_STRING) {
-				this.parent = (HashedId) Values.ROOT_VALUES_STRING;
+			if (type == id(Types.XSD_BOOLEAN)) {
+				this.parent = (HashedId) ROOT_VALUES_BOOLEAN;
+			} else if (type == id(Types.XSD_INTEGER)) {
+				this.parent = (HashedId) ROOT_VALUES_INTEGER;
+			} else if (type == id(Types.XSD_DOUBLE)) {
+				this.parent = (HashedId) ROOT_VALUES_DOUBLE;
+			} else if (type == id(Types.XSD_FLOAT)) {
+				this.parent = (HashedId) ROOT_VALUES_FLOAT;
+			} else if (type == id(Types.XSD_DECIMAL)) {
+				this.parent = (HashedId) ROOT_VALUES_DECIMAL;
+			} else if (type == id(Types.XSD_STRING)) {
+				this.parent = (HashedId) ROOT_VALUES_STRING;
 				stringRep = JavaUtil.quote(obj.toString());
 				uriPath = UriEncoding.percentEncodeIri(obj.toString(), UriEncoding.URI_EXTRA_CHARS_PATH, true);
 			} else {
@@ -721,6 +756,21 @@ public class IdFactory {
 		public String toString() {
 			return stringRep;
 		}
+
+		@Override
+		public Literal asLiteral() {
+			return rdfFactory.createLiteral(stringRep, type.asIRI());
+		}
+
+		@Override
+		public RDFTerm asRDFTerm() {
+			return asLiteral();
+		}
+
+		@Override
+		public IRI asIRI() {
+			return null;
+		}
 	}
 
 	static class ParamId extends HashedId {
@@ -768,11 +818,13 @@ public class IdFactory {
 				base += "?";
 			}
 
-			base += UriEncoding.percentEncodeIri(paramKey.computeUriString(full), UriEncoding.URI_EXTRA_CHARS_QUERY, true);
+			base += UriEncoding.percentEncodeIri(paramKey.computeUriString(full), UriEncoding.URI_EXTRA_CHARS_QUERY,
+					true);
 
-			if (paramVal != RDF.LITERAL_TRUE) {
+			if (paramVal != literal(true)) {
 				base += "=";
-				base += UriEncoding.percentEncodeIri(paramVal.computeUriString(full), UriEncoding.URI_EXTRA_CHARS_QUERY, true);
+				base += UriEncoding.percentEncodeIri(paramVal.computeUriString(full), UriEncoding.URI_EXTRA_CHARS_QUERY,
+						true);
 			}
 			return base;
 		}
@@ -899,12 +951,15 @@ public class IdFactory {
 		}
 	}
 
-
 	public static Id id(Id root, String... path) {
 		for (String p : path) {
 			root = root.addPath(p);
 		}
 		return root;
+	}
+
+	public static Id id(IRI iri) {
+		return HashedId.fromUriString(iri.getIRIString());
 	}
 
 	public static Id literal(Object s) {

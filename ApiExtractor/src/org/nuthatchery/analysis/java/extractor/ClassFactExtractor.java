@@ -4,10 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.rdf.api.BlankNodeOrIRI;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDFTerm;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
-import org.nuthatchery.ontology.Id;
-import org.nuthatchery.ontology.IdFactory;
-import org.nuthatchery.ontology.FactsDb.IFactsWriter;
+import org.nuthatchery.ontology.Model;
+import org.nuthatchery.ontology.basic.Predicates;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -20,52 +22,52 @@ import org.objectweb.asm.TypePath;
 public class ClassFactExtractor extends ClassVisitor {
 	public static String className; // TODO
 	protected String context;
-	protected final Stack<Id> currentClass = new Stack<>();
+	protected final Stack<IRI> currentClass = new Stack<>();
 
 	protected int currentLine = -1;
 
 	protected final Stack<String> currentSource = new Stack<>();
 
-	private final IFactsWriter fw;
+	private final Model model;
 
 	private final ILogger log;
-	private Id memberId;
+	private IRI memberId;
 	protected Set<String> seen = new HashSet<>();
 
-	public ClassFactExtractor(IFactsWriter fw, ILogger logger) {
+	public ClassFactExtractor(Model fw, ILogger logger) {
 		super(Opcodes.ASM6);
-		this.fw = fw;
+		this.model = fw;
 		this.log = logger.indent(this::indentLevel);
 	}
 
-	protected Id getClassId() {
+	protected IRI getClassId() {
 		return currentClass.peek();
 	}
 
-	Id getMemberId(String owner, String name, String desc) {
-		return JavaFacts.method(JavaFacts.Types.object(owner), name, desc);
+	BlankNodeOrIRI getMemberId(String owner, String name, String desc) {
+		return JavaFacts.method(model, JavaFacts.Types.object(model, owner), name, desc);
 	}
 
-	Id getMemberName(String name, String desc) {
-		return JavaFacts.method(getClassId(), name, desc);
+	BlankNodeOrIRI getMemberName(String name, String desc) {
+		return JavaFacts.method(model, getClassId(), name, desc);
 	}
 
 	protected Integer indentLevel() {
 		return currentClass.size();
 	}
+	/*
+	protected void put(IRI relation, BlankNodeOrIRI obj) {
+		model.add(obj, relation, model.literal(true));
+	}*/
 
-	protected void put(Id relation, Id obj) {
-		fw.put(obj, relation);
+	protected void put(BlankNodeOrIRI subj, IRI pred, RDFTerm obj) {
+		model.add(subj, pred, obj);
 	}
 
-	protected void put(Id relation, Id obj, Id tgt) {
-		fw.put(obj, relation, tgt);
-	}
-
-	protected void put(Id relation, Id obj, Id tgt, Id field) {
-		fw.put(obj, relation, tgt, field);
-	}
-
+	/*
+	 * protected void put(IRI relation, BlankNodeOrIRI obj, RDFTerm tgt,
+	 * BlankNodeOrIRI field) { fw.put(obj, relation, tgt, field); }
+	 */
 	@Override
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
 		log.log("\n" + "class " + name + " {");
@@ -75,23 +77,22 @@ public class ClassFactExtractor extends ClassVisitor {
 		int minor = (version >>> 16) & 0xffff;
 
 		className = name;
-		Id id = JavaFacts.Types.object(name);
+		IRI id = JavaFacts.Types.object(model, name);
 		currentClass.push(id);
-		put(JavaFacts.CLASS_FILE_VERSION, id, IdFactory.literal(major));
+		put(id, JavaFacts.P_CLASS_FILE_VERSION, model.literal(major));
 		if (minor != 0) {
-			put(JavaFacts.CLASS_FILE_MINOR, id, IdFactory.literal(minor));
+			put(id, JavaFacts.P_CLASS_FILE_MINOR, model.literal(minor));
 		}
-		put(JavaFacts.CLASS, id);
+		put(id, Predicates.IS_A, JavaFacts.C_CLASS);
 		if (superName != null) {
-			put(JavaFacts.EXTENDS, id, JavaFacts.Types.object(superName));
+			put(id, JavaFacts.EXTENDS, JavaFacts.Types.object(model, superName));
 		}
 		if (interfaces != null) {
 			for (String s : interfaces) {
-				put(JavaFacts.IMPLEMENTS, id, JavaFacts.Types.object(s));
+				put(id, JavaFacts.IMPLEMENTS, JavaFacts.Types.object(model, s));
 			}
 		}
 		addClassAccessFlags(access, id);
-
 
 	}
 
@@ -108,7 +109,7 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	@Override
 	public void visitEnd() {
-		Id s = getClassId();
+		BlankNodeOrIRI s = getClassId();
 		currentClass.pop();
 		log.log("} // end of " + s + "\n");
 	}
@@ -119,10 +120,10 @@ public class ClassFactExtractor extends ClassVisitor {
 		// signature=%s, value=%s)%n", Printer.OPCODES[access],
 		// name, desc, signature, value);
 		log.log("\n" + "field " + JavaUtil.decodeDescriptor(className, name, desc));
-		memberId = JavaFacts.method(getClassId(), name, desc);
-		put(JavaFacts.ACCESS_FIELD, memberId);
+		memberId = JavaFacts.method(model, getClassId(), name, desc);
+		put(memberId, Predicates.IS_A, JavaFacts.C_FIELD);
 		if (value != null) {
-			put(JavaFacts.INITIAL_VALUE, memberId, IdFactory.literal(value));
+			put(memberId, JavaFacts.INITIAL_VALUE, model.literal(value));
 		}
 		addFieldAccessFlags(access, memberId);
 
@@ -146,18 +147,19 @@ public class ClassFactExtractor extends ClassVisitor {
 		System.out.flush();
 		System.err.flush();
 		log.log("\n" + "method " + JavaUtil.decodeDescriptor(className, name, desc));
-		memberId = JavaFacts.method(getClassId(), name, desc);
-		put(JavaFacts.METHOD, memberId);
+		memberId = JavaFacts.method(model, getClassId(), name, desc);
 		if (name.equals("<init>")) {
-			put(JavaFacts.CONSTRUCTOR, memberId);
-			put(JavaFacts.CONSTRUCTS, memberId, getClassId());
+			put(memberId, Predicates.IS_A, JavaFacts.C_CONSTRUCTOR);
+			put(memberId, JavaFacts.CONSTRUCTS, getClassId());
+		} else {
+			put(memberId, Predicates.IS_A, JavaFacts.C_METHOD);
 		}
 		if (signature != null) {
-			put(JavaFacts.GENERIC, memberId, IdFactory.literal(signature));
+			put(memberId, JavaFacts.GENERIC, model.literal(signature));
 		}
 		if (exceptions != null) {
 			for (String s : exceptions) {
-				put(JavaFacts.DECLARES_THROW, memberId, JavaFacts.Types.object(s));
+				put(memberId, JavaFacts.DECLARES_THROW, JavaFacts.Types.object(model, s));
 			}
 		}
 		addMethodAccessFlags(access, memberId);
@@ -178,13 +180,13 @@ public class ClassFactExtractor extends ClassVisitor {
 	@Override
 	public void visitSource(String source, String debug) {
 		if (source != null) {
-			put(JavaFacts.SOURCE, getClassId(), IdFactory.literal(source));
+			put(getClassId(), JavaFacts.P_SOURCE_FILE, model.literal(source));
 			currentSource.push(source);
 		} else {
 			currentSource.push("");
 		}
 		if (debug != null) {
-			put(JavaFacts.DEBUG, getClassId(), IdFactory.literal(source));
+			put(getClassId(), JavaFacts.DEBUG, model.literal(source));
 			// logf("visitSource(source=%s, debug=%s)%n",
 			// source,
 			// debug);
@@ -198,18 +200,15 @@ public class ClassFactExtractor extends ClassVisitor {
 		return null;
 	}
 
-	public void addAccessFlags(int access, Id id) {
+	public void addAccessFlags(int access, BlankNodeOrIRI id) {
 		if ((access & Opcodes.ACC_PUBLIC) != 0) {
-			put(JavaFacts.ACCESS, id, JavaFacts.Flags.PUBLIC);
-		}
-		else if ((access & Opcodes.ACC_PRIVATE) != 0) {
-			put(JavaFacts.ACCESS, id, JavaFacts.Flags.PRIVATE);
-		}
-		else if ((access & Opcodes.ACC_PROTECTED) != 0) {
-			put(JavaFacts.ACCESS, id, JavaFacts.Flags.PROTECTED);
-		}
-		else {
-			put(JavaFacts.ACCESS, id, JavaFacts.Flags.PACKAGE);
+			put(id, JavaFacts.ACCESS, JavaFacts.Flags.PUBLIC);
+		} else if ((access & Opcodes.ACC_PRIVATE) != 0) {
+			put(id, JavaFacts.ACCESS, JavaFacts.Flags.PRIVATE);
+		} else if ((access & Opcodes.ACC_PROTECTED) != 0) {
+			put(id, JavaFacts.ACCESS, JavaFacts.Flags.PROTECTED);
+		} else {
+			put(id, JavaFacts.ACCESS, JavaFacts.Flags.PACKAGE);
 		}
 		if ((access & Opcodes.ACC_STATIC) != 0) {
 			putFlag(id, JavaFacts.Flags.STATIC);
@@ -240,13 +239,14 @@ public class ClassFactExtractor extends ClassVisitor {
 		}
 	}
 
-	public void addClassAccessFlags(int access, Id id) {
+	public void addClassAccessFlags(int access, BlankNodeOrIRI id) {
 		addAccessFlags(access, id);
 		if ((access & Opcodes.ACC_MODULE) != 0) { // class
 			putFlag(id, JavaFacts.Flags.MODULE);
 		}
 	}
-	public void addMethodAccessFlags(int access, Id id) {
+
+	public void addMethodAccessFlags(int access, BlankNodeOrIRI id) {
 		addAccessFlags(access, id);
 		if ((access & Opcodes.ACC_SYNCHRONIZED) != 0) { // method
 			putFlag(id, JavaFacts.Flags.SUPER);
@@ -258,12 +258,14 @@ public class ClassFactExtractor extends ClassVisitor {
 			putFlag(id, JavaFacts.Flags.VARARGS);
 		}
 	}
+
 	/**
 	 * Also for parameters
+	 *
 	 * @param access
 	 * @param id
 	 */
-	public void addFieldAccessFlags(int access, Id id) {
+	public void addFieldAccessFlags(int access, BlankNodeOrIRI id) {
 		addAccessFlags(access, id);
 		if ((access & Opcodes.ACC_VOLATILE) != 0) { // 0x40, field
 			putFlag(id, JavaFacts.Flags.VOLATILE);
@@ -275,7 +277,8 @@ public class ClassFactExtractor extends ClassVisitor {
 			putFlag(id, JavaFacts.Flags.MANDATED);
 		}
 	}
-	public void addModuleAccessFlags(int access, Id id) {
+
+	public void addModuleAccessFlags(int access, BlankNodeOrIRI id) {
 		addAccessFlags(access, id);
 		if ((access & Opcodes.ACC_STATIC_PHASE) != 0) { // 0x40, module
 			putFlag(id, JavaFacts.Flags.STATIC_PHASE);
@@ -285,8 +288,11 @@ public class ClassFactExtractor extends ClassVisitor {
 		}
 	}
 
-	public void putFlag(Id id, Id flag) {
-		put(flag, id);
+	public void putFlag(BlankNodeOrIRI id, IRI flag) {
+		put(id, JavaFacts.P_HAS_FLAG, flag);
 	}
 
+	public Model getModel() {
+		return model;
+	}
 }

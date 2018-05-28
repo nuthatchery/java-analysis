@@ -2,6 +2,11 @@ package org.nuthatchery.ontology;
 
 import java.util.stream.Stream;
 
+import org.apache.commons.rdf.api.BlankNodeOrIRI;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.Literal;
+import org.apache.commons.rdf.api.RDFTerm;
+
 public interface Id {
 	Id addPath(Stream<String> segments);
 
@@ -67,4 +72,10 @@ public interface Id {
 	String getNamespace();
 
 	String toFullUriString();
+
+	RDFTerm asRDFTerm();
+
+	IRI asIRI();
+	BlankNodeOrIRI asBlankNodeOrIRI();
+	Literal asLiteral();
 }

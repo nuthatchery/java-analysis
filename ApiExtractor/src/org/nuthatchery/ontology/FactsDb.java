@@ -210,7 +210,7 @@ public class FactsDb {
 			ns(obj);
 			ns(relation);
 
-			put(String.format("%s %s true .", obj.toRdfString(), relation.toRdfString()));
+			put(String.format("%s %s true .", obj.asRDFTerm().ntriplesString(), relation.asRDFTerm().ntriplesString()));
 		}
 
 		@Override
@@ -218,7 +218,7 @@ public class FactsDb {
 			ns(obj);
 			ns(relation);
 			ns(tgt);
-			put(String.format("%s %s %s .", obj.toRdfString(), relation.toRdfString(), tgt.toRdfString()));
+			put(String.format("%s %s %s .", obj.asBlankNodeOrIRI().ntriplesString(), relation.asIRI().ntriplesString(), tgt.asRDFTerm().ntriplesString()));
 		}
 
 		@Override
@@ -228,7 +228,7 @@ public class FactsDb {
 			ns(mod);
 			relation = relation.setParam(mod);
 
-			put(String.format("%s %s %s .", obj.toRdfString(), relation.toRdfString(), tgt.toRdfString()));
+			put(String.format("%s %s %s .", obj.asBlankNodeOrIRI().ntriplesString(), relation.asIRI().ntriplesString(), tgt.asRDFTerm().ntriplesString()));
 		}
 
 		@Override
@@ -241,7 +241,7 @@ public class FactsDb {
 			relation = relation.setParam(mod1);
 			relation = relation.setParam(mod2);
 
-			put(String.format("%s %s %s .", obj.toRdfString(), relation.toRdfString(), tgt.toRdfString()));
+			put(String.format("%s %s %s .", obj.asBlankNodeOrIRI().ntriplesString(), relation.asIRI().ntriplesString(), tgt.asRDFTerm().ntriplesString()));
 		}
 		private void ns(Id id) {
 			String ns = id.getNamespace();

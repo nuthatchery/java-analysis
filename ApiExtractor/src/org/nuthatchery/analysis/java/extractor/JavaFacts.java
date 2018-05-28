@@ -1,112 +1,176 @@
 package org.nuthatchery.analysis.java.extractor;
 
-import org.nuthatchery.ontology.Id;
-import org.nuthatchery.ontology.IdFactory;
+import org.apache.commons.rdf.api.BlankNode;
+import org.apache.commons.rdf.api.BlankNodeOrIRI;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDFTerm;
+import org.nuthatchery.ontology.Model;
+import org.nuthatchery.ontology.ModelFactory;
+import org.nuthatchery.ontology.basic.CommonVocabulary;
+import org.nuthatchery.ontology.basic.Predicates;
+import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.util.Printer;
 
 public abstract class JavaFacts {
+	private static final RdfVocabulary rdf = RdfVocabulary.getInstance();
+	private static final CommonVocabulary common = CommonVocabulary.getInstance();
+
+	public static final String javaPrefix = "http://model.nuthatchery.org/java/";
+	public static final String javaFlagsPrefix = javaPrefix + "flags/";
+	public static final String javaMethodsPrefix = javaPrefix + "methods/";
+	public static final String javaTypesPrefix = javaPrefix + "types/";
+	public static final Model javaModel = //
+			ModelFactory.getInstance().createModel(javaPrefix);
+	public static final Model javaFlagsModel = //
+			ModelFactory.getInstance().createModel(javaFlagsPrefix);
+	public static final Model javaMethodsModel = //
+			ModelFactory.getInstance().createModel(javaMethodsPrefix);
+	public static final Model javaTypesModel = //
+			ModelFactory.getInstance().createModel(javaTypesPrefix);
+
 	public static class Types {
-		private static final Id ARRAY = JAVA_TYPES.addPath("array");
-		public static final Id BOOLEAN = JAVA_TYPES.addPath("boolean");
-		public static final Id BYTE = JAVA_TYPES.addPath("byte");
-		public static final Id CHAR = IdFactory.id(IdFactory.root("java", "//types"), "char");
-		public static final Id DOUBLE = JAVA_TYPES.addPath("double");
-		public static final Id FLOAT = JAVA_TYPES.addPath("float");
-		public static final Id INT = JAVA_TYPES.addPath("int");
-		public static final Id LONG = JAVA_TYPES.addPath("long");
-		private static final Id OBJECT = JAVA_TYPES.addPath("object");
-		public static final Id SHORT = JAVA_TYPES.addPath("short");
-		public static final Id TOP = JAVA_TYPES.addPath("top-half");
-		public static final Id UNINITIALIZED_THIS = JAVA_TYPES.addPath("new-obj");
+		public static final IRI ARRAY_REF = javaTypesModel.node("array-ref");
+		public static final IRI ARRAY_DIM = javaTypesModel.node("array-dim");
+		public static final IRI ARRAY_ELEMENT_TYPE = javaTypesModel.node("array-element-type");
+		public static final IRI REFERENCE_TYPE = javaTypesModel.node("ref");
+		public static final IRI OBJECT_REF_TYPE = javaTypesModel.node("object-ref-type");
+		public static final IRI PRIMITIVE_TYPE = javaTypesModel.node("primitive");
+		public static final IRI BOOLEAN = javaTypesModel.node("boolean");
+		public static final IRI BYTE = javaTypesModel.node("byte");
+		public static final IRI CHAR = javaTypesModel.node("char");
+		public static final IRI DOUBLE = javaTypesModel.node("double");
+		public static final IRI FLOAT = javaTypesModel.node("float");
+		public static final IRI INT = javaTypesModel.node("int");
+		public static final IRI LONG = javaTypesModel.node("long");
+		public static final IRI SHORT = javaTypesModel.node("short");
+		public static final IRI TOP = javaTypesModel.node("top-half");
+		public static final IRI UNINITIALIZED_THIS = javaTypesModel.node("new-obj");
+		public static final IRI VOID = javaTypesModel.node("void");
 
-		public static final Id VOID = JAVA_TYPES.addPath("void");
-
-		public static Id array(int dim, Id type) {
-			return ARRAY.addPath(Integer.toString(dim)).addPath(type.getPath());
+		static {
+			javaTypesModel.add(PRIMITIVE_TYPE, rdf.RDFS_SUBCLASS_OF, common.TYPE);
+			javaTypesModel.add(BOOLEAN, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(BYTE, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(SHORT, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(INT, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(LONG, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(FLOAT, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(DOUBLE, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(CHAR, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(TOP, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(VOID, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(REFERENCE_TYPE, rdf.RDFS_SUBCLASS_OF, common.TYPE);
+			javaTypesModel.add(UNINITIALIZED_THIS, rdf.RDFS_SUBCLASS_OF, REFERENCE_TYPE);
 		}
 
-		public static Id object(String string) {
-			return OBJECT.addPath(string.split("/"));
+		public static BlankNodeOrIRI array(Model m, int dim, BlankNodeOrIRI type) {
+			BlankNode t = javaTypesModel.blank();
+			m.add(t, Predicates.IS_A, ARRAY_REF);
+			m.add(t, ARRAY_DIM, m.literal(dim));
+			m.add(t, ARRAY_ELEMENT_TYPE, type);
+			return t;
+		}
+
+		public static IRI object(Model m, String typeName) {
+			IRI t = m.node(typeName);
+			m.add(t, rdf.RDFS_SUBCLASS_OF, REFERENCE_TYPE);
+			return t;
 		}
 	}
 
-	public static final Id JAVA_FACTS = IdFactory
-			.namespace(IdFactory.root("http", "//nuthatchery.org").addPath("javaFacts"), "jf");
-	public static final Id ACCESS = JAVA_FACTS.addPath("access");
-	public static final Id JAVA_FLAGS = JAVA_FACTS.addPath("flags");
-	public static final Id CALLS = JAVA_FACTS.addPath("calls");
-	public static final Id CLASS = JAVA_FACTS.addPath("class");
-	public static final Id CONSTRUCTOR = JAVA_FACTS.addPath("constructor");
-	public static final Id CONSTRUCTS = JAVA_FACTS.addPath("constructs");
-	public static final Id CREATES = JAVA_FACTS.addPath("creates");
-	public static final Id DEBUG = JAVA_FACTS.addPath("debug");
-	public static final Id DECLARES_THROW = JAVA_FACTS.addPath("declaresThrow");
-	public static final Id EXTENDS = JAVA_FACTS.addPath("extends");
-	public static final Id GENERIC = JAVA_FACTS.addPath("generic");
-	public static final Id IMPLEMENTS = JAVA_FACTS.addPath("implements");
-	public static final Id INITIAL_VALUE = JAVA_FACTS.addPath("initialValue");
+	public static final IRI ACCESS = javaModel.node("access");
+	public static final IRI CALLS = javaModel.node("calls");
+	public static final RDFTerm C_CLASS = javaModel.node("class");
+	public static final RDFTerm C_CONSTRUCTOR = javaModel.node("constructor");
+	public static final IRI CONSTRUCTS = javaModel.node("constructs");
+	public static final IRI CREATES = javaModel.node("creates");
+	public static final IRI DEBUG = javaModel.node("debug");
+	public static final IRI DECLARES_THROW = javaModel.node("declaresThrow");
+	public static final IRI EXTENDS = javaModel.node("extends");
+	public static final IRI GENERIC = javaModel.node("generic");
+	public static final IRI IMPLEMENTS = javaModel.node("implements");
+	public static final IRI INITIAL_VALUE = javaModel.node("initialValue");
 
-	public static final Id ACCESS_FIELD = JAVA_FACTS.addPath("field");
-	public static final Id ACCESS_DYNAMIC = JAVA_FACTS.addPath("dynamic");
-	public static final Id ACCESS_SPECIAL = JAVA_FACTS.addPath("special");
-	public static final Id ACCESS_STATIC = JAVA_FACTS.addPath("static");
-	public static final Id ACCESS_INTERFACE = JAVA_FACTS.addPath("interface");
-	public static final Id ACCESS_VIRTUAL = JAVA_FACTS.addPath("virtual");
+	public static final IRI ACCESS_FIELD = javaModel.node("field");
+	public static final IRI ACCESS_DYNAMIC = javaModel.node("dynamic");
+	public static final IRI ACCESS_SPECIAL = javaModel.node("special");
+	public static final IRI ACCESS_STATIC = javaModel.node("static");
+	public static final IRI ACCESS_INTERFACE = javaModel.node("interface");
+	public static final IRI ACCESS_VIRTUAL = javaModel.node("virtual");
 
 	/**
 	 * Copied from JVM specs: Flags
+	 *
 	 * @author anna, anya
 	 */
 	public static final class Flags {
-		public static final Id INTERFACE = JAVA_FACTS.addPath("interface");
-		public static final Id FINAL = JAVA_FLAGS.addPath("final");
-		public static final Id SUPER = JAVA_FLAGS.addPath("super");
-		public static final Id MODULE = JAVA_FLAGS.addPath("module");
-		public static final Id ABSTRACT = JAVA_FLAGS.addPath("abstract");
-		public static final Id SYNTHETIC = JAVA_FLAGS.addPath("synthetic");
-		public static final Id ANNOTATION = JAVA_FLAGS.addPath("annotation");
-		public static final Id ENUM = JAVA_FLAGS.addPath("enum");
-		public static final Id NATIVE = JAVA_FLAGS.addPath("native");
-		public static final Id PRIVATE = JAVA_FLAGS.addPath("private");
-		public static final Id PROTECTED = JAVA_FLAGS.addPath("protected");
-		public static final Id VOLATILE = JAVA_FLAGS.addPath("volatile");
-		public static final Id TRANSIENT = JAVA_FLAGS.addPath("transient");
-		public static final Id SYNCHRONIZED = JAVA_FLAGS.addPath("synchronized");
-		public static final Id BRIDGE = JAVA_FLAGS.addPath("bridge");
-		public static final Id VARARGS = JAVA_FLAGS.addPath("varArgs");
-		public static final Id STRICT = JAVA_FLAGS.addPath("strict");
-		public static final Id MANDATED = JAVA_FLAGS.addPath("mandated");
-		public static final Id OPEN = JAVA_FLAGS.addPath("open");
-		public static final Id TRANSITIVE = JAVA_FLAGS.addPath("transitive");
-		public static final Id STATIC_PHASE = JAVA_FLAGS.addPath("staticPhase");
-		public static final Id PUBLIC = JAVA_FLAGS.addPath("public");
-		public static final Id STATIC = JAVA_FLAGS.addPath("static");
-		public static final Id DEPRECATED = JAVA_FLAGS.addPath("deprecated");
-		public static final Id PACKAGE = JAVA_FLAGS.addPath("package");
+		public static final IRI INTERFACE = javaModel.node("interface");
+		public static final IRI FINAL = javaFlagsModel.node("final");
+		public static final IRI SUPER = javaFlagsModel.node("super");
+		public static final IRI MODULE = javaFlagsModel.node("module");
+		public static final IRI ABSTRACT = javaFlagsModel.node("abstract");
+		public static final IRI SYNTHETIC = javaFlagsModel.node("synthetic");
+		public static final IRI ANNOTATION = javaFlagsModel.node("annotation");
+		public static final IRI ENUM = javaFlagsModel.node("enum");
+		public static final IRI NATIVE = javaFlagsModel.node("native");
+		public static final IRI PRIVATE = javaFlagsModel.node("private");
+		public static final IRI PROTECTED = javaFlagsModel.node("protected");
+		public static final IRI VOLATILE = javaFlagsModel.node("volatile");
+		public static final IRI TRANSIENT = javaFlagsModel.node("transient");
+		public static final IRI SYNCHRONIZED = javaFlagsModel.node("synchronized");
+		public static final IRI BRIDGE = javaFlagsModel.node("bridge");
+		public static final IRI VARARGS = javaFlagsModel.node("varArgs");
+		public static final IRI STRICT = javaFlagsModel.node("strict");
+		public static final IRI MANDATED = javaFlagsModel.node("mandated");
+		public static final IRI OPEN = javaFlagsModel.node("open");
+		public static final IRI TRANSITIVE = javaFlagsModel.node("transitive");
+		public static final IRI STATIC_PHASE = javaFlagsModel.node("staticPhase");
+		public static final IRI PUBLIC = javaFlagsModel.node("public");
+		public static final IRI STATIC = javaFlagsModel.node("static");
+		public static final IRI DEPRECATED = javaFlagsModel.node("deprecated");
+		public static final IRI PACKAGE = javaFlagsModel.node("package");
 	}
 
-	public static final Id JAVA_METHODS = IdFactory.root("java", "members");
-	public static final Id JAVA_TYPES = IdFactory.root("java", "types");
-	public static final Id METHOD = JAVA_FACTS.addPath("method");
-	public static final Id READS = JAVA_FACTS.addPath("reads");
-	public static final Id SIGNATURE = JAVA_FACTS.addPath("signature");
-	public static final Id SOURCE = JAVA_FACTS.addPath("source");
-	public static final Id THROWS = JAVA_FACTS.addPath("throws");
-	public static final Id USES_JSR = JAVA_FACTS.addPath("usesJsr");
-	public static final Id USES_OBJ_EQUALS = JAVA_FACTS.addPath("usesObjEquals");
-	public static final Id USES_REF_EQUALS = JAVA_FACTS.addPath("usesRefEquals");
-	public static final Id USES_REF_NULLCHECK = JAVA_FACTS.addPath("usesRefNullCheck");
-	public static final Id USES_TYPE = JAVA_FACTS.addPath("usesType");
+	public static final RDFTerm C_METHOD = javaModel.node("method");
+	public static final RDFTerm C_FIELD = javaModel.node("field");
+	public static final IRI P_HAS_FLAG = javaModel.node("hasFlag");
+	public static final IRI READS = javaModel.node("reads");
+	public static final IRI SIGNATURE = javaModel.node("signature");
+	public static final IRI P_SOURCE_FILE = javaModel.node("sourceFile");
+	public static final IRI P_THROWS = javaModel.node("throws");
+	/*	public static final IRI USES_JSR = javaModel.node("usesJsr");
+	public static final IRI USES_OBJ_EQUALS = javaModel.node("usesObjEquals");
+	public static final IRI USES_REF_EQUALS = javaModel.node("usesRefEquals");
+	public static final IRI USES_REF_NULLCHECK = javaModel.node("usesRefNullCheck");
+	public static final IRI USES_TYPE = javaModel.node("usesType");
+	 */
+	public static final IRI WRITES = javaModel.node("writes");
+	public static final IRI P_CLASS_FILE_VERSION = javaModel.node("classFileVersion");
+	public static final IRI P_CLASS_FILE_MINOR = javaModel.node("classFileMinorVersion");
+	public static final IRI PARAMETER = javaModel.node("parameter");
 
-	public static final Id WRITES = JAVA_FACTS.addPath("writes");
-	public static final Id CLASS_FILE_VERSION = JAVA_FACTS.addPath("classFileVersion");
-	public static final Id CLASS_FILE_MINOR = JAVA_FACTS.addPath("classFileMinorVersion");
-	public static final Id PARAMETER = JAVA_FACTS.addPath("parameter");
+	public static final IRI P_CODE = javaModel.node("code");
+	public static final IRI P_NEXT = javaModel.node("next");
+	public static final IRI P_NEXT_IF_TRUE = javaModel.node("nextIfTrue");
+	public static final IRI P_NEXT_IF_FALSE = javaModel.node("nextIfFalse");
+	public static final IRI R_END = javaModel.node("end");
+	public static final IRI P_FIELD = javaModel.node("field");
+	public static final IRI P_CALL = javaModel.node("call");
+	public static final IRI P_OPERAND = javaModel.node("operand");
+	public static final IRI P_VAR = javaModel.node("var");
+	public static final IRI P_LINE = common.LINE_NUMBER;
+	public static final IRI P_TYPE = javaModel.node("type");
 
-	public static Id method(Id owner, String memberName, String memberDesc) {
+	public static IRI method(Model m, IRI owner, String memberName, String memberDesc) {
+		if (memberName.equals("<init>")) {
+			memberName = "$init";
+		}
+		// return m.node(owner, memberName + "/" + memberDesc);
+		System.out.println("METHOD: " + owner + ", " + memberName + ", " + memberDesc);
 		Type type = Type.getType(memberDesc);
 		StringBuilder sb = new StringBuilder();
-		sb.append(memberName.replaceAll("[<>]", "-"));
+		sb.append(memberName); // .re.replaceAll("[<>]", "-"));
 		if (type.getSort() == Type.METHOD) {
 			sb.append("(");
 			String sep = "";
@@ -126,23 +190,30 @@ public abstract class JavaFacts {
 			}
 			sb.append(")");
 			type = type.getReturnType();
-		} else {
-			sb.append("~");
 		}
-		while (type.getSort() == Type.ARRAY) {
-			sb.append("A");
-			sb.append(type.getDimensions());
-			type = type.getElementType();
+
+		if (!memberName.equals("$init")) {
+			sb.append(":");
+			while (type.getSort() == Type.ARRAY) {
+				sb.append("A");
+				sb.append(type.getDimensions());
+				type = type.getElementType();
+			}
+			if (type.getSort() == Type.OBJECT) {
+				sb.append(type.getClassName());
+			} else {
+				sb.append(type.getClassName());
+			}
 		}
-		if (type.getSort() == Type.OBJECT) {
-			sb.append(type.getClassName());
-		} else {
-			sb.append(type.getClassName());
-		}
-		return JAVA_METHODS.addPath(owner.getPath()).addPath(sb.toString().split("/"));
+		System.out.println(sb.toString());
+		return m.node(owner, sb.toString());
 		// + UriEncoding.percentEncodeIri(methodName,
 		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true)
 		// + UriEncoding.percentEncodeIri(methodDesc,
 		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true));
+	}
+
+	public static IRI opcode(int opcode) {
+		return javaModel.node(Printer.OPCODES[opcode].toLowerCase());
 	}
 }

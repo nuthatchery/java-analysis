@@ -4,9 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.rdf.api.BlankNode;
+import org.apache.commons.rdf.api.BlankNodeOrIRI;
+import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDFTerm;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
-import org.nuthatchery.ontology.Id;
-import org.nuthatchery.ontology.IdFactory;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -18,20 +20,23 @@ import org.objectweb.asm.commons.AnalyzerAdapter;
 
 class MethodFactExtractor extends AnalyzerAdapter {
 	// private ClassFactExtractor parent;
-	private final Id currentMethodId;
+	private final IRI currentMethodId;
+	private BlankNodeOrIRI currentInsn;
+	private IRI insnChain;
+	private BlankNodeOrIRI lastInsn;
 	private ILogger log;
+	private static int count = 0;
 	/**
 	 *
 	 */
 	private final ClassFactExtractor parent;
 
-	public MethodFactExtractor(ClassFactExtractor parent, Id methodId, int access, String name, String desc,
+	public MethodFactExtractor(ClassFactExtractor parent, IRI methodId, int access, String name, String desc,
 			ILogger log) {
 		super(Opcodes.ASM6, ClassFactExtractor.className, access, name, desc, null);
 		this.parent = parent;
 		this.currentMethodId = methodId;
 		this.log = log;
-		// this.parent = parent;
 	}
 
 	/**
@@ -120,13 +125,30 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitCode() {
 		log.log("{");
 		parent.currentLine = -1;
+		nextInstruction();
+		lastInsn = currentMethodId;
+		insnChain = JavaFacts.P_CODE;
 		super.visitCode();
+	}
+
+	/**
+	 * Move to next instruction.
+	 *
+	 * @return Identifier of previous instruction
+	 */
+	protected void nextInstruction() {
+		lastInsn = currentInsn;
+		currentInsn = parent.getModel().blank(String.valueOf(count++));
 	}
 
 	@Override
 	public void visitEnd() {
 		parent.currentLine = -1;
 		log.log("} // end of " + currentMethodId);
+		if (lastInsn != null && insnChain != null) {
+			parent.getModel().add(lastInsn, insnChain, JavaFacts.R_END);
+		}
+
 		super.visitEnd();
 	}
 
@@ -136,33 +158,49 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		// " " +
 		// owner + "." + name + " [" + desc + "]");
 		log.log("# access field: " + JavaUtil.decodeDescriptor(owner, name, desc));
-		parent.put(JavaFacts.USES_TYPE, currentMethodId, JavaFacts.Types.object(owner));
-		switch (opcode) {
-		case Opcodes.GETSTATIC:
-			parent.put(JavaFacts.READS, currentMethodId, parent.getMemberId(owner, name, desc), JavaFacts.ACCESS_STATIC);
-			break;
-		case Opcodes.PUTSTATIC:
-			parent.put(JavaFacts.WRITES, currentMethodId, parent.getMemberId(owner, name, desc), JavaFacts.ACCESS_STATIC);
-			break;
-		case Opcodes.GETFIELD:
-			parent.put(JavaFacts.READS, currentMethodId, parent.getMemberId(owner, name, desc), JavaFacts.ACCESS_FIELD);
-			break;
-		case Opcodes.PUTFIELD:
-			parent.put(JavaFacts.WRITES, currentMethodId, parent.getMemberId(owner, name, desc), JavaFacts.ACCESS_FIELD);
-			break;
-		default:
-			throw new RuntimeException();
-		}
+		BlankNodeOrIRI memberId = parent.getMemberId(owner, name, desc);
+		putInstruction(opcode, JavaFacts.P_FIELD, memberId);
+		nextInstruction();
 		super.visitFieldInsn(opcode, owner, name, desc);
 	}
 
 	@Override
 	public void visitIincInsn(int var, int increment) {
+		putInstruction(Opcodes.IINC, JavaFacts.P_VAR, var, JavaFacts.P_OPERAND, increment);
+		nextInstruction();
 		super.visitIincInsn(var, increment);
+	}
+
+	protected void putInstruction(int opcode, Object... args) {
+		if (args.length % 2 == 1) {
+			throw new IllegalArgumentException();
+		}
+		System.out.println("(" + lastInsn + "," + insnChain + "," + currentInsn + ")");
+		if (lastInsn != null && insnChain != null) {
+			parent.getModel().add(lastInsn, insnChain, currentInsn);
+		}
+		insnChain = JavaFacts.P_NEXT;
+		parent.put(currentInsn, JavaFacts.P_CALL, JavaFacts.opcode(opcode));
+		for (int i = 0; i < args.length; i += 2) {
+			if (args[i] instanceof IRI) {
+				IRI pred = (IRI) args[i];
+				RDFTerm obj;
+				if (args[i + 1] instanceof RDFTerm) {
+					obj = (RDFTerm) args[i + 1];
+				} else {
+					obj = parent.getModel().literal(args[i + 1]);
+				}
+				parent.put(currentInsn, pred, obj);
+			} else {
+				throw new IllegalArgumentException();
+			}
+		}
 	}
 
 	@Override
 	public void visitInsn(int opcode) {
+		putInstruction(opcode);
+		nextInstruction();
 		super.visitInsn(opcode);
 	}
 
@@ -173,81 +211,47 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitIntInsn(int opcode, int operand) {
+		putInstruction(opcode, JavaFacts.P_OPERAND, operand);
+		nextInstruction();
 		super.visitIntInsn(opcode, operand);
 	}
 
 	@Override
 	public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
-		parent.put(JavaFacts.CALLS, currentMethodId, parent.getMemberName(name, desc), JavaFacts.ACCESS_DYNAMIC);
 		log.log("INVOKEDYNAMIC " + name + " [" + desc + "]" + " " + bsm + " " + Arrays.toString(bsmArgs));
+		putInstruction(Opcodes.INVOKEDYNAMIC, JavaFacts.P_OPERAND, parent.getMemberName(name, desc));
+		nextInstruction();
 		super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
 	}
 
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
-		switch (opcode) {
-		case Opcodes.IF_ICMPEQ:
-		case Opcodes.IF_ICMPNE:
-		case Opcodes.IF_ICMPGT:
-		case Opcodes.IF_ICMPLT:
-		case Opcodes.IF_ICMPGE:
-		case Opcodes.IF_ICMPLE:
-			// compare two ints
-			break;
-		case Opcodes.IFEQ:
-		case Opcodes.IFNE:
-		case Opcodes.IFGT:
-		case Opcodes.IFLT:
-		case Opcodes.IFGE:
-		case Opcodes.IFLE:
-			// compare a single int with zero
-			break;
-		case Opcodes.IF_ACMPEQ:
-		case Opcodes.IF_ACMPNE: {
-			// compare two references
-			Id methodId = currentMethodId;
-			if (parent.currentLine > 0) {
-				methodId = methodId.setParam(IdFactory.literal("line"), IdFactory.literal(parent.currentLine));
-			}
-			Id type1 = JavaUtil.frameTypeToId(stackGetType(0, "java/lang/Object"));
-			Id type2 = JavaUtil.frameTypeToId(stackGetType(1, "java/lang/Object"));
-			log.logf("* ref equals on type %s with %s", type1, type2);
-			parent.put(JavaFacts.USES_REF_EQUALS, methodId, type1);
-			parent.put(JavaFacts.USES_REF_EQUALS, methodId, type2);
-			break;
+		BlankNode target = parent.getModel().blank(label.toString());
+		putInstruction(opcode);
+		if (opcode == Opcodes.GOTO) {
+			parent.getModel().add(currentInsn, JavaFacts.P_NEXT, target);
+			insnChain = null;
+		} else if (opcode == Opcodes.JSR) {
+			throw new UnsupportedOperationException();
+		} else {
+			parent.getModel().add(currentInsn, JavaFacts.P_NEXT_IF_TRUE, target);
+			insnChain = JavaFacts.P_NEXT_IF_FALSE;
 		}
-		case Opcodes.IFNONNULL:
-		case Opcodes.IFNULL: {
-			// compare a single reference with null
-			Id methodId = currentMethodId;
-			if (parent.currentLine > 0) {
-				methodId = methodId.setParam(IdFactory.literal("line"), IdFactory.literal(parent.currentLine));
-			}
-
-			Id type = JavaUtil.frameTypeToId(stackGetType(0, "java/lang/Object"));
-			parent.put(JavaFacts.USES_REF_NULLCHECK, methodId, type);
-			break;
-		}
-		case Opcodes.GOTO:
-			// jump to an instruction within the same method
-			break;
-		case Opcodes.JSR:
-			// jump to subroutine within same method
-			parent.put(JavaFacts.USES_JSR, currentMethodId);
-			return;
-			// break;
-		}
+		nextInstruction();
 		super.visitJumpInsn(opcode, label);
 	}
 
 	@Override
 	public void visitLabel(Label label) {
 		log.log(label + ":");
+		currentInsn = parent.getModel().blank(label.toString());
 		super.visitLabel(label);
 	}
 
 	@Override
 	public void visitLdcInsn(Object cst) {
+		putInstruction(Opcodes.LDC, JavaFacts.P_OPERAND, cst);
+		nextInstruction();
 		super.visitLdcInsn(cst);
 	}
 
@@ -255,6 +259,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitLineNumber(int line, Label start) {
 		log.log(parent.currentSource.peek() + ":" + line + "\tlabel=" + start);
 		parent.currentLine = line;
+		currentInsn = parent.getModel().blank(start.toString());
+		parent.getModel().add(currentInsn, JavaFacts.P_LINE, parent.getModel().literal(line));
 		super.visitLineNumber(line, start);
 	}
 
@@ -262,6 +268,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
 		log.logf("visitLocalVariable(name=%s, desc=%s, signature=%s, start=%s, end=%s, index=%d)%n",
 				JavaUtil.decodeDescriptor(name, desc), desc, signature, start, end, index);
+		// TODO
 		super.visitLocalVariable(name, desc, signature, start, end, index);
 	}
 
@@ -273,6 +280,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
+		// TODO
 		super.visitLookupSwitchInsn(dflt, keys, labels);
 	}
 
@@ -286,8 +294,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		// logln(indent() + "" + Printer.OPCODES[opcode] +
 		// " " +
 		// owner + "." + name + " [" + desc + "]");
-		Id classId = JavaFacts.Types.object(owner);
-		Id methodId = JavaFacts.method(classId, name, desc);
+		IRI classId = JavaFacts.Types.object(parent.getModel(), owner);
+		IRI methodId = JavaFacts.method(parent.getModel(), classId, name, desc);
 		// NOTE: Example of finding the types of actual arguments and formal
 		// parameters
 		Type objType = Type.getObjectType(owner);
@@ -328,42 +336,32 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		for (int i = 0; i < argumentTypes.length; i++) {
 			Object type = stackGetType(i);
 			if (type != null) {
-				parent.put(IdFactory.literal("ACTUAL_ARGUMENT_TYPE" + i), JavaUtil.frameTypeToId(type));
+				// TODO
+				// parent.put(parent.getModel().literal("ACTUAL_ARGUMENT_TYPE" + i),
+				// JavaUtil.frameTypeToId(type));
 			}
 		}
 
-		Id modifier;
-		switch (opcode) {
-		case Opcodes.INVOKEVIRTUAL:
-			modifier = JavaFacts.ACCESS_VIRTUAL; //vanlig dynamic dispatch 
-			break;
-		case Opcodes.INVOKESPECIAL:
-			modifier = JavaFacts.ACCESS_SPECIAL;
-			break;
-		case Opcodes.INVOKESTATIC:
-			modifier = JavaFacts.ACCESS_STATIC;
-			break;
-		case Opcodes.INVOKEINTERFACE:
-			modifier = JavaFacts.ACCESS_INTERFACE;
-			break;
-		default:
-			throw new RuntimeException();
-		}
-		parent.put(JavaFacts.CALLS, currentMethodId, methodId, modifier);
+		putInstruction(opcode, JavaFacts.P_OPERAND, methodId);
+		nextInstruction();
 		super.visitMethodInsn(opcode, owner, name, desc, itf);
 	}
 
 	@Override
 	public void visitMultiANewArrayInsn(String desc, int dims) {
 		log.logf("visitMultiANewArrayInsn(desc=%s, dims=%d)%n", desc, dims);
+		putInstruction(Opcodes.MULTIANEWARRAY, JavaFacts.P_TYPE, //
+				JavaFacts.Types.array(parent.getModel(), dims, //
+						JavaFacts.Types.object(parent.getModel(), desc)));
+		nextInstruction();
 		super.visitMultiANewArrayInsn(desc, dims);
 	}
 
 	@Override
 	public void visitParameter(String name, int access) {
 		log.logf("visitParameter(name=%s, access=%d)%n", name, access);
-		Id paramId = currentMethodId.addPath(name);
-		parent.put(JavaFacts.PARAMETER, currentMethodId, paramId);
+		BlankNodeOrIRI paramId = parent.getModel().node(currentMethodId, name);
+		parent.put(currentMethodId, JavaFacts.PARAMETER, paramId);
 		parent.addFieldAccessFlags(access, paramId);
 
 		super.visitParameter(name, access);
@@ -376,6 +374,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
+		// TODO
 		super.visitTableSwitchInsn(min, max, dflt, labels);
 	}
 
@@ -386,46 +385,34 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
+		// TODO
 		super.visitTryCatchBlock(start, end, handler, type);
 	}
 
 	@Override
 	public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+		// TODO
 		return super.visitTypeAnnotation(typeRef, typePath, desc, visible);
 	}
 
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
-		// logln(indent() + "" + Printer.OPCODES[opcode] +
-		// " " +
-		// type);
-		parent.put(JavaFacts.USES_TYPE, currentMethodId, JavaFacts.Types.object(type));
-		switch (opcode) {
-		case Opcodes.NEW:
-			parent.put(JavaFacts.CREATES, currentMethodId, JavaFacts.Types.object(type));
-			break;
-		case Opcodes.NEWARRAY:
-			parent.put(JavaFacts.CREATES, currentMethodId,
-					JavaFacts.Types.array(1/* TODO: correct dim */, JavaFacts.Types.object(type)));
-			break;
-		case Opcodes.ANEWARRAY:
-			parent.put(JavaFacts.CREATES, currentMethodId,
-					JavaFacts.Types.array(1/* TODO: correct dim */, JavaFacts.Types.object(type)));
-			break;
-		case Opcodes.CHECKCAST:
-			break;
-		case Opcodes.INSTANCEOF:
-			break;
-		default:
-			throw new RuntimeException();
-		}
+		putInstruction(opcode, JavaFacts.P_OPERAND, JavaFacts.Types.object(parent.getModel(), type));
+		nextInstruction();
 		super.visitTypeInsn(opcode, type);
 	}
 
 	@Override
 	public void visitVarInsn(int opcode, int var) {
 		log.logf("visitVarInsn(opcode=%s, var=%d)%n", opcode, var);
-		if (opcode != Opcodes.RET) {
+		if (opcode == Opcodes.RET) {
+			putInstruction(opcode);
+			parent.getModel().add(currentInsn, JavaFacts.P_NEXT, JavaFacts.R_END);
+			insnChain = null;
+			nextInstruction();
+		} else {
+			putInstruction(opcode, JavaFacts.P_VAR, var);
+			nextInstruction();
 			super.visitVarInsn(opcode, var);
 		}
 	}
