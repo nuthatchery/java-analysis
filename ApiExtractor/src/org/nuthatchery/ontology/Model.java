@@ -15,6 +15,7 @@ import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.api.Triple;
 import org.apache.commons.rdf.simple.Types;
+import org.nuthatchery.ontology.standard.RdfVocabulary;
 
 public class Model {
 	private final RDF factory;
@@ -25,7 +26,7 @@ public class Model {
 
 	public Model(Dataset dataset, String name, String prefix, RDF factory) {
 		super();
-		if (!(prefix.endsWith("#") || prefix.endsWith("/") || prefix.endsWith(":"))) {
+		if (!(prefix.endsWith("#") || prefix.endsWith("/") || prefix.endsWith(":") || prefix.isEmpty())) {
 			throw new IllegalArgumentException("Prefix should end with #, / or :");
 		}
 		this.dataset = dataset;
@@ -41,6 +42,11 @@ public class Model {
 
 	public Model(String prefix, RDF factory) {
 		this(null, prefix.substring(0, prefix.length() - 1), prefix, factory);
+	}
+
+	public Model(Graph graph, String prefix, RDF factory) {
+		this(null, prefix.substring(0, prefix.length() - 1), prefix, factory);
+		this.graph = graph;
 	}
 
 	/**
@@ -72,6 +78,15 @@ public class Model {
 	 */
 	public BlankNode blank() {
 		return factory.createBlankNode();
+	}
+
+	/**
+	 * Create a list builder
+	 *
+	 * @return A list builder
+	 */
+	public ListBuilder list() {
+		return new ListBuilder(this);
 	}
 
 	/**
@@ -368,8 +383,47 @@ public class Model {
 		} else if (obj instanceof String) {
 			return Types.XSD_STRING;
 		} else {
+			System.err
+			.println("Mode.getType(): can't find type of " + obj.getClass().toString() + " " + obj.toString());
 			return null;
 		}
 	}
 
+	public static class ListBuilder implements AutoCloseable {
+		private static final IRI NIL = RdfVocabulary.getInstance().RDF_NIL;
+		private static final IRI FIRST = RdfVocabulary.getInstance().RDF_FIRST;
+		private static final IRI REST = RdfVocabulary.getInstance().RDF_REST;
+		private static final IRI LIST = RdfVocabulary.getInstance().RDF_LIST;
+		private static final IRI TYPE = RdfVocabulary.getInstance().RDF_TYPE;
+		private BlankNodeOrIRI head = NIL;
+		private BlankNodeOrIRI current = null;
+		private final Model model;
+
+		public ListBuilder(Model m) {
+			this.model = m;
+		}
+
+		public void add(RDFTerm t) {
+			BlankNode node = model.blank();
+			//			model.add(node, TYPE, LIST);
+			model.add(node, FIRST, t);
+			if(current == null) {
+				head = node;
+			} else {
+				model.add(current, REST, node);
+			}
+			current = node;
+		}
+		public BlankNodeOrIRI build() {
+			if(current != null) {
+				model.add(current, REST, NIL);
+			}
+			return head;
+		}
+
+		@Override
+		public void close() {
+			build();
+		}
+	}
 }

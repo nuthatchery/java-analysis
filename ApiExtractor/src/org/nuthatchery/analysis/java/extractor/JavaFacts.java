@@ -34,6 +34,7 @@ public abstract class JavaFacts {
 		public static final IRI ARRAY_DIM = javaTypesModel.node("array-dim");
 		public static final IRI ARRAY_ELEMENT_TYPE = javaTypesModel.node("array-element-type");
 		public static final IRI REFERENCE_TYPE = javaTypesModel.node("ref");
+		public static final IRI JAVA_TYPE = javaTypesModel.node("type");
 		public static final IRI OBJECT_REF_TYPE = javaTypesModel.node("object-ref-type");
 		public static final IRI PRIMITIVE_TYPE = javaTypesModel.node("primitive");
 		public static final IRI BOOLEAN = javaTypesModel.node("boolean");
@@ -49,7 +50,8 @@ public abstract class JavaFacts {
 		public static final IRI VOID = javaTypesModel.node("void");
 
 		static {
-			javaTypesModel.add(PRIMITIVE_TYPE, rdf.RDFS_SUBCLASS_OF, common.TYPE);
+			javaTypesModel.add(JAVA_TYPE, rdf.RDFS_SUBCLASS_OF, common.TYPE);
+			javaTypesModel.add(PRIMITIVE_TYPE, rdf.RDFS_SUBCLASS_OF, JAVA_TYPE);
 			javaTypesModel.add(BOOLEAN, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
 			javaTypesModel.add(BYTE, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
 			javaTypesModel.add(SHORT, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
@@ -60,7 +62,7 @@ public abstract class JavaFacts {
 			javaTypesModel.add(CHAR, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
 			javaTypesModel.add(TOP, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
 			javaTypesModel.add(VOID, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(REFERENCE_TYPE, rdf.RDFS_SUBCLASS_OF, common.TYPE);
+			javaTypesModel.add(REFERENCE_TYPE, rdf.RDFS_SUBCLASS_OF, JAVA_TYPE);
 			javaTypesModel.add(UNINITIALIZED_THIS, rdf.RDFS_SUBCLASS_OF, REFERENCE_TYPE);
 		}
 
@@ -74,22 +76,22 @@ public abstract class JavaFacts {
 
 		public static IRI object(Model m, String typeName) {
 			IRI t = m.node(typeName);
-			m.add(t, rdf.RDFS_SUBCLASS_OF, REFERENCE_TYPE);
+			m.add(t, rdf.RDF_TYPE, REFERENCE_TYPE);
 			return t;
 		}
 	}
 
 	public static final IRI ACCESS = javaModel.node("access");
 	public static final IRI CALLS = javaModel.node("calls");
-	public static final RDFTerm C_CLASS = javaModel.node("class");
-	public static final RDFTerm C_CONSTRUCTOR = javaModel.node("constructor");
+	public static final IRI C_CLASS = javaModel.node("class");
+	public static final IRI C_CONSTRUCTOR = javaModel.node("constructor");
 	public static final IRI CONSTRUCTS = javaModel.node("constructs");
 	public static final IRI CREATES = javaModel.node("creates");
 	public static final IRI DEBUG = javaModel.node("debug");
 	public static final IRI DECLARES_THROW = javaModel.node("declaresThrow");
-	public static final IRI EXTENDS = javaModel.node("extends");
+	public static final IRI P_EXTENDS = javaModel.node("extends");
 	public static final IRI GENERIC = javaModel.node("generic");
-	public static final IRI IMPLEMENTS = javaModel.node("implements");
+	public static final IRI P_SUBTYPE_OF = javaModel.node("implements");
 	public static final IRI INITIAL_VALUE = javaModel.node("initialValue");
 
 	public static final IRI ACCESS_FIELD = javaModel.node("field");
@@ -132,18 +134,20 @@ public abstract class JavaFacts {
 		public static final IRI PACKAGE = javaFlagsModel.node("package");
 	}
 
-	public static final RDFTerm C_METHOD = javaModel.node("method");
-	public static final RDFTerm C_FIELD = javaModel.node("field");
+	public static final IRI C_MEMBER = javaModel.node("member");
+	public static final IRI C_METHOD = javaModel.node("method");
+	public static final IRI C_FIELD = javaModel.node("field");
 	public static final IRI P_HAS_FLAG = javaModel.node("hasFlag");
 	public static final IRI READS = javaModel.node("reads");
 	public static final IRI SIGNATURE = javaModel.node("signature");
 	public static final IRI P_SOURCE_FILE = javaModel.node("sourceFile");
 	public static final IRI P_THROWS = javaModel.node("throws");
-	/*	public static final IRI USES_JSR = javaModel.node("usesJsr");
-	public static final IRI USES_OBJ_EQUALS = javaModel.node("usesObjEquals");
-	public static final IRI USES_REF_EQUALS = javaModel.node("usesRefEquals");
-	public static final IRI USES_REF_NULLCHECK = javaModel.node("usesRefNullCheck");
-	public static final IRI USES_TYPE = javaModel.node("usesType");
+	/*
+	 * public static final IRI USES_JSR = javaModel.node("usesJsr"); public static
+	 * final IRI USES_OBJ_EQUALS = javaModel.node("usesObjEquals"); public static
+	 * final IRI USES_REF_EQUALS = javaModel.node("usesRefEquals"); public static
+	 * final IRI USES_REF_NULLCHECK = javaModel.node("usesRefNullCheck"); public
+	 * static final IRI USES_TYPE = javaModel.node("usesType");
 	 */
 	public static final IRI WRITES = javaModel.node("writes");
 	public static final IRI P_CLASS_FILE_VERSION = javaModel.node("classFileVersion");
@@ -155,19 +159,48 @@ public abstract class JavaFacts {
 	public static final IRI P_NEXT_IF_TRUE = javaModel.node("nextIfTrue");
 	public static final IRI P_NEXT_IF_FALSE = javaModel.node("nextIfFalse");
 	public static final IRI R_END = javaModel.node("end");
-	public static final IRI P_FIELD = javaModel.node("field");
 	public static final IRI P_CALL = javaModel.node("call");
-	public static final IRI P_OPERAND = javaModel.node("operand");
-	public static final IRI P_VAR = javaModel.node("var");
 	public static final IRI P_LINE = common.LINE_NUMBER;
-	public static final IRI P_TYPE = javaModel.node("type");
+	public static final IRI C_INSTRUCTION = javaModel.node("jvmInstruction");
+	public static final IRI C_JVM_INSN = javaModel.node("jvmInsn");
+	public static final IRI P_OPERAND_INT = javaModel.node("intOperand");
+	public static final IRI P_OPERAND = javaModel.node("operand");
+	public static final IRI P_OPERAND_CONSTANT = javaModel.node("constantOperand");
+	public static final IRI P_OPERAND_MEMBER = javaModel.node("memberOperand");
+	public static final IRI P_OPERAND_TYPE = javaModel.node("typeOperand");
+	public static final IRI P_OPERAND_VAR = javaModel.node("varOperand");
+	public static final IRI P_OPERAND_LABEL = javaModel.node("labelOperand");
+	public static final IRI P_OPERAND_LIST = javaModel.node("listOperand");
+	public static final IRI P_TRY_CATCH_BLOCK =  javaModel.node("tryCatchBlock");
+
+	static {
+		isProperty(javaModel, P_CODE, C_METHOD, C_INSTRUCTION);
+		isProperty(javaModel, P_NEXT, C_INSTRUCTION, C_INSTRUCTION);
+		isProperty(javaModel, P_NEXT_IF_TRUE, C_INSTRUCTION, C_INSTRUCTION, //
+				rdf.RDFS_SUBPROPERTY_OF, P_NEXT);
+		isProperty(javaModel, P_NEXT_IF_FALSE, C_INSTRUCTION, C_INSTRUCTION, //
+				rdf.RDFS_SUBPROPERTY_OF, P_NEXT);
+		javaModel.add(R_END, Predicates.IS_A, C_INSTRUCTION);
+		isProperty(javaModel, P_OPERAND, C_INSTRUCTION, null);
+		isProperty(javaModel, P_OPERAND_CONSTANT, C_INSTRUCTION, rdf.RDFS_RESOURCE, //
+				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+		isProperty(javaModel, P_OPERAND_INT, C_INSTRUCTION, org.apache.commons.rdf.simple.Types.XSD_INTEGER, //
+				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+		isProperty(javaModel, P_OPERAND_MEMBER, C_INSTRUCTION, C_MEMBER, //
+				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+		isProperty(javaModel, P_OPERAND_TYPE, C_INSTRUCTION, Types.JAVA_TYPE, //
+				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+		isProperty(javaModel, P_OPERAND_VAR, C_INSTRUCTION, org.apache.commons.rdf.simple.Types.XSD_INTEGER, //
+				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+		isProperty(javaModel, P_CALL, C_INSTRUCTION, C_JVM_INSN);
+		isProperty(javaModel, P_LINE, C_INSTRUCTION, org.apache.commons.rdf.simple.Types.XSD_INTEGER);
+		javaModel.add(C_INSTRUCTION, Predicates.IS_A, rdf.RDFS_CLASS);
+		javaModel.add(C_JVM_INSN, Predicates.IS_A, rdf.RDFS_CLASS);
+	}
 
 	public static IRI method(Model m, IRI owner, String memberName, String memberDesc) {
-		if (memberName.equals("<init>")) {
-			memberName = "$init";
-		}
+		memberName = memberName.replaceAll("[<>]", "\\$");
 		// return m.node(owner, memberName + "/" + memberDesc);
-		System.out.println("METHOD: " + owner + ", " + memberName + ", " + memberDesc);
 		Type type = Type.getType(memberDesc);
 		StringBuilder sb = new StringBuilder();
 		sb.append(memberName); // .re.replaceAll("[<>]", "-"));
@@ -205,12 +238,24 @@ public abstract class JavaFacts {
 				sb.append(type.getClassName());
 			}
 		}
-		System.out.println(sb.toString());
 		return m.node(owner, sb.toString());
 		// + UriEncoding.percentEncodeIri(methodName,
 		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true)
 		// + UriEncoding.percentEncodeIri(methodDesc,
 		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true));
+	}
+
+	private static void isProperty(Model m, IRI prop, BlankNodeOrIRI sub, RDFTerm obj, RDFTerm... more) {
+		m.add(prop, rdf.RDF_TYPE, rdf.RDF_PROPERTY);
+		if (sub != null) {
+			m.add(prop, rdf.RDFS_RANGE, sub);
+		}
+		if (obj != null) {
+			m.add(prop, rdf.RDFS_DOMAIN, obj);
+		}
+		for (int i = 0; i < more.length; i += 2) {
+			m.add(prop, (IRI) more[i], more[i + 1]);
+		}
 	}
 
 	public static IRI opcode(int opcode) {

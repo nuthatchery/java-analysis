@@ -9,6 +9,9 @@ import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDFTerm;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
+import org.nuthatchery.ontology.Model;
+import org.nuthatchery.ontology.Model.ListBuilder;
+import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -19,13 +22,12 @@ import org.objectweb.asm.TypePath;
 import org.objectweb.asm.commons.AnalyzerAdapter;
 
 class MethodFactExtractor extends AnalyzerAdapter {
-	// private ClassFactExtractor parent;
 	private final IRI currentMethodId;
+	private ListBuilder insnList;
 	private BlankNodeOrIRI currentInsn;
-	private IRI insnChain;
-	private BlankNodeOrIRI lastInsn;
 	private ILogger log;
 	private static int count = 0;
+	private final Model model;
 	/**
 	 *
 	 */
@@ -37,6 +39,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		this.parent = parent;
 		this.currentMethodId = methodId;
 		this.log = log;
+		this.model = parent.getModel();
 	}
 
 	/**
@@ -125,49 +128,33 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitCode() {
 		log.log("{");
 		parent.currentLine = -1;
-		nextInstruction();
-		lastInsn = currentMethodId;
-		insnChain = JavaFacts.P_CODE;
+		currentInsn = model.blank();
+		insnList = model.list();
 		super.visitCode();
-	}
-
-	/**
-	 * Move to next instruction.
-	 *
-	 * @return Identifier of previous instruction
-	 */
-	protected void nextInstruction() {
-		lastInsn = currentInsn;
-		currentInsn = parent.getModel().blank(String.valueOf(count++));
 	}
 
 	@Override
 	public void visitEnd() {
 		parent.currentLine = -1;
 		log.log("} // end of " + currentMethodId);
-		if (lastInsn != null && insnChain != null) {
-			parent.getModel().add(lastInsn, insnChain, JavaFacts.R_END);
+		if(insnList != null) {
+			model.add(currentMethodId, JavaFacts.P_CODE, insnList.build());
 		}
-
+		insnList = null;
 		super.visitEnd();
 	}
 
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-		// logln(indent() + "" + Printer.OPCODES[opcode] +
-		// " " +
-		// owner + "." + name + " [" + desc + "]");
 		log.log("# access field: " + JavaUtil.decodeDescriptor(owner, name, desc));
 		BlankNodeOrIRI memberId = parent.getMemberId(owner, name, desc);
-		putInstruction(opcode, JavaFacts.P_FIELD, memberId);
-		nextInstruction();
+		putInstruction(opcode, JavaFacts.P_OPERAND_MEMBER, memberId);
 		super.visitFieldInsn(opcode, owner, name, desc);
 	}
 
 	@Override
 	public void visitIincInsn(int var, int increment) {
-		putInstruction(Opcodes.IINC, JavaFacts.P_VAR, var, JavaFacts.P_OPERAND, increment);
-		nextInstruction();
+		putInstruction(Opcodes.IINC, JavaFacts.P_OPERAND_VAR, var, JavaFacts.P_OPERAND_INT, increment);
 		super.visitIincInsn(var, increment);
 	}
 
@@ -175,12 +162,9 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		if (args.length % 2 == 1) {
 			throw new IllegalArgumentException();
 		}
-		System.out.println("(" + lastInsn + "," + insnChain + "," + currentInsn + ")");
-		if (lastInsn != null && insnChain != null) {
-			parent.getModel().add(lastInsn, insnChain, currentInsn);
-		}
-		insnChain = JavaFacts.P_NEXT;
-		parent.put(currentInsn, JavaFacts.P_CALL, JavaFacts.opcode(opcode));
+
+		insnList.add(currentInsn);
+		model.add(currentInsn, JavaFacts.P_CALL, JavaFacts.opcode(opcode));
 		for (int i = 0; i < args.length; i += 2) {
 			if (args[i] instanceof IRI) {
 				IRI pred = (IRI) args[i];
@@ -188,19 +172,19 @@ class MethodFactExtractor extends AnalyzerAdapter {
 				if (args[i + 1] instanceof RDFTerm) {
 					obj = (RDFTerm) args[i + 1];
 				} else {
-					obj = parent.getModel().literal(args[i + 1]);
+					obj = model.literal(args[i + 1]);
 				}
-				parent.put(currentInsn, pred, obj);
+				model.add(currentInsn, pred, obj);
 			} else {
 				throw new IllegalArgumentException();
 			}
 		}
+		currentInsn = model.blank(String.valueOf(count++));
 	}
 
 	@Override
 	public void visitInsn(int opcode) {
 		putInstruction(opcode);
-		nextInstruction();
 		super.visitInsn(opcode);
 	}
 
@@ -211,47 +195,43 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitIntInsn(int opcode, int operand) {
-		putInstruction(opcode, JavaFacts.P_OPERAND, operand);
-		nextInstruction();
+		putInstruction(opcode, JavaFacts.P_OPERAND_INT, operand);
 		super.visitIntInsn(opcode, operand);
 	}
 
 	@Override
 	public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
 		log.log("INVOKEDYNAMIC " + name + " [" + desc + "]" + " " + bsm + " " + Arrays.toString(bsmArgs));
-		putInstruction(Opcodes.INVOKEDYNAMIC, JavaFacts.P_OPERAND, parent.getMemberName(name, desc));
-		nextInstruction();
+		putInstruction(Opcodes.INVOKEDYNAMIC, JavaFacts.P_OPERAND_MEMBER, parent.getMemberName(name, desc));
 		super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
 	}
 
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
-		BlankNode target = parent.getModel().blank(label.toString());
-		putInstruction(opcode);
-		if (opcode == Opcodes.GOTO) {
-			parent.getModel().add(currentInsn, JavaFacts.P_NEXT, target);
-			insnChain = null;
-		} else if (opcode == Opcodes.JSR) {
-			throw new UnsupportedOperationException();
-		} else {
-			parent.getModel().add(currentInsn, JavaFacts.P_NEXT_IF_TRUE, target);
-			insnChain = JavaFacts.P_NEXT_IF_FALSE;
+		BlankNode target = model.blank(label.toString());
+		putInstruction(opcode, JavaFacts.P_OPERAND_LABEL, target);
+		if (opcode == Opcodes.JSR) {
+			return;
 		}
-		nextInstruction();
 		super.visitJumpInsn(opcode, label);
 	}
 
 	@Override
 	public void visitLabel(Label label) {
 		log.log(label + ":");
-		currentInsn = parent.getModel().blank(label.toString());
+		currentInsn = model.blank(label.toString());
 		super.visitLabel(label);
 	}
 
 	@Override
 	public void visitLdcInsn(Object cst) {
-		putInstruction(Opcodes.LDC, JavaFacts.P_OPERAND, cst);
-		nextInstruction();
+		RDFTerm operand;
+		if (cst instanceof Type) {
+			operand = JavaUtil.typeToId(model, (Type) cst);
+		} else {
+			operand = model.literal(cst);
+		}
+		putInstruction(Opcodes.LDC, JavaFacts.P_OPERAND_CONSTANT, operand);
 		super.visitLdcInsn(cst);
 	}
 
@@ -259,8 +239,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitLineNumber(int line, Label start) {
 		log.log(parent.currentSource.peek() + ":" + line + "\tlabel=" + start);
 		parent.currentLine = line;
-		currentInsn = parent.getModel().blank(start.toString());
-		parent.getModel().add(currentInsn, JavaFacts.P_LINE, parent.getModel().literal(line));
+		currentInsn = model.blank(start.toString());
+		model.add(currentInsn, JavaFacts.P_LINE, model.literal(line));
 		super.visitLineNumber(line, start);
 	}
 
@@ -280,7 +260,15 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-		// TODO
+		ListBuilder list = model.list();
+		for (int i = 0; i < keys.length; i++) {
+			BlankNode node = model.blank();
+			model.add(node, JavaFacts.P_OPERAND_INT, model.literal(keys[i]));
+			model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(labels[i].toString()));
+			list.add(node);
+		}
+		putInstruction(Opcodes.LOOKUPSWITCH, JavaFacts.P_OPERAND_LIST, list.build());
+
 		super.visitLookupSwitchInsn(dflt, keys, labels);
 	}
 
@@ -291,11 +279,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-		// logln(indent() + "" + Printer.OPCODES[opcode] +
-		// " " +
-		// owner + "." + name + " [" + desc + "]");
-		IRI classId = JavaFacts.Types.object(parent.getModel(), owner);
-		IRI methodId = JavaFacts.method(parent.getModel(), classId, name, desc);
+		IRI classId = JavaFacts.Types.object(model, owner);
+		IRI methodId = JavaFacts.method(model, classId, name, desc);
 		// NOTE: Example of finding the types of actual arguments and formal
 		// parameters
 		Type objType = Type.getObjectType(owner);
@@ -337,31 +322,29 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			Object type = stackGetType(i);
 			if (type != null) {
 				// TODO
-				// parent.put(parent.getModel().literal("ACTUAL_ARGUMENT_TYPE" + i),
+				// model.add(model.literal("ACTUAL_ARGUMENT_TYPE" + i),
 				// JavaUtil.frameTypeToId(type));
 			}
 		}
 
-		putInstruction(opcode, JavaFacts.P_OPERAND, methodId);
-		nextInstruction();
+		putInstruction(opcode, JavaFacts.P_OPERAND_MEMBER, methodId);
 		super.visitMethodInsn(opcode, owner, name, desc, itf);
 	}
 
 	@Override
 	public void visitMultiANewArrayInsn(String desc, int dims) {
 		log.logf("visitMultiANewArrayInsn(desc=%s, dims=%d)%n", desc, dims);
-		putInstruction(Opcodes.MULTIANEWARRAY, JavaFacts.P_TYPE, //
-				JavaFacts.Types.array(parent.getModel(), dims, //
-						JavaFacts.Types.object(parent.getModel(), desc)));
-		nextInstruction();
+		putInstruction(Opcodes.MULTIANEWARRAY, JavaFacts.P_OPERAND_TYPE, //
+				JavaFacts.Types.array(model, dims, //
+						JavaFacts.Types.object(model, desc)));
 		super.visitMultiANewArrayInsn(desc, dims);
 	}
 
 	@Override
 	public void visitParameter(String name, int access) {
 		log.logf("visitParameter(name=%s, access=%d)%n", name, access);
-		BlankNodeOrIRI paramId = parent.getModel().node(currentMethodId, name);
-		parent.put(currentMethodId, JavaFacts.PARAMETER, paramId);
+		BlankNodeOrIRI paramId = model.node(currentMethodId, name);
+		model.add(currentMethodId, JavaFacts.PARAMETER, paramId);
 		parent.addFieldAccessFlags(access, paramId);
 
 		super.visitParameter(name, access);
@@ -374,7 +357,27 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-		// TODO
+		ListBuilder list = model.list();
+
+		BlankNode node = model.blank();
+		model.add(node, JavaFacts.P_OPERAND_INT, model.literal(min));
+		list.add(node);
+
+		node = model.blank();
+		model.add(node, JavaFacts.P_OPERAND_INT, model.literal(max));
+		list.add(node);
+
+		node = model.blank();
+		model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(dflt.toString()));
+		list.add(node);
+
+		for (Label label : labels) {
+			node = model.blank();
+			model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(label.toString()));
+			list.add(node);
+		}
+		putInstruction(Opcodes.TABLESWITCH, JavaFacts.P_OPERAND_LIST, list.build());
+
 		super.visitTableSwitchInsn(min, max, dflt, labels);
 	}
 
@@ -385,7 +388,23 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-		// TODO
+		ListBuilder list = model.list();
+
+		BlankNode node = model.blank();
+		model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(start.toString()));
+		list.add(node);
+
+		node = model.blank();
+		model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(end.toString()));
+		list.add(node);
+
+		node = model.blank();
+		model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(handler.toString()));
+		model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, type));
+		list.add(node);
+
+		model.add(currentMethodId, JavaFacts.P_TRY_CATCH_BLOCK, list.build());
+
 		super.visitTryCatchBlock(start, end, handler, type);
 	}
 
@@ -397,8 +416,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
-		putInstruction(opcode, JavaFacts.P_OPERAND, JavaFacts.Types.object(parent.getModel(), type));
-		nextInstruction();
+		putInstruction(opcode, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, type));
 		super.visitTypeInsn(opcode, type);
 	}
 
@@ -406,13 +424,9 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitVarInsn(int opcode, int var) {
 		log.logf("visitVarInsn(opcode=%s, var=%d)%n", opcode, var);
 		if (opcode == Opcodes.RET) {
-			putInstruction(opcode);
-			parent.getModel().add(currentInsn, JavaFacts.P_NEXT, JavaFacts.R_END);
-			insnChain = null;
-			nextInstruction();
+			putInstruction(opcode, JavaFacts.P_OPERAND_VAR, var);
 		} else {
-			putInstruction(opcode, JavaFacts.P_VAR, var);
-			nextInstruction();
+			putInstruction(opcode, JavaFacts.P_OPERAND_VAR, var);
 			super.visitVarInsn(opcode, var);
 		}
 	}

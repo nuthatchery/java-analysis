@@ -2,6 +2,7 @@ package org.nuthatchery.analysis.java.extractor;
 
 import java.io.Console;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,28 +19,30 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.apache.commons.rdf.jena.JenaDataset;
+import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.jena.JenaRDF;
-import org.apache.jena.graph.Graph;
+import org.apache.jena.atlas.logging.LogCtl;
+import org.apache.jena.fuseki.embedded.FusekiServer;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.rdf.model.impl.NTripleWriter;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFWriter;
-import org.apache.jena.riot.RDFWriterBuilder;
-import org.nuthatchery.ontology.FactsDb;
+import org.apache.jena.tdb.TDB;
+import org.apache.jena.tdb.TDBFactory;
 import org.nuthatchery.ontology.Model;
 import org.nuthatchery.ontology.ModelFactory;
-import org.nuthatchery.ontology.FactsDb.IFactsWriter;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
 import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
-	private static final List<String> DEFAULT_CLASSES = Arrays.asList("../../../../../ImmutablePosition.class",
-			"../../../../../MutablePosition.class", "../../../../../Test.class");
+	private static final String DB_PREFIX = "http://db.nuthatchery.org/java/";
+	private static final List<String> DEFAULT_CLASSES = Arrays.asList("-m", "demo", "../../../../../Test.class");
+	private static int logLevel;
+	private static boolean demoMode = false;
 	// "/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
+	private static JenaRDF jenaRDF;
+	private static Model defaultModel;
 
 	public static String fill(String s, int size, String ellipsis, boolean flushRight) {
 		if (s.length() > size) {
@@ -66,65 +69,127 @@ public class ExtractApi {
 		ModelFactory.setFactory(() -> new JenaRDF());
 		ModelFactory mf = ModelFactory.getInstance();
 		RdfVocabulary rdfVocabulary = RdfVocabulary.getInstance();
-		JenaRDF jenaRDF = new JenaRDF();
+		jenaRDF = new JenaRDF();
+		boolean tdb = false;
 		Dataset dataset = DatasetFactory.create();
+		String outFile = "/tmp/data.trig";
+		setupDataset(dataset);
 
-		boolean openAsResource = args.length == 0;
-		int logLevel = args.length == 0 ? 10 : 0;
-		List<String> arguments = new ArrayList<>(openAsResource ? DEFAULT_CLASSES : Arrays.asList(args));
-		List<String> files = new ArrayList<>();
-		FileSystem fs = FileSystems.getDefault();
-		int nClasses = 0;
-		int nJars = 0;
-		if (openAsResource) {
-			files.addAll(arguments);
-		} else {
-			for (int i = 0; i < arguments.size(); i++) {
-				Path path = fs.getPath(arguments.get(i));
-				String str = path.toString();
-				if (Files.isRegularFile(path)) {
-					if (str.endsWith(".class")) {
-						files.add(path.toString());
-						nClasses++;
-					} else if (str.endsWith(".jar")) {
-						files.add(path.toString());
-						nJars++;
-					}
-				} else if (Files.isDirectory(path)) {
-					System.out.println("Adding files from " + path);
-					Files.list(path).forEach((Path p) -> {
-						arguments.add(p.toString());
-					});
-				}
-			}
-			System.out.println("" + nClasses + " class files and " + nJars + " jars found.");
-		}
+		LogCtl.setJavaLogging();
+
+		demoMode = args.length == 0;
+		logLevel = args.length == 0 ? 10 : 0;
+		List<String> arguments = new ArrayList<>(demoMode ? DEFAULT_CLASSES : Arrays.asList(args));
 		// IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
-		Model model = mf.createModel(jenaRDF.asDataset(dataset), "this:");
-		System.out.println(JavaFacts.Types.BOOLEAN);
-		ClassReader cr;
-		int i = 0;
-		int n = files.size();
-		Console console = System.console();
+		Model model = mf.createModel(jenaRDF.asDataset(dataset), DB_PREFIX);
+		String modelName = null;
+		for (Iterator<String> it = arguments.iterator(); it.hasNext();) {
+			String arg = it.next();
+			switch (arg) {
+			case "-d":
+				String dbDir = it.next();
+				dataset.close();
+				dataset = TDBFactory.createDataset(dbDir);
+				setupDataset(dataset);
+				model = mf.createModel(jenaRDF.asDataset(dataset), DB_PREFIX);
+				outFile = null;
+				break;
+			case "-s":
+				FusekiServer server = FusekiServer.create()//
+				.add("/dataset", dataset, true)//
+				.enableStats(true)//
+				.build();
+				server.start();
+				TDB.sync(dataset);
+				server.join();
+				break;
+			case "-m":
+				modelName = it.next();
+				break;
+			default:
+				extractModel(dataset, model, modelName, arg);
+			}
+		}
+
+		if (outFile != null) {
+			try (OutputStream output = new FileOutputStream(outFile)) {
+				RDFDataMgr.write(output, dataset, Lang.TRIG);
+				// jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
+			}
+		}
+		dataset.close();
+
+	}
+
+	private static void setupDataset(Dataset dataset) {
+		defaultModel = ModelFactory.getInstance().createModel(jenaRDF.asGraph(dataset.getDefaultModel()), DB_PREFIX);
+
+		List<String> list = new ArrayList<>();
+		for (Iterator<String> it = dataset.listNames(); it.hasNext(); list.add(it.next())) {
+			;
+		}
+		for (String s : list) {
+			System.out.println("setup: "+ s);
+			defaultModel.add(defaultModel.iri(s), ModelFactory.getInstance().rdfVocabulary().RDFS_IS_DEFINED_BY, defaultModel.iri(s));
+		}
+
+		dataset.getDefaultModel().removeAll();
+		dataset.addNamedModel(JavaFacts.javaPrefix, toJenaModel(JavaFacts.javaModel));
+		dataset.addNamedModel(JavaFacts.javaTypesPrefix, toJenaModel(JavaFacts.javaTypesModel));
+		dataset.getDefaultModel().setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
+		dataset.getDefaultModel().setNsPrefix("rdf", RdfVocabulary.RDF_PREFIX);
+		dataset.getDefaultModel().setNsPrefix("rdfs", RdfVocabulary.RDFS_PREFIX);
+		dataset.getDefaultModel().setNsPrefix("j", JavaFacts.javaPrefix);
+		dataset.getDefaultModel().setNsPrefix("jType", JavaFacts.javaTypesPrefix);
+		dataset.getDefaultModel().setNsPrefix("jFlag", JavaFacts.javaFlagsPrefix);
+		dataset.getDefaultModel().setNsPrefix("db", DB_PREFIX);
+		dataset.getDefaultModel().setNsPrefix("nh", CommonVocabulary.PREFIX);
+	}
+
+	private static org.apache.jena.rdf.model.Model toJenaModel(Model m) {
+		return org.apache.jena.rdf.model.ModelFactory.createModelForGraph(jenaRDF.asJenaGraph(m.getGraph()));
+	}
+
+	private static void extractModel(Dataset dataset, Model mainModel, String modelName, String arg)
+			throws IOException, FileNotFoundException {
 		String prc = "Processing:  ";
 		String chk = "(checkpoint) ";
 		String msg = prc;
+		List<String> files = findFiles(arg);
+		Console console = System.console();
+		int i = 0;
+		int n = files.size();
+
+		if(modelName == null) {
+			modelName = "";
+		}
+		Model model = mainModel.model(DB_PREFIX + modelName, "this:"); // DB_PREFIX + modelName + "/");
 		for (String file : files) {
-			Model m = model.model(file + "/", "this:");
-			ClassFactExtractor ea = new ClassFactExtractor(m, JavaUtil.logger(logLevel));
+			System.out.println("Processing: " + file);
 			if (console != null) {
 				console.printf("[%02d%%] %s%s\r", (i * 100) / n, msg, fill(file, 60, "…", true));
 			}
-			if (openAsResource && file.endsWith(".class")) {
-				cr = new ClassReader(ExtractApi.class.getResourceAsStream(file));
+			if (demoMode && file.endsWith(".class")) {
+				addModelName(model.getName());
+				ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
+				ClassReader cr = new ClassReader(ExtractApi.class.getResourceAsStream(file));
 				cr.accept(ea, ClassReader.EXPAND_FRAMES);
 			} else if (file.endsWith(".class")) {
+				addModelName(model.getName());
 				try (InputStream stream = new FileInputStream(file)) {
-					cr = new ClassReader(stream);
+					ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
+					ClassReader cr = new ClassReader(stream);
 					cr.accept(ea, ClassReader.EXPAND_FRAMES);
 				}
 			} else if (file.endsWith(".jar")) {
 				try (JarFile jarFile = new JarFile(file)) {
+					String name = file;
+					if (name.contains("/")) {
+						name = name.substring(name.lastIndexOf("/") + 1, name.length());
+					}
+					Model m = model.model(DB_PREFIX + name, "this:");
+					addModelName(m.getName());
+					ClassFactExtractor ea = new ClassFactExtractor(m, JavaUtil.logger(logLevel));
 					int nEntries = jarFile.size();
 					int j = 0;
 					for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
@@ -136,7 +201,7 @@ public class ExtractApi {
 									console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
 											fill(file, 60, "…", true));
 								}
-								cr = new ClassReader(stream);
+								ClassReader cr = new ClassReader(stream);
 								cr.accept(ea, ClassReader.EXPAND_FRAMES);
 							}
 						} else if (console != null) {
@@ -148,27 +213,49 @@ public class ExtractApi {
 				}
 			}
 			if (i++ % 10 == 0) {
-				// if (fw.checkpoint()) {
+				TDB.sync(dataset);
 				msg = chk;
-				// }
 			} else if (i % 10 == 5) {
 				msg = prc;
 			}
 		}
-		System.out.println();
+	}
 
-		dataset.getDefaultModel().setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
-		dataset.getDefaultModel().setNsPrefix("rdf", RdfVocabulary.RDF_PREFIX);
-		dataset.getDefaultModel().setNsPrefix("rdfs", RdfVocabulary.RDFS_PREFIX);
-		dataset.getDefaultModel().setNsPrefix("j", JavaFacts.javaPrefix);
-		dataset.getDefaultModel().setNsPrefix("jt", JavaFacts.javaTypesPrefix);
-		dataset.getDefaultModel().setNsPrefix("jf", JavaFacts.javaFlagsPrefix);
-		dataset.getDefaultModel().setNsPrefix("nh", CommonVocabulary.PREFIX);
+	private static void addModelName(IRI s) {
+		defaultModel.add(s, ModelFactory.getInstance().rdfVocabulary().RDFS_IS_DEFINED_BY, s);
+	}
 
-		try (OutputStream output = new FileOutputStream("/tmp/data.n3")) {
-			RDFDataMgr.write(output, dataset, Lang.TRIX);
-			//			jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
+	private static List<String> findFiles(String loc) throws IOException {
+		List<String> files = new ArrayList<>();
+		if (demoMode) {
+			files.add(loc);
+			return files;
 		}
+		FileSystem fs = FileSystems.getDefault();
+		int nClasses = 0;
+		int nJars = 0;
+		List<String> todo = new ArrayList<>();
+		todo.add(loc);
+		for (int i = 0; i < todo.size(); i++) {
+			Path path = fs.getPath(todo.get(i));
+			String str = path.toString();
+			if (Files.isRegularFile(path)) {
+				if (str.endsWith(".class")) {
+					files.add(path.toString());
+					nClasses++;
+				} else if (str.endsWith(".jar")) {
+					files.add(path.toString());
+					nJars++;
+				}
+			} else if (Files.isDirectory(path)) {
+				System.out.println("Adding files from " + path);
+				Files.list(path).forEach((Path p) -> {
+					todo.add(p.toString());
+				});
+			}
+		}
+		System.out.println("" + nClasses + " class files and " + nJars + " jars found in " + loc + ".");
+		return files;
 	}
 
 }

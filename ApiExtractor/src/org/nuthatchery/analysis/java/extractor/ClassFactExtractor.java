@@ -55,19 +55,7 @@ public class ClassFactExtractor extends ClassVisitor {
 	protected Integer indentLevel() {
 		return currentClass.size();
 	}
-	/*
-	protected void put(IRI relation, BlankNodeOrIRI obj) {
-		model.add(obj, relation, model.literal(true));
-	}*/
 
-	protected void put(BlankNodeOrIRI subj, IRI pred, RDFTerm obj) {
-		model.add(subj, pred, obj);
-	}
-
-	/*
-	 * protected void put(IRI relation, BlankNodeOrIRI obj, RDFTerm tgt,
-	 * BlankNodeOrIRI field) { fw.put(obj, relation, tgt, field); }
-	 */
 	@Override
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
 		log.log("\n" + "class " + name + " {");
@@ -79,17 +67,17 @@ public class ClassFactExtractor extends ClassVisitor {
 		className = name;
 		IRI id = JavaFacts.Types.object(model, name);
 		currentClass.push(id);
-		put(id, JavaFacts.P_CLASS_FILE_VERSION, model.literal(major));
+		model.add(id, JavaFacts.P_CLASS_FILE_VERSION, model.literal(major));
 		if (minor != 0) {
-			put(id, JavaFacts.P_CLASS_FILE_MINOR, model.literal(minor));
+			model.add(id, JavaFacts.P_CLASS_FILE_MINOR, model.literal(minor));
 		}
-		put(id, Predicates.IS_A, JavaFacts.C_CLASS);
+		model.add(id, Predicates.IS_A, JavaFacts.C_CLASS);
 		if (superName != null) {
-			put(id, JavaFacts.EXTENDS, JavaFacts.Types.object(model, superName));
+			model.add(id, JavaFacts.P_EXTENDS, JavaFacts.Types.object(model, superName));
 		}
 		if (interfaces != null) {
 			for (String s : interfaces) {
-				put(id, JavaFacts.IMPLEMENTS, JavaFacts.Types.object(model, s));
+				model.add(id, JavaFacts.P_SUBTYPE_OF, JavaFacts.Types.object(model, s));
 			}
 		}
 		addClassAccessFlags(access, id);
@@ -121,9 +109,9 @@ public class ClassFactExtractor extends ClassVisitor {
 		// name, desc, signature, value);
 		log.log("\n" + "field " + JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(model, getClassId(), name, desc);
-		put(memberId, Predicates.IS_A, JavaFacts.C_FIELD);
+		model.add(memberId, Predicates.IS_A, JavaFacts.C_FIELD);
 		if (value != null) {
-			put(memberId, JavaFacts.INITIAL_VALUE, model.literal(value));
+			model.add(memberId, JavaFacts.INITIAL_VALUE, model.literal(value));
 		}
 		addFieldAccessFlags(access, memberId);
 
@@ -149,17 +137,17 @@ public class ClassFactExtractor extends ClassVisitor {
 		log.log("\n" + "method " + JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(model, getClassId(), name, desc);
 		if (name.equals("<init>")) {
-			put(memberId, Predicates.IS_A, JavaFacts.C_CONSTRUCTOR);
-			put(memberId, JavaFacts.CONSTRUCTS, getClassId());
+			model.add(memberId, Predicates.IS_A, JavaFacts.C_CONSTRUCTOR);
+			model.add(memberId, JavaFacts.CONSTRUCTS, getClassId());
 		} else {
-			put(memberId, Predicates.IS_A, JavaFacts.C_METHOD);
+			model.add(memberId, Predicates.IS_A, JavaFacts.C_METHOD);
 		}
 		if (signature != null) {
-			put(memberId, JavaFacts.GENERIC, model.literal(signature));
+			model.add(memberId, JavaFacts.GENERIC, model.literal(signature));
 		}
 		if (exceptions != null) {
 			for (String s : exceptions) {
-				put(memberId, JavaFacts.DECLARES_THROW, JavaFacts.Types.object(model, s));
+				model.add(memberId, JavaFacts.DECLARES_THROW, JavaFacts.Types.object(model, s));
 			}
 		}
 		addMethodAccessFlags(access, memberId);
@@ -180,13 +168,13 @@ public class ClassFactExtractor extends ClassVisitor {
 	@Override
 	public void visitSource(String source, String debug) {
 		if (source != null) {
-			put(getClassId(), JavaFacts.P_SOURCE_FILE, model.literal(source));
+			model.add(getClassId(), JavaFacts.P_SOURCE_FILE, model.literal(source));
 			currentSource.push(source);
 		} else {
 			currentSource.push("");
 		}
 		if (debug != null) {
-			put(getClassId(), JavaFacts.DEBUG, model.literal(source));
+			model.add(getClassId(), JavaFacts.DEBUG, model.literal(source));
 			// logf("visitSource(source=%s, debug=%s)%n",
 			// source,
 			// debug);
@@ -202,13 +190,13 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	public void addAccessFlags(int access, BlankNodeOrIRI id) {
 		if ((access & Opcodes.ACC_PUBLIC) != 0) {
-			put(id, JavaFacts.ACCESS, JavaFacts.Flags.PUBLIC);
+			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PUBLIC);
 		} else if ((access & Opcodes.ACC_PRIVATE) != 0) {
-			put(id, JavaFacts.ACCESS, JavaFacts.Flags.PRIVATE);
+			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PRIVATE);
 		} else if ((access & Opcodes.ACC_PROTECTED) != 0) {
-			put(id, JavaFacts.ACCESS, JavaFacts.Flags.PROTECTED);
+			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PROTECTED);
 		} else {
-			put(id, JavaFacts.ACCESS, JavaFacts.Flags.PACKAGE);
+			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PACKAGE);
 		}
 		if ((access & Opcodes.ACC_STATIC) != 0) {
 			putFlag(id, JavaFacts.Flags.STATIC);
@@ -289,7 +277,7 @@ public class ClassFactExtractor extends ClassVisitor {
 	}
 
 	public void putFlag(BlankNodeOrIRI id, IRI flag) {
-		put(id, JavaFacts.P_HAS_FLAG, flag);
+		model.add(id, JavaFacts.P_HAS_FLAG, flag);
 	}
 
 	public Model getModel() {

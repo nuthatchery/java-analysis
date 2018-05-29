@@ -3,7 +3,9 @@ package org.nuthatchery.ontology;
 import java.util.function.Supplier;
 
 import org.apache.commons.rdf.api.Dataset;
+import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.RDF;
+import org.apache.commons.rdf.jena.JenaGraph;
 import org.apache.commons.rdf.simple.SimpleRDF;
 import org.nuthatchery.ontology.standard.RdfVocabulary;
 
@@ -47,10 +49,15 @@ public class ModelFactory {
 		return new Model(ds, name, prefix, createRDF());
 	}
 
+
+	public Model createModel(Graph graph, String prefix) {
+		return new Model(graph, prefix, createRDF());
+	}
 	public RdfVocabulary rdfVocabulary() {
 		if (rdfVocabulary == null) {
 			rdfVocabulary = new RdfVocabulary(createRDF());
 		}
 		return rdfVocabulary;
 	}
+
 }
