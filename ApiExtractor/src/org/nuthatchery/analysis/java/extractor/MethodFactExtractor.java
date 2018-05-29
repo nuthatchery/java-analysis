@@ -11,7 +11,6 @@ import org.apache.commons.rdf.api.RDFTerm;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
 import org.nuthatchery.ontology.Model;
 import org.nuthatchery.ontology.Model.ListBuilder;
-import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -22,11 +21,11 @@ import org.objectweb.asm.TypePath;
 import org.objectweb.asm.commons.AnalyzerAdapter;
 
 class MethodFactExtractor extends AnalyzerAdapter {
+	private static int count = 0;
 	private final IRI currentMethodId;
 	private ListBuilder insnList;
 	private BlankNodeOrIRI currentInsn;
 	private ILogger log;
-	private static int count = 0;
 	private final Model model;
 	/**
 	 *
@@ -40,6 +39,30 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		this.currentMethodId = methodId;
 		this.log = log;
 		this.model = parent.getModel();
+	}
+
+	protected void putInstruction(int opcode, Object... args) {
+		if (args.length % 2 == 1) {
+			throw new IllegalArgumentException();
+		}
+
+		insnList.add(currentInsn);
+		model.add(currentInsn, JavaFacts.P_CALL, JavaFacts.opcode(opcode));
+		for (int i = 0; i < args.length; i += 2) {
+			if (args[i] instanceof IRI) {
+				IRI pred = (IRI) args[i];
+				RDFTerm obj;
+				if (args[i + 1] instanceof RDFTerm) {
+					obj = (RDFTerm) args[i + 1];
+				} else {
+					obj = model.literal(args[i + 1]);
+				}
+				model.add(currentInsn, pred, obj);
+			} else {
+				throw new IllegalArgumentException();
+			}
+		}
+		currentInsn = model.blank(String.valueOf(count++));
 	}
 
 	/**
@@ -156,30 +179,6 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitIincInsn(int var, int increment) {
 		putInstruction(Opcodes.IINC, JavaFacts.P_OPERAND_VAR, var, JavaFacts.P_OPERAND_INT, increment);
 		super.visitIincInsn(var, increment);
-	}
-
-	protected void putInstruction(int opcode, Object... args) {
-		if (args.length % 2 == 1) {
-			throw new IllegalArgumentException();
-		}
-
-		insnList.add(currentInsn);
-		model.add(currentInsn, JavaFacts.P_CALL, JavaFacts.opcode(opcode));
-		for (int i = 0; i < args.length; i += 2) {
-			if (args[i] instanceof IRI) {
-				IRI pred = (IRI) args[i];
-				RDFTerm obj;
-				if (args[i + 1] instanceof RDFTerm) {
-					obj = (RDFTerm) args[i + 1];
-				} else {
-					obj = model.literal(args[i + 1]);
-				}
-				model.add(currentInsn, pred, obj);
-			} else {
-				throw new IllegalArgumentException();
-			}
-		}
-		currentInsn = model.blank(String.valueOf(count++));
 	}
 
 	@Override

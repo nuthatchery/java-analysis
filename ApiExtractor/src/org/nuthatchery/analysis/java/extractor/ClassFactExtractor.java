@@ -6,7 +6,6 @@ import java.util.Stack;
 
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDFTerm;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
 import org.nuthatchery.ontology.Model;
 import org.nuthatchery.ontology.basic.Predicates;
@@ -40,6 +39,94 @@ public class ClassFactExtractor extends ClassVisitor {
 		this.log = logger.indent(this::indentLevel);
 	}
 
+	public void addAccessFlags(int access, BlankNodeOrIRI id) {
+		if ((access & Opcodes.ACC_PUBLIC) != 0) {
+			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PUBLIC);
+		} else if ((access & Opcodes.ACC_PRIVATE) != 0) {
+			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PRIVATE);
+		} else if ((access & Opcodes.ACC_PROTECTED) != 0) {
+			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PROTECTED);
+		} else {
+			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PACKAGE);
+		}
+		if ((access & Opcodes.ACC_STATIC) != 0) {
+			putFlag(id, JavaFacts.Flags.STATIC);
+		}
+		if ((access & Opcodes.ACC_FINAL) != 0) {
+			putFlag(id, JavaFacts.Flags.FINAL);
+		}
+		if ((access & Opcodes.ACC_NATIVE) != 0) {
+			putFlag(id, JavaFacts.Flags.NATIVE);
+		}
+		if ((access & Opcodes.ACC_INTERFACE) != 0) {
+			putFlag(id, JavaFacts.Flags.INTERFACE);
+		}
+		if ((access & Opcodes.ACC_ABSTRACT) != 0) {
+			putFlag(id, JavaFacts.Flags.ABSTRACT);
+		}
+		if ((access & Opcodes.ACC_SYNTHETIC) != 0) {
+			putFlag(id, JavaFacts.Flags.SYNTHETIC);
+		}
+		if ((access & Opcodes.ACC_ANNOTATION) != 0) {
+			putFlag(id, JavaFacts.Flags.ANNOTATION);
+		}
+		if ((access & Opcodes.ACC_ENUM) != 0) {
+			putFlag(id, JavaFacts.Flags.ENUM);
+		}
+		if ((access & Opcodes.ACC_DEPRECATED) != 0) {
+			putFlag(id, JavaFacts.Flags.DEPRECATED);
+		}
+	}
+
+	public void addClassAccessFlags(int access, BlankNodeOrIRI id) {
+		addAccessFlags(access, id);
+		if ((access & Opcodes.ACC_MODULE) != 0) { // class
+			putFlag(id, JavaFacts.Flags.MODULE);
+		}
+	}
+
+	/**
+	 * Also for parameters
+	 *
+	 * @param access
+	 * @param id
+	 */
+	public void addFieldAccessFlags(int access, BlankNodeOrIRI id) {
+		addAccessFlags(access, id);
+		if ((access & Opcodes.ACC_VOLATILE) != 0) { // 0x40, field
+			putFlag(id, JavaFacts.Flags.VOLATILE);
+		}
+		if ((access & Opcodes.ACC_TRANSIENT) != 0) { // 0x80, field
+			putFlag(id, JavaFacts.Flags.TRANSIENT);
+		}
+		if ((access & Opcodes.ACC_MANDATED) != 0) { // parameter, module
+			putFlag(id, JavaFacts.Flags.MANDATED);
+		}
+	}
+
+	public void addMethodAccessFlags(int access, BlankNodeOrIRI id) {
+		addAccessFlags(access, id);
+		if ((access & Opcodes.ACC_SYNCHRONIZED) != 0) { // method
+			putFlag(id, JavaFacts.Flags.SUPER);
+		}
+		if ((access & Opcodes.ACC_BRIDGE) != 0) { // 0x40, method
+			putFlag(id, JavaFacts.Flags.BRIDGE);
+		}
+		if ((access & Opcodes.ACC_VARARGS) != 0) { // 0x80, method
+			putFlag(id, JavaFacts.Flags.VARARGS);
+		}
+	}
+
+	public void addModuleAccessFlags(int access, BlankNodeOrIRI id) {
+		addAccessFlags(access, id);
+		if ((access & Opcodes.ACC_STATIC_PHASE) != 0) { // 0x40, module
+			putFlag(id, JavaFacts.Flags.STATIC_PHASE);
+		}
+		if ((access & Opcodes.ACC_MANDATED) != 0) { // parameter, module
+			putFlag(id, JavaFacts.Flags.MANDATED);
+		}
+	}
+
 	protected IRI getClassId() {
 		return currentClass.peek();
 	}
@@ -52,8 +139,16 @@ public class ClassFactExtractor extends ClassVisitor {
 		return JavaFacts.method(model, getClassId(), name, desc);
 	}
 
+	public Model getModel() {
+		return model;
+	}
+
 	protected Integer indentLevel() {
 		return currentClass.size();
+	}
+
+	public void putFlag(BlankNodeOrIRI id, IRI flag) {
+		model.add(id, JavaFacts.P_HAS_FLAG, flag);
 	}
 
 	@Override
@@ -186,101 +281,5 @@ public class ClassFactExtractor extends ClassVisitor {
 		log.logf("visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n", typeRef, typePath.toString(),
 				desc, visible);
 		return null;
-	}
-
-	public void addAccessFlags(int access, BlankNodeOrIRI id) {
-		if ((access & Opcodes.ACC_PUBLIC) != 0) {
-			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PUBLIC);
-		} else if ((access & Opcodes.ACC_PRIVATE) != 0) {
-			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PRIVATE);
-		} else if ((access & Opcodes.ACC_PROTECTED) != 0) {
-			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PROTECTED);
-		} else {
-			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PACKAGE);
-		}
-		if ((access & Opcodes.ACC_STATIC) != 0) {
-			putFlag(id, JavaFacts.Flags.STATIC);
-		}
-		if ((access & Opcodes.ACC_FINAL) != 0) {
-			putFlag(id, JavaFacts.Flags.FINAL);
-		}
-		if ((access & Opcodes.ACC_NATIVE) != 0) {
-			putFlag(id, JavaFacts.Flags.NATIVE);
-		}
-		if ((access & Opcodes.ACC_INTERFACE) != 0) {
-			putFlag(id, JavaFacts.Flags.INTERFACE);
-		}
-		if ((access & Opcodes.ACC_ABSTRACT) != 0) {
-			putFlag(id, JavaFacts.Flags.ABSTRACT);
-		}
-		if ((access & Opcodes.ACC_SYNTHETIC) != 0) {
-			putFlag(id, JavaFacts.Flags.SYNTHETIC);
-		}
-		if ((access & Opcodes.ACC_ANNOTATION) != 0) {
-			putFlag(id, JavaFacts.Flags.ANNOTATION);
-		}
-		if ((access & Opcodes.ACC_ENUM) != 0) {
-			putFlag(id, JavaFacts.Flags.ENUM);
-		}
-		if ((access & Opcodes.ACC_DEPRECATED) != 0) {
-			putFlag(id, JavaFacts.Flags.DEPRECATED);
-		}
-	}
-
-	public void addClassAccessFlags(int access, BlankNodeOrIRI id) {
-		addAccessFlags(access, id);
-		if ((access & Opcodes.ACC_MODULE) != 0) { // class
-			putFlag(id, JavaFacts.Flags.MODULE);
-		}
-	}
-
-	public void addMethodAccessFlags(int access, BlankNodeOrIRI id) {
-		addAccessFlags(access, id);
-		if ((access & Opcodes.ACC_SYNCHRONIZED) != 0) { // method
-			putFlag(id, JavaFacts.Flags.SUPER);
-		}
-		if ((access & Opcodes.ACC_BRIDGE) != 0) { // 0x40, method
-			putFlag(id, JavaFacts.Flags.BRIDGE);
-		}
-		if ((access & Opcodes.ACC_VARARGS) != 0) { // 0x80, method
-			putFlag(id, JavaFacts.Flags.VARARGS);
-		}
-	}
-
-	/**
-	 * Also for parameters
-	 *
-	 * @param access
-	 * @param id
-	 */
-	public void addFieldAccessFlags(int access, BlankNodeOrIRI id) {
-		addAccessFlags(access, id);
-		if ((access & Opcodes.ACC_VOLATILE) != 0) { // 0x40, field
-			putFlag(id, JavaFacts.Flags.VOLATILE);
-		}
-		if ((access & Opcodes.ACC_TRANSIENT) != 0) { // 0x80, field
-			putFlag(id, JavaFacts.Flags.TRANSIENT);
-		}
-		if ((access & Opcodes.ACC_MANDATED) != 0) { // parameter, module
-			putFlag(id, JavaFacts.Flags.MANDATED);
-		}
-	}
-
-	public void addModuleAccessFlags(int access, BlankNodeOrIRI id) {
-		addAccessFlags(access, id);
-		if ((access & Opcodes.ACC_STATIC_PHASE) != 0) { // 0x40, module
-			putFlag(id, JavaFacts.Flags.STATIC_PHASE);
-		}
-		if ((access & Opcodes.ACC_MANDATED) != 0) { // parameter, module
-			putFlag(id, JavaFacts.Flags.MANDATED);
-		}
-	}
-
-	public void putFlag(BlankNodeOrIRI id, IRI flag) {
-		model.add(id, JavaFacts.P_HAS_FLAG, flag);
-	}
-
-	public Model getModel() {
-		return model;
 	}
 }

@@ -13,22 +13,38 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.util.Printer;
 
 public abstract class JavaFacts {
-	private static final RdfVocabulary rdf = RdfVocabulary.getInstance();
-	private static final CommonVocabulary common = CommonVocabulary.getInstance();
-
-	public static final String javaPrefix = "http://model.nuthatchery.org/java/";
-	public static final String javaFlagsPrefix = javaPrefix + "flags/";
-	public static final String javaMethodsPrefix = javaPrefix + "methods/";
-	public static final String javaTypesPrefix = javaPrefix + "types/";
-	public static final Model javaModel = //
-			ModelFactory.getInstance().createModel(javaPrefix);
-	public static final Model javaFlagsModel = //
-			ModelFactory.getInstance().createModel(javaFlagsPrefix);
-	public static final Model javaMethodsModel = //
-			ModelFactory.getInstance().createModel(javaMethodsPrefix);
-	public static final Model javaTypesModel = //
-			ModelFactory.getInstance().createModel(javaTypesPrefix);
-
+	/**
+	 * Copied from JVM specs: Flags
+	 *
+	 * @author anna, anya
+	 */
+	public static final class Flags {
+		public static final IRI INTERFACE = javaModel.node("interface");
+		public static final IRI FINAL = javaFlagsModel.node("final");
+		public static final IRI SUPER = javaFlagsModel.node("super");
+		public static final IRI MODULE = javaFlagsModel.node("module");
+		public static final IRI ABSTRACT = javaFlagsModel.node("abstract");
+		public static final IRI SYNTHETIC = javaFlagsModel.node("synthetic");
+		public static final IRI ANNOTATION = javaFlagsModel.node("annotation");
+		public static final IRI ENUM = javaFlagsModel.node("enum");
+		public static final IRI NATIVE = javaFlagsModel.node("native");
+		public static final IRI PRIVATE = javaFlagsModel.node("private");
+		public static final IRI PROTECTED = javaFlagsModel.node("protected");
+		public static final IRI VOLATILE = javaFlagsModel.node("volatile");
+		public static final IRI TRANSIENT = javaFlagsModel.node("transient");
+		public static final IRI SYNCHRONIZED = javaFlagsModel.node("synchronized");
+		public static final IRI BRIDGE = javaFlagsModel.node("bridge");
+		public static final IRI VARARGS = javaFlagsModel.node("varArgs");
+		public static final IRI STRICT = javaFlagsModel.node("strict");
+		public static final IRI MANDATED = javaFlagsModel.node("mandated");
+		public static final IRI OPEN = javaFlagsModel.node("open");
+		public static final IRI TRANSITIVE = javaFlagsModel.node("transitive");
+		public static final IRI STATIC_PHASE = javaFlagsModel.node("staticPhase");
+		public static final IRI PUBLIC = javaFlagsModel.node("public");
+		public static final IRI STATIC = javaFlagsModel.node("static");
+		public static final IRI DEPRECATED = javaFlagsModel.node("deprecated");
+		public static final IRI PACKAGE = javaFlagsModel.node("package");
+	}
 	public static class Types {
 		public static final IRI ARRAY_REF = javaTypesModel.node("array-ref");
 		public static final IRI ARRAY_DIM = javaTypesModel.node("array-dim");
@@ -81,6 +97,22 @@ public abstract class JavaFacts {
 		}
 	}
 
+	private static final RdfVocabulary rdf = RdfVocabulary.getInstance();
+	private static final CommonVocabulary common = CommonVocabulary.getInstance();
+	public static final String javaPrefix = "http://model.nuthatchery.org/java/";
+	public static final String javaFlagsPrefix = javaPrefix + "flags/";
+	public static final String javaMethodsPrefix = javaPrefix + "methods/";
+	public static final String javaTypesPrefix = javaPrefix + "types/";
+	public static final Model javaModel = //
+			ModelFactory.getInstance().createModel(javaPrefix);
+	public static final Model javaFlagsModel = //
+			ModelFactory.getInstance().createModel(javaFlagsPrefix);
+
+	public static final Model javaMethodsModel = //
+			ModelFactory.getInstance().createModel(javaMethodsPrefix);
+
+	public static final Model javaTypesModel = //
+			ModelFactory.getInstance().createModel(javaTypesPrefix);
 	public static final IRI ACCESS = javaModel.node("access");
 	public static final IRI CALLS = javaModel.node("calls");
 	public static final IRI C_CLASS = javaModel.node("class");
@@ -92,47 +124,15 @@ public abstract class JavaFacts {
 	public static final IRI P_EXTENDS = javaModel.node("extends");
 	public static final IRI GENERIC = javaModel.node("generic");
 	public static final IRI P_SUBTYPE_OF = javaModel.node("implements");
-	public static final IRI INITIAL_VALUE = javaModel.node("initialValue");
 
+	public static final IRI INITIAL_VALUE = javaModel.node("initialValue");
 	public static final IRI ACCESS_FIELD = javaModel.node("field");
 	public static final IRI ACCESS_DYNAMIC = javaModel.node("dynamic");
 	public static final IRI ACCESS_SPECIAL = javaModel.node("special");
 	public static final IRI ACCESS_STATIC = javaModel.node("static");
 	public static final IRI ACCESS_INTERFACE = javaModel.node("interface");
-	public static final IRI ACCESS_VIRTUAL = javaModel.node("virtual");
 
-	/**
-	 * Copied from JVM specs: Flags
-	 *
-	 * @author anna, anya
-	 */
-	public static final class Flags {
-		public static final IRI INTERFACE = javaModel.node("interface");
-		public static final IRI FINAL = javaFlagsModel.node("final");
-		public static final IRI SUPER = javaFlagsModel.node("super");
-		public static final IRI MODULE = javaFlagsModel.node("module");
-		public static final IRI ABSTRACT = javaFlagsModel.node("abstract");
-		public static final IRI SYNTHETIC = javaFlagsModel.node("synthetic");
-		public static final IRI ANNOTATION = javaFlagsModel.node("annotation");
-		public static final IRI ENUM = javaFlagsModel.node("enum");
-		public static final IRI NATIVE = javaFlagsModel.node("native");
-		public static final IRI PRIVATE = javaFlagsModel.node("private");
-		public static final IRI PROTECTED = javaFlagsModel.node("protected");
-		public static final IRI VOLATILE = javaFlagsModel.node("volatile");
-		public static final IRI TRANSIENT = javaFlagsModel.node("transient");
-		public static final IRI SYNCHRONIZED = javaFlagsModel.node("synchronized");
-		public static final IRI BRIDGE = javaFlagsModel.node("bridge");
-		public static final IRI VARARGS = javaFlagsModel.node("varArgs");
-		public static final IRI STRICT = javaFlagsModel.node("strict");
-		public static final IRI MANDATED = javaFlagsModel.node("mandated");
-		public static final IRI OPEN = javaFlagsModel.node("open");
-		public static final IRI TRANSITIVE = javaFlagsModel.node("transitive");
-		public static final IRI STATIC_PHASE = javaFlagsModel.node("staticPhase");
-		public static final IRI PUBLIC = javaFlagsModel.node("public");
-		public static final IRI STATIC = javaFlagsModel.node("static");
-		public static final IRI DEPRECATED = javaFlagsModel.node("deprecated");
-		public static final IRI PACKAGE = javaFlagsModel.node("package");
-	}
+	public static final IRI ACCESS_VIRTUAL = javaModel.node("virtual");
 
 	public static final IRI C_MEMBER = javaModel.node("member");
 	public static final IRI C_METHOD = javaModel.node("method");
@@ -198,6 +198,19 @@ public abstract class JavaFacts {
 		javaModel.add(C_JVM_INSN, Predicates.IS_A, rdf.RDFS_CLASS);
 	}
 
+	private static void isProperty(Model m, IRI prop, BlankNodeOrIRI sub, RDFTerm obj, RDFTerm... more) {
+		m.add(prop, rdf.RDF_TYPE, rdf.RDF_PROPERTY);
+		if (sub != null) {
+			m.add(prop, rdf.RDFS_RANGE, sub);
+		}
+		if (obj != null) {
+			m.add(prop, rdf.RDFS_DOMAIN, obj);
+		}
+		for (int i = 0; i < more.length; i += 2) {
+			m.add(prop, (IRI) more[i], more[i + 1]);
+		}
+	}
+
 	public static IRI method(Model m, IRI owner, String memberName, String memberDesc) {
 		memberName = memberName.replaceAll("[<>]", "\\$");
 		// return m.node(owner, memberName + "/" + memberDesc);
@@ -243,19 +256,6 @@ public abstract class JavaFacts {
 		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true)
 		// + UriEncoding.percentEncodeIri(methodDesc,
 		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true));
-	}
-
-	private static void isProperty(Model m, IRI prop, BlankNodeOrIRI sub, RDFTerm obj, RDFTerm... more) {
-		m.add(prop, rdf.RDF_TYPE, rdf.RDF_PROPERTY);
-		if (sub != null) {
-			m.add(prop, rdf.RDFS_RANGE, sub);
-		}
-		if (obj != null) {
-			m.add(prop, rdf.RDFS_DOMAIN, obj);
-		}
-		for (int i = 0; i < more.length; i += 2) {
-			m.add(prop, (IRI) more[i], more[i + 1]);
-		}
 	}
 
 	public static IRI opcode(int opcode) {

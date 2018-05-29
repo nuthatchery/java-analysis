@@ -44,6 +44,81 @@ public class ExtractApi {
 	private static JenaRDF jenaRDF;
 	private static Model defaultModel;
 
+	private static void addModelName(IRI s) {
+		defaultModel.add(s, ModelFactory.getInstance().rdfVocabulary().RDFS_IS_DEFINED_BY, s);
+	}
+
+	private static void extractModel(Dataset dataset, Model mainModel, String modelName, String arg)
+			throws IOException, FileNotFoundException {
+		String prc = "Processing:  ";
+		String chk = "(checkpoint) ";
+		String msg = prc;
+		List<String> files = findFiles(arg);
+		Console console = System.console();
+		int i = 0;
+		int n = files.size();
+
+		if(modelName == null) {
+			modelName = "";
+		}
+		Model model = mainModel.model(DB_PREFIX + modelName, "this:"); // DB_PREFIX + modelName + "/");
+		for (String file : files) {
+			System.out.println("Processing: " + file);
+			if (console != null) {
+				console.printf("[%02d%%] %s%s\r", (i * 100) / n, msg, fill(file, 60, "…", true));
+			}
+			if (demoMode && file.endsWith(".class")) {
+				addModelName(model.getName());
+				ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
+				ClassReader cr = new ClassReader(ExtractApi.class.getResourceAsStream(file));
+				cr.accept(ea, ClassReader.EXPAND_FRAMES);
+			} else if (file.endsWith(".class")) {
+				addModelName(model.getName());
+				try (InputStream stream = new FileInputStream(file)) {
+					ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
+					ClassReader cr = new ClassReader(stream);
+					cr.accept(ea, ClassReader.EXPAND_FRAMES);
+				}
+			} else if (file.endsWith(".jar")) {
+				try (JarFile jarFile = new JarFile(file)) {
+					String name = file;
+					if (name.contains("/")) {
+						name = name.substring(name.lastIndexOf("/") + 1, name.length());
+					}
+					Model m = model.model(DB_PREFIX + name, "this:");
+					addModelName(m.getName());
+					ClassFactExtractor ea = new ClassFactExtractor(m, JavaUtil.logger(logLevel));
+					int nEntries = jarFile.size();
+					int j = 0;
+					for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+						JarEntry nextElement = entries.nextElement();
+						if (nextElement.getName().endsWith(".class")) {
+							try (InputStream stream = jarFile.getInputStream(nextElement)) {
+
+								if (console != null) {
+									console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
+											fill(file, 60, "…", true));
+								}
+								ClassReader cr = new ClassReader(stream);
+								cr.accept(ea, ClassReader.EXPAND_FRAMES);
+							}
+						} else if (console != null) {
+							console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
+									fill("", 60, "…", true));
+						}
+						j++;
+					}
+				}
+			}
+			if (i++ % 10 == 0) {
+				TDB.sync(dataset);
+				msg = chk;
+			} else if (i % 10 == 5) {
+				msg = prc;
+			}
+		}
+	}
+
 	public static String fill(String s, int size, String ellipsis, boolean flushRight) {
 		if (s.length() > size) {
 			if (flushRight) {
@@ -65,12 +140,44 @@ public class ExtractApi {
 
 	}
 
+	private static List<String> findFiles(String loc) throws IOException {
+		List<String> files = new ArrayList<>();
+		if (demoMode) {
+			files.add(loc);
+			return files;
+		}
+		FileSystem fs = FileSystems.getDefault();
+		int nClasses = 0;
+		int nJars = 0;
+		List<String> todo = new ArrayList<>();
+		todo.add(loc);
+		for (int i = 0; i < todo.size(); i++) {
+			Path path = fs.getPath(todo.get(i));
+			String str = path.toString();
+			if (Files.isRegularFile(path)) {
+				if (str.endsWith(".class")) {
+					files.add(path.toString());
+					nClasses++;
+				} else if (str.endsWith(".jar")) {
+					files.add(path.toString());
+					nJars++;
+				}
+			} else if (Files.isDirectory(path)) {
+				System.out.println("Adding files from " + path);
+				Files.list(path).forEach((Path p) -> {
+					todo.add(p.toString());
+				});
+			}
+		}
+		System.out.println("" + nClasses + " class files and " + nJars + " jars found in " + loc + ".");
+		return files;
+	}
+
 	public static void main(String[] args) throws IOException {
 		ModelFactory.setFactory(() -> new JenaRDF());
 		ModelFactory mf = ModelFactory.getInstance();
-		RdfVocabulary rdfVocabulary = RdfVocabulary.getInstance();
+		RdfVocabulary.getInstance();
 		jenaRDF = new JenaRDF();
-		boolean tdb = false;
 		Dataset dataset = DatasetFactory.create();
 		String outFile = "/tmp/data.trig";
 		setupDataset(dataset);
@@ -148,114 +255,6 @@ public class ExtractApi {
 
 	private static org.apache.jena.rdf.model.Model toJenaModel(Model m) {
 		return org.apache.jena.rdf.model.ModelFactory.createModelForGraph(jenaRDF.asJenaGraph(m.getGraph()));
-	}
-
-	private static void extractModel(Dataset dataset, Model mainModel, String modelName, String arg)
-			throws IOException, FileNotFoundException {
-		String prc = "Processing:  ";
-		String chk = "(checkpoint) ";
-		String msg = prc;
-		List<String> files = findFiles(arg);
-		Console console = System.console();
-		int i = 0;
-		int n = files.size();
-
-		if(modelName == null) {
-			modelName = "";
-		}
-		Model model = mainModel.model(DB_PREFIX + modelName, "this:"); // DB_PREFIX + modelName + "/");
-		for (String file : files) {
-			System.out.println("Processing: " + file);
-			if (console != null) {
-				console.printf("[%02d%%] %s%s\r", (i * 100) / n, msg, fill(file, 60, "…", true));
-			}
-			if (demoMode && file.endsWith(".class")) {
-				addModelName(model.getName());
-				ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
-				ClassReader cr = new ClassReader(ExtractApi.class.getResourceAsStream(file));
-				cr.accept(ea, ClassReader.EXPAND_FRAMES);
-			} else if (file.endsWith(".class")) {
-				addModelName(model.getName());
-				try (InputStream stream = new FileInputStream(file)) {
-					ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
-					ClassReader cr = new ClassReader(stream);
-					cr.accept(ea, ClassReader.EXPAND_FRAMES);
-				}
-			} else if (file.endsWith(".jar")) {
-				try (JarFile jarFile = new JarFile(file)) {
-					String name = file;
-					if (name.contains("/")) {
-						name = name.substring(name.lastIndexOf("/") + 1, name.length());
-					}
-					Model m = model.model(DB_PREFIX + name, "this:");
-					addModelName(m.getName());
-					ClassFactExtractor ea = new ClassFactExtractor(m, JavaUtil.logger(logLevel));
-					int nEntries = jarFile.size();
-					int j = 0;
-					for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
-						JarEntry nextElement = entries.nextElement();
-						if (nextElement.getName().endsWith(".class")) {
-							try (InputStream stream = jarFile.getInputStream(nextElement)) {
-
-								if (console != null) {
-									console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
-											fill(file, 60, "…", true));
-								}
-								ClassReader cr = new ClassReader(stream);
-								cr.accept(ea, ClassReader.EXPAND_FRAMES);
-							}
-						} else if (console != null) {
-							console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
-									fill("", 60, "…", true));
-						}
-						j++;
-					}
-				}
-			}
-			if (i++ % 10 == 0) {
-				TDB.sync(dataset);
-				msg = chk;
-			} else if (i % 10 == 5) {
-				msg = prc;
-			}
-		}
-	}
-
-	private static void addModelName(IRI s) {
-		defaultModel.add(s, ModelFactory.getInstance().rdfVocabulary().RDFS_IS_DEFINED_BY, s);
-	}
-
-	private static List<String> findFiles(String loc) throws IOException {
-		List<String> files = new ArrayList<>();
-		if (demoMode) {
-			files.add(loc);
-			return files;
-		}
-		FileSystem fs = FileSystems.getDefault();
-		int nClasses = 0;
-		int nJars = 0;
-		List<String> todo = new ArrayList<>();
-		todo.add(loc);
-		for (int i = 0; i < todo.size(); i++) {
-			Path path = fs.getPath(todo.get(i));
-			String str = path.toString();
-			if (Files.isRegularFile(path)) {
-				if (str.endsWith(".class")) {
-					files.add(path.toString());
-					nClasses++;
-				} else if (str.endsWith(".jar")) {
-					files.add(path.toString());
-					nJars++;
-				}
-			} else if (Files.isDirectory(path)) {
-				System.out.println("Adding files from " + path);
-				Files.list(path).forEach((Path p) -> {
-					todo.add(p.toString());
-				});
-			}
-		}
-		System.out.println("" + nClasses + " class files and " + nJars + " jars found in " + loc + ".");
-		return files;
 	}
 
 }
