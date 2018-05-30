@@ -42,9 +42,6 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	 *
 	 */
 	private final ClassFactExtractor parent;
-	private final String descName;
-	private String methodName;
-
 	private int startLine;
 
 	public MethodFactExtractor(ClassFactExtractor parent, IRI methodId, int access, String name, String desc,
@@ -54,15 +51,12 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		this.currentMethodId = methodId;
 		this.log = log;
 		this.model = parent.getModel();
-		this.methodName = name;
-		this.descName = parent.className + "." + name + ":" + desc;
 		parent.currentLine = -1;
 	}
 
 	protected void putInstruction(int opcode, Object... args) {
-		if (args.length % 2 == 1) {
+		if (args.length % 2 == 1)
 			throw new IllegalArgumentException();
-		}
 
 		insnList.add(currentInsn);
 		model.add(currentInsn, JavaFacts.P_CALL, JavaFacts.opcode(opcode));
@@ -76,9 +70,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 					obj = model.literal(args[i + 1]);
 				}
 				model.add(currentInsn, pred, obj);
-			} else {
+			} else
 				throw new IllegalArgumentException();
-			}
 		}
 		currentInsn = model.blank(String.valueOf(count++));
 	}
@@ -90,9 +83,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	 * @return The argument, or null if not found
 	 */
 	protected Object stackFind(int argNum) {
-		if (stack == null) {
+		if (stack == null)
 			return null;
-		}
 
 		int i = stack.size() - 1;
 		for (; i >= 0; i--, argNum--) {
@@ -100,9 +92,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 				// piece of data
 				i--;
 			}
-			if (argNum == 0) {
+			if (argNum == 0)
 				return stack.get(i);
-			}
 		}
 		return null;
 	}
@@ -115,11 +106,10 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	 */
 	protected Object stackGetType(int argNum) {
 		Object o = stackFind(argNum);
-		if (o instanceof Label) {
+		if (o instanceof Label)
 			return uninitializedTypes.get(o);
-		} else {
+		else
 			return o;
-		}
 	}
 
 	/**
@@ -130,13 +120,12 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	 */
 	protected Object stackGetType(int argNum, String dflt) {
 		Object o = stackFind(argNum);
-		if (o instanceof Label) {
+		if (o instanceof Label)
 			return uninitializedTypes.get(o);
-		} else if (o == null) {
+		else if (o == null)
 			return dflt;
-		} else {
+		else
 			return o;
-		}
 	}
 
 	/**
@@ -240,9 +229,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitJumpInsn(int opcode, Label label) {
 		BlankNode target = model.blank(label.toString());
 		putInstruction(opcode, JavaFacts.P_OPERAND_LABEL, target);
-		if (opcode == Opcodes.JSR) {
+		if (opcode == Opcodes.JSR)
 			return;
-		}
 		super.visitJumpInsn(opcode, label);
 	}
 
@@ -284,9 +272,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 				JavaUtil.decodeDescriptor(name, desc), desc, signature, start, end, index);
 		int startIndex = labels.indexOf(start);
 		int endIndex = labels.indexOf(end);
-		if (startIndex < 0 || endIndex < 0) {
+		if (startIndex < 0 || endIndex < 0)
 			throw new IllegalStateException("wrong labels!");
-		}
 		for (VarUsage vu : localVarUse) {
 			if (vu.varNum == index && startIndex <= vu.lastLabel && endIndex > vu.lastLabel) {
 				model.add(vu.varId, CommonVocabulary.P_NAME, model.literal(name));
