@@ -1,6 +1,10 @@
 import java.util.function.Supplier;
 
 public class Test {
+	class Bar {
+
+	}
+
 	private Test x;
 
 	public void foo() {
@@ -18,9 +22,5 @@ public class Test {
 		do {
 			o = o.x;
 		} while (o != null);
-	}
-
-	class Bar {
-
 	}
 }

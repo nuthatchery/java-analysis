@@ -3,9 +3,9 @@ public interface IMutablePosition {
 
 	int getX();
 
-	void setX(int x);
-
 	int getY();
+
+	void setX(int x);
 
 	void setY(int y);
 

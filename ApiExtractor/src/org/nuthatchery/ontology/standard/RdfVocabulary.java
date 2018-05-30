@@ -2,7 +2,6 @@ package org.nuthatchery.ontology.standard;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.Literal;
-import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.Types;
 import org.nuthatchery.ontology.Model;
 import org.nuthatchery.ontology.ModelFactory;
@@ -74,30 +73,16 @@ public class RdfVocabulary {
 	 */
 	public static final IRI RDF_VALUE;
 
-	/**
-	 * Container indices
-	 *
-	 * @param index
-	 *            The index
-	 * @return The IRI <code>rdf:_</code>index
-	 * @requires index >= 1
-	 */
-	public IRI index(int index) {
-		if (index < 1) {
-			throw new IllegalArgumentException(String.valueOf(index));
-		}
-		return rdfModel.node(String.format("_%d", index));
-	}
-
 	public static final Literal LITERAL_FALSE;
+
 	public static final Literal LITERAL_ONE;
 	public static final Literal LITERAL_TRUE;
 	public static final Literal LITERAL_ZERO;
-
 	/**
 	 * Object of property P must be of class C
 	 */
 	public static final IRI RDFS_DOMAIN;
+
 	/**
 	 * Subject of property P must be of class C
 	 */
@@ -156,7 +141,6 @@ public class RdfVocabulary {
 	public static final IRI RDFS_LABEL;
 	public static final IRI TYPE_BOOLEAN = Types.XSD_BOOLEAN;
 	public static final IRI TYPE_DECIMAL = Types.XSD_DECIMAL;
-
 	public static final IRI TYPE_DOUBLE = Types.XSD_DOUBLE;
 
 	public static final IRI TYPE_FLOAT = Types.XSD_FLOAT;
@@ -168,7 +152,7 @@ public class RdfVocabulary {
 	static {
 		rdfModel = ModelFactory.getInstance().createModel(RDF_PREFIX);
 		rdfsModel = ModelFactory.getInstance().createModel(RDFS_PREFIX);
-		//xsdModel = new Model("http://www.w3.org/2001/XMLSchema#", factory);
+		// xsdModel = new Model("http://www.w3.org/2001/XMLSchema#", factory);
 		RDF_TYPE = rdfModel.node("type");
 		RDF_PROPERTY = rdfModel.node("Property");
 		RDF_XMLLITERAL = rdfModel.node("XMLLiteral");
@@ -218,5 +202,20 @@ public class RdfVocabulary {
 
 	public static Model getRdfsModel() {
 		return rdfsModel;
+	}
+
+	/**
+	 * Container indices
+	 *
+	 * @param index
+	 *            The index
+	 * @return The IRI <code>rdf:_</code>index
+	 * @requires index >= 1
+	 */
+	public IRI index(int index) {
+		if (index < 1) {
+			throw new IllegalArgumentException(String.valueOf(index));
+		}
+		return rdfModel.node(String.format("_%d", index));
 	}
 }

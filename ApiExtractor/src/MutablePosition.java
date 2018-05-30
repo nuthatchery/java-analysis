@@ -9,7 +9,9 @@ public class MutablePosition implements IMutablePosition {
 		this.y = y;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see IMutablePosition#getX()
 	 */
 	@Override
@@ -17,17 +19,9 @@ public class MutablePosition implements IMutablePosition {
 		return x;
 	}
 
-	/* (non-Javadoc)
-	 * @see IMutablePosition#setX(int)
-	 */
-	@Override
-	public void setX(int x) {
-		MutablePosition[] foo = new MutablePosition[5];
-		if (foo == null && x < 3)
-			this.x = foo[x].x;
-	}
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see IMutablePosition#getY()
 	 */
 	@Override
@@ -35,7 +29,22 @@ public class MutablePosition implements IMutablePosition {
 		return y;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see IMutablePosition#setX(int)
+	 */
+	@Override
+	public void setX(int x) {
+		MutablePosition[] foo = new MutablePosition[5];
+		if (foo == null && x < 3) {
+			this.x = foo[x].x;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
 	 * @see IMutablePosition#setY(int)
 	 */
 	@Override

@@ -140,12 +140,13 @@ public class UriSchemes {
 	 * @return True if portNum is default port for scheme
 	 */
 	public static boolean hasPort(String scheme, String portNum) {
-		if (portNum.startsWith(":"))
+		if (portNum.startsWith(":")) {
 			return hasPort(scheme, portNum.substring(1));
-		else if (portNum.equals(""))
+		} else if (portNum.equals("")) {
 			return false;
-		else
+		} else {
 			return hasPort(scheme, Integer.valueOf(portNum));
+		}
 	}
 
 	/**
@@ -155,9 +156,10 @@ public class UriSchemes {
 	 * @return "//" if the scheme is unknown or is known to use a network location
 	 */
 	public static String hierPartPrefix(String scheme) {
-		if (SCHEME_MAP.getOrDefault(scheme, UNKNOWN_PORT) == NO_NETWORK_LOCATION)
+		if (SCHEME_MAP.getOrDefault(scheme, UNKNOWN_PORT) == NO_NETWORK_LOCATION) {
 			return "";
-		else
+		} else {
 			return "//";
+		}
 	}
 }

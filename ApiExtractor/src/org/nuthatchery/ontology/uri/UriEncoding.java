@@ -110,11 +110,12 @@ public class UriEncoding {
 	}
 
 	private static String encodeCheck(String prefix, int first, int last) {
-		if (first == last)
+		if (first == last) {
 			return String.format("  %s c == 0x%04X  // %s%n", prefix, first, Character.getName(first));
-		else
+		} else {
 			return String.format("  %s (c >= 0x%04X && c <= 0x%04X)  // %s – %s%n", prefix, first, last,
 					Character.getName(first), Character.getName(last));
+		}
 
 	}
 

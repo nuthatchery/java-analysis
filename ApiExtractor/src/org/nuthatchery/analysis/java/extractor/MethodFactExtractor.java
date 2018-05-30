@@ -2,9 +2,7 @@ package org.nuthatchery.analysis.java.extractor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.rdf.api.BlankNode;
@@ -26,6 +24,12 @@ import org.objectweb.asm.TypePath;
 import org.objectweb.asm.commons.AnalyzerAdapter;
 
 class MethodFactExtractor extends AnalyzerAdapter {
+	class VarUsage {
+		int lastLabel;
+		int varNum;
+		BlankNodeOrIRI varId;
+	}
+
 	private static int count = 0;
 	private final IRI currentMethodId;
 	private ListBuilder insnList;
@@ -40,17 +44,18 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	private final ClassFactExtractor parent;
 	private final String descName;
 	private String methodName;
+
 	private int startLine;
 
 	public MethodFactExtractor(ClassFactExtractor parent, IRI methodId, int access, String name, String desc,
 			ILogger log) {
-		super(Opcodes.ASM6, ClassFactExtractor.className, access, name, desc, null);
+		super(Opcodes.ASM6, parent.className, access, name, desc, null);
 		this.parent = parent;
 		this.currentMethodId = methodId;
 		this.log = log;
 		this.model = parent.getModel();
 		this.methodName = name;
-		this.descName = ClassFactExtractor.className + "." + name + ":" + desc;
+		this.descName = parent.className + "." + name + ":" + desc;
 		parent.currentLine = -1;
 	}
 
@@ -173,7 +178,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitEnd() {
-		if(startLine != -1 && parent.currentLine != -1) {
+		if (startLine != -1 && parent.currentLine != -1) {
 			BlankNode start = model.blank();
 			model.add(start, JavaFacts.P_LINE, model.literal(startLine));
 			BlankNode end = model.blank();
@@ -497,11 +502,5 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		if (opcode != Opcodes.RET) {
 			super.visitVarInsn(opcode, var);
 		}
-	}
-
-	class VarUsage {
-		int lastLabel;
-		int varNum;
-		BlankNodeOrIRI varId;
 	}
 }

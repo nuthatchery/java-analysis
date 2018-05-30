@@ -6,16 +6,17 @@ import org.apache.commons.rdf.api.Dataset;
 import org.apache.commons.rdf.api.Graph;
 import org.apache.commons.rdf.api.RDF;
 import org.apache.commons.rdf.simple.SimpleRDF;
-import org.nuthatchery.ontology.standard.RdfVocabulary;
 
 public class ModelFactory {
 	private static ModelFactory instance;
+
 	public static synchronized ModelFactory getInstance() {
 		if (instance == null) {
 			instance = new ModelFactory(() -> new SimpleRDF());
 		}
 		return instance;
 	}
+
 	public static synchronized void setFactory(Supplier<RDF> constructor) {
 		instance = new ModelFactory(constructor);
 	}
@@ -45,7 +46,6 @@ public class ModelFactory {
 	public Model createModel(String name, String prefix) {
 		return new Model(null, name, prefix, createRDF());
 	}
-
 
 	public RDF createRDF() {
 		return constructor.get();

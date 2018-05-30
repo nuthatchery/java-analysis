@@ -22,8 +22,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 
 public class ClassFactExtractor extends ClassVisitor {
-	public static String className; // TODO
+	public String className; // TODO
 	protected String context;
+
 	protected final Stack<IRI> currentClass = new Stack<>();
 
 	protected int currentLine = -1;
@@ -31,9 +32,9 @@ public class ClassFactExtractor extends ClassVisitor {
 	protected final Stack<String> currentSource = new Stack<>();
 
 	private final Model model;
-
 	private final ILogger log;
 	private IRI memberId;
+
 	protected Set<String> seen = new HashSet<>();
 
 	public ClassFactExtractor(Model fw, ILogger logger) {
@@ -243,8 +244,8 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	@Override
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-		log.logf("visitInnerClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name, outerName,
-				innerName, access);
+		log.logf("visitInnerClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name, outerName, innerName,
+				access);
 
 		// model.add(id, CommonVocabulary.P_IDNAME, model.literal(className));
 
@@ -338,13 +339,5 @@ public class ClassFactExtractor extends ClassVisitor {
 				typePath.toString(), desc, visible);
 		super.visitTypeAnnotation(typeRef, typePath, desc, visible);
 		return null;
-	}
-
-	public static class Foo {
-		ClassFactExtractor foo;
-
-		public int line() {
-			return foo.currentLine;
-		}
 	}
 }

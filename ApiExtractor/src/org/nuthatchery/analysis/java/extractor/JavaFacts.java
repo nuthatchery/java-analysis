@@ -44,6 +44,7 @@ public abstract class JavaFacts {
 		public static final IRI DEPRECATED = javaFlagsModel.node("deprecated");
 		public static final IRI PACKAGE = javaFlagsModel.node("package");
 	}
+
 	public static class Types {
 		public static final IRI ARRAY_REF = javaTypesModel.node("array-ref");
 		public static final IRI ARRAY_DIM = javaTypesModel.node("array-dim");
@@ -172,7 +173,7 @@ public abstract class JavaFacts {
 	public static final IRI P_OPERAND_VAR = javaModel.node("varOperand");
 	public static final IRI P_OPERAND_LABEL = javaModel.node("labelOperand");
 	public static final IRI P_OPERAND_LIST = javaModel.node("listOperand");
-	public static final IRI P_TRY_CATCH_BLOCK =  javaModel.node("tryCatchBlock");
+	public static final IRI P_TRY_CATCH_BLOCK = javaModel.node("tryCatchBlock");
 	public static final IRI P_TYPE = javaModel.node("type");
 	public static final IRI P_RETURN_TYPE = javaModel.node("rType");
 	public static final IRI P_PARAMETERS = javaModel.node("params");
@@ -184,7 +185,6 @@ public abstract class JavaFacts {
 		javaModel.add(C_CLASS, RdfVocabulary.RDFS_SUBCLASS_OF, Types.REFERENCE_TYPE);
 		javaModel.add(C_ENUM, RdfVocabulary.RDFS_SUBCLASS_OF, Types.REFERENCE_TYPE);
 		javaModel.add(C_INTERFACE, RdfVocabulary.RDFS_SUBCLASS_OF, Types.REFERENCE_TYPE);
-
 
 		isProperty(javaModel, P_CODE, C_METHOD, C_INSTRUCTION);
 		isProperty(javaModel, P_NEXT, C_INSTRUCTION, C_INSTRUCTION);

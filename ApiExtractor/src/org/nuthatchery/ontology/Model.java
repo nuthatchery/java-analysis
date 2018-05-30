@@ -30,15 +30,16 @@ public class Model {
 		public void add(RDFTerm t) {
 			BlankNode node = model.blank();
 			model.add(node, RdfVocabulary.RDF_FIRST, t);
-			if(current == null) {
+			if (current == null) {
 				head = node;
 			} else {
 				model.add(current, RdfVocabulary.RDF_REST, node);
 			}
 			current = node;
 		}
+
 		public BlankNodeOrIRI build() {
-			if(current != null) {
+			if (current != null) {
 				model.add(current, RdfVocabulary.RDF_REST, RdfVocabulary.RDF_NIL);
 			}
 			return head;
@@ -49,6 +50,7 @@ public class Model {
 			build();
 		}
 	}
+
 	/**
 	 * Determine the type of an object.
 	 *
@@ -82,10 +84,11 @@ public class Model {
 			return Types.XSD_STRING;
 		} else {
 			System.err
-			.println("Mode.getType(): can't find type of " + obj.getClass().toString() + " " + obj.toString());
+					.println("Mode.getType(): can't find type of " + obj.getClass().toString() + " " + obj.toString());
 			return null;
 		}
 	}
+
 	private final RDF factory;
 	private final String prefix;
 	private final IRI name;

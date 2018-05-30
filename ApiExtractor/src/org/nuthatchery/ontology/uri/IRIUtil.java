@@ -10,20 +10,21 @@ public class IRIUtil {
 		this.rdf = rdf;
 	}
 
-	public IRI addPath(IRI base, String path) {
-		String iriBase = base.getIRIString();
-		if(iriBase.endsWith("/") || iriBase.endsWith(":")) {
-			return rdf.createIRI(iriBase + path);
-		} else {
-			return rdf.createIRI(iriBase + "/" + path);
-		}
-	}
 	public IRI addFragment(IRI base, String frag) {
 		String iriBase = base.getIRIString();
-		if(iriBase.endsWith("#")) {
+		if (iriBase.endsWith("#")) {
 			return rdf.createIRI(iriBase + frag);
 		} else {
 			return rdf.createIRI(iriBase + "#" + frag);
+		}
+	}
+
+	public IRI addPath(IRI base, String path) {
+		String iriBase = base.getIRIString();
+		if (iriBase.endsWith("/") || iriBase.endsWith(":")) {
+			return rdf.createIRI(iriBase + path);
+		} else {
+			return rdf.createIRI(iriBase + "/" + path);
 		}
 	}
 
