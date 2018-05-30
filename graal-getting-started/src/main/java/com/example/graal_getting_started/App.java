@@ -28,10 +28,11 @@ public class App {
 	public static void main(String[] args) throws Exception {
 		KBBuilder kbb = new KBBuilder();
 		kbb.setStore(new DefaultInMemoryGraphStore()); // RDF4jStore(new SailRepository(new MemoryStore())));
-		RDFParser rdfParser = new RDFParser(new File("/tmp/data.n3"), RDFFormat.NQUADS);
+		RDFParser rdfParser = new RDFParser(new File("/tmp/data.trig"), RDFFormat.TRIG);
 		kbb.addAtoms(rdfParser, new AbstractMapper() {
 			@Override
 			public Atom map(Atom arg0) {
+				System.err.println(arg0);
 				return RDFTypeAtomMapper.instance().map(arg0);
 			}
 
@@ -58,10 +59,12 @@ public class App {
 		kbb.addAll(new DlgpParser(""//
 				+ "@prefix j: <http://model.nuthatchery.org/java/> " //
 				+ "@prefix jvm: <http://model.nuthatchery.org/java/>\n" //
+				+ "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"
 				// + "@una\n"
-				+ "j:next(X,Y) :- j:nextIfTrue(X,Y)." + "j:next(X,Y) :- j:nextIfFalse(X,Y)."
-				+ "hasInsn(M,I) :- j:code(M,I)." //
-				+ "hasInsn(M,I) :- hasInsn(M,I0), j:next(I0,I)."
+				//+ "j:next(X,Y) :- j:nextIfTrue(X,Y)." + "j:next(X,Y) :- j:nextIfFalse(X,Y)."
+				+ "hasInsn(M,I) :- j:code(M,L), listHasInsn(L,I)." //
+				+ "listHasInsn(L,I) :- rdf:first(L,I)." //
+				+ "listHasInsn(L,I) :- rdf:rest(L,L2), listHasInsn(L2,I)." //
 				// + "executes(M,J) :- hasInsn(M,I), j:call(I,J)."
 				+ "isInvoke(I) :- j:call(I,jvm:invokevirtual)." + "isInvoke(I) :- j:call(I,jvm:invokestatic)."
 				+ "isInvoke(I) :- j:call(I,jvm:invokeinterface)." + "isInvoke(I) :- j:call(I,jvm:invokespecial)."
@@ -155,7 +158,10 @@ public class App {
 	public static void query(KnowledgeBase kb, String q) {
 		try {
 			ConjunctiveQuery query = DlgpParser.parseQuery(//
-					"@prefix j: <http://model.nuthatchery.org/java/> \n" + q);
+					"@prefix j: <http://model.nuthatchery.org/java/> \n"//
+					+ "@prefix jvm: <http://model.nuthatchery.org/java/>\n" //
+					+ "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" //
+					+ q);
 			CloseableIterator<Substitution> results = kb.query(query);
 			System.out.println(q);
 			int i = 1;
