@@ -37,7 +37,7 @@ import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
 	private static final String DB_PREFIX = "http://db.nuthatchery.org/java/";
-	private static final List<String> DEFAULT_CLASSES = Arrays.asList("-m", "demo", "../../../../../Test.class");
+	private static final List<String> DEFAULT_CLASSES = Arrays.asList("-m", "demo", "../../../../../Test.class", "../../../../../Test$1.class", "../../../../../Test$Bar.class", "../../../../../IMutablePosition.class");
 	private static int logLevel;
 	private static boolean demoMode = false;
 	// "/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
@@ -45,7 +45,7 @@ public class ExtractApi {
 	private static Model defaultModel;
 
 	private static void addModelName(IRI s) {
-		defaultModel.add(s, ModelFactory.getInstance().rdfVocabulary().RDFS_IS_DEFINED_BY, s);
+		defaultModel.add(s, RdfVocabulary.RDFS_IS_DEFINED_BY, s);
 	}
 
 	private static void extractModel(Dataset dataset, Model mainModel, String modelName, String arg)
@@ -176,7 +176,6 @@ public class ExtractApi {
 	public static void main(String[] args) throws IOException {
 		ModelFactory.setFactory(() -> new JenaRDF());
 		ModelFactory mf = ModelFactory.getInstance();
-		RdfVocabulary.getInstance();
 		jenaRDF = new JenaRDF();
 		Dataset dataset = DatasetFactory.create();
 		String outFile = "/tmp/data.trig";
@@ -193,6 +192,9 @@ public class ExtractApi {
 		for (Iterator<String> it = arguments.iterator(); it.hasNext();) {
 			String arg = it.next();
 			switch (arg) {
+			case "-v":
+				logLevel = 10;
+				break;
 			case "-d":
 				String dbDir = it.next();
 				dataset.close();
@@ -237,7 +239,7 @@ public class ExtractApi {
 		}
 		for (String s : list) {
 			System.out.println("setup: "+ s);
-			defaultModel.add(defaultModel.iri(s), ModelFactory.getInstance().rdfVocabulary().RDFS_IS_DEFINED_BY, defaultModel.iri(s));
+			defaultModel.add(defaultModel.iri(s), RdfVocabulary.RDFS_IS_DEFINED_BY, defaultModel.iri(s));
 		}
 
 		dataset.getDefaultModel().removeAll();

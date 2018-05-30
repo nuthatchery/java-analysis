@@ -22,8 +22,6 @@ public class ModelFactory {
 
 	private final Supplier<RDF> constructor;
 
-	private RdfVocabulary rdfVocabulary;
-
 	private ModelFactory(Supplier<RDF> constructor) {
 		this.constructor = constructor;
 	}
@@ -52,11 +50,4 @@ public class ModelFactory {
 	public RDF createRDF() {
 		return constructor.get();
 	}
-	public RdfVocabulary rdfVocabulary() {
-		if (rdfVocabulary == null) {
-			rdfVocabulary = new RdfVocabulary(createRDF());
-		}
-		return rdfVocabulary;
-	}
-
 }

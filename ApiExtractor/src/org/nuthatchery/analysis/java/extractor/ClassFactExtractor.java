@@ -1,5 +1,6 @@
 package org.nuthatchery.analysis.java.extractor;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
@@ -8,7 +9,8 @@ import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
 import org.nuthatchery.ontology.Model;
-import org.nuthatchery.ontology.basic.Predicates;
+import org.nuthatchery.ontology.basic.CommonVocabulary;
+import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -16,6 +18,7 @@ import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.ModuleVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 
 public class ClassFactExtractor extends ClassVisitor {
@@ -155,18 +158,29 @@ public class ClassFactExtractor extends ClassVisitor {
 	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
 		log.log("\n" + "class " + name + " {");
 		log.logf("\n\n" + "visit(version=%d, access=%d, name=%s, signature=%s, superName=%s, interfaces=%s)%n", version,
-				access, name, signature, superName, interfaces);
+				access, name, signature, superName, Arrays.toString(interfaces));
 		int major = version & 0xffff;
 		int minor = (version >>> 16) & 0xffff;
 
 		className = name;
 		IRI id = JavaFacts.Types.object(model, name);
 		currentClass.push(id);
+		if (!className.contains("$")) {
+			model.add(id, CommonVocabulary.P_NAME, model.literal(className));
+		}
+		model.add(id, CommonVocabulary.P_IDNAME, model.literal(className));
+		model.add(id, RdfVocabulary.RDF_TYPE, CommonVocabulary.C_DEF);
 		model.add(id, JavaFacts.P_CLASS_FILE_VERSION, model.literal(major));
 		if (minor != 0) {
 			model.add(id, JavaFacts.P_CLASS_FILE_MINOR, model.literal(minor));
 		}
-		model.add(id, Predicates.IS_A, JavaFacts.C_CLASS);
+		if ((access & Opcodes.ACC_INTERFACE) != 0) {
+			model.add(id, CommonVocabulary.P_DEFINES, JavaFacts.C_INTERFACE);
+		} else if ((access & Opcodes.ACC_ENUM) != 0) {
+			model.add(id, CommonVocabulary.P_DEFINES, JavaFacts.C_ENUM);
+		} else {
+			model.add(id, CommonVocabulary.P_DEFINES, JavaFacts.C_CLASS);
+		}
 		if (superName != null) {
 			model.add(id, JavaFacts.P_EXTENDS, JavaFacts.Types.object(model, superName));
 		}
@@ -176,18 +190,20 @@ public class ClassFactExtractor extends ClassVisitor {
 			}
 		}
 		addClassAccessFlags(access, id);
-
+		super.visit(version, access, name, signature, superName, interfaces);
 	}
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		log.logf("visitAnnotation(desc=%s, visible=%b)%n", desc, visible);
+		log.warnf("unimplemented: visitAnnotation(desc=%s, visible=%b)%n", desc, visible);
+		super.visitAnnotation(desc, visible);
 		return null;
 	}
 
 	@Override
 	public void visitAttribute(Attribute attr) {
-		log.logf("visitAttribue(attr=%s)%n", attr);
+		log.warnf("unimplemented: visitAttribue(attr=%s)%n", attr);
+		super.visitAttribute(attr);
 	}
 
 	@Override
@@ -195,6 +211,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		BlankNodeOrIRI s = getClassId();
 		currentClass.pop();
 		log.log("} // end of " + s + "\n");
+		super.visitEnd();
 	}
 
 	@Override
@@ -204,38 +221,67 @@ public class ClassFactExtractor extends ClassVisitor {
 		// name, desc, signature, value);
 		log.log("\n" + "field " + JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(model, getClassId(), name, desc);
-		model.add(memberId, Predicates.IS_A, JavaFacts.C_FIELD);
+		String descName = className + "." + name + ":" + desc;
+		model.add(memberId, CommonVocabulary.P_NAME, model.literal(name));
+		model.add(memberId, CommonVocabulary.P_IDNAME, model.literal(descName));
+		model.add(memberId, RdfVocabulary.RDF_TYPE, CommonVocabulary.C_DEF);
+		model.add(memberId, JavaFacts.P_TYPE, JavaUtil.typeToId(model, Type.getType(desc)));
+		model.add(memberId, JavaFacts.P_MEMBER_OF, getClassId());
 		if (value != null) {
+			model.add(memberId, CommonVocabulary.P_DEFINES, JavaFacts.C_FIELD);
 			model.add(memberId, JavaFacts.INITIAL_VALUE, model.literal(value));
+		} else {
+			model.add(memberId, CommonVocabulary.P_DECLARES, JavaFacts.C_FIELD);
 		}
+
 		addFieldAccessFlags(access, memberId);
 
 		memberId = null;
+		super.visitField(access, name, descName, signature, value);
 		return null;
 	}
 
 	@Override
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-		log.logf("visitOuterClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name, outerName, innerName,
-				access);
+		log.logf("visitInnerClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name, outerName,
+				innerName, access);
+
+		// model.add(id, CommonVocabulary.P_IDNAME, model.literal(className));
+
+		if (outerName != null) {
+			IRI inner = JavaFacts.Types.object(model, name);
+			IRI outer = JavaFacts.Types.object(model, outerName);
+			model.add(inner, JavaFacts.P_MEMBER_OF, outer);
+			if (innerName != null) {
+				model.add(inner, CommonVocabulary.P_NAME, model.literal(innerName));
+			}
+		}
+		super.visitInnerClass(name, outerName, innerName, access);
 	}
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		// logf("visitMethod(access=%s, name=%s,
-		// desc=%s,
-		// signature=%s, exceptions=%s)%n",
-		// Printer.OPCODES[access], name, desc, signature,
-		// Arrays.toString(exceptions));
+		log.logf("visitMethod(access=%s, name=%s, desc=%s, signature=%s, exceptions=%s)%n", "", name, desc, signature,
+				Arrays.toString(exceptions));
 		System.out.flush();
 		System.err.flush();
-		log.log("\n" + "method " + JavaUtil.decodeDescriptor(className, name, desc));
+
+		log.log("\n" + "method " + className + "." + name + desc);// JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(model, getClassId(), name, desc);
+		String descName = className + "." + name + ":" + desc;
+		model.add(memberId, CommonVocabulary.P_NAME, model.literal(name));
+		model.add(memberId, CommonVocabulary.P_IDNAME, model.literal(descName));
+		model.add(memberId, RdfVocabulary.RDF_TYPE, CommonVocabulary.C_DEF);
+		model.add(memberId, JavaFacts.P_RETURN_TYPE, JavaUtil.typeToId(model, Type.getType(desc).getReturnType()));
+		model.add(memberId, JavaFacts.P_MEMBER_OF, getClassId());
 		if (name.equals("<init>")) {
-			model.add(memberId, Predicates.IS_A, JavaFacts.C_CONSTRUCTOR);
+			model.add(memberId, CommonVocabulary.P_DEFINES, JavaFacts.C_FIELD);
+			model.add(memberId, CommonVocabulary.P_DEFINES, JavaFacts.C_CONSTRUCTOR);
 			model.add(memberId, JavaFacts.CONSTRUCTS, getClassId());
+		} else if ((access & Opcodes.ACC_ABSTRACT) != 0) {
+			model.add(memberId, CommonVocabulary.P_DECLARES, JavaFacts.C_METHOD);
 		} else {
-			model.add(memberId, Predicates.IS_A, JavaFacts.C_METHOD);
+			model.add(memberId, CommonVocabulary.P_DEFINES, JavaFacts.C_METHOD);
 		}
 		if (signature != null) {
 			model.add(memberId, JavaFacts.GENERIC, model.literal(signature));
@@ -251,13 +297,22 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	@Override
 	public ModuleVisitor visitModule(String name, int access, String version) {
-		log.logf("visitModule(name=%s, access=%d, version=%d)%n", name, access, version);
+		log.warnf("unimplemented: visitModule(name=%s, access=%d, version=%d)%n", name, access, version);
+		super.visitModule(name, access, version);
 		return null;
 	}
 
 	@Override
 	public void visitOuterClass(String owner, String name, String desc) {
 		log.logf("visitOuterClass(owner=%s, name=%s, desc=%s)%n", owner, name, desc);
+		IRI ownerId = JavaFacts.Types.object(model, owner);
+		if (name != null && desc != null) {
+			IRI methodId = JavaFacts.method(model, ownerId, name, desc);
+			model.add(getClassId(), JavaFacts.P_MEMBER_OF, methodId);
+		} else {
+			model.add(getClassId(), JavaFacts.P_MEMBER_OF, ownerId);
+		}
+		super.visitOuterClass(owner, name, desc);
 	}
 
 	@Override
@@ -274,12 +329,22 @@ public class ClassFactExtractor extends ClassVisitor {
 			// source,
 			// debug);
 		}
+		super.visitSource(source, debug);
 	}
 
 	@Override
 	public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
-		log.logf("visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n", typeRef, typePath.toString(),
-				desc, visible);
+		log.warnf("unimplemented: visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n", typeRef,
+				typePath.toString(), desc, visible);
+		super.visitTypeAnnotation(typeRef, typePath, desc, visible);
 		return null;
+	}
+
+	public static class Foo {
+		ClassFactExtractor foo;
+
+		public int line() {
+			return foo.currentLine;
+		}
 	}
 }

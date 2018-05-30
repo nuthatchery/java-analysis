@@ -14,6 +14,10 @@ public class JavaUtil {
 		public void log(String s);
 
 		public void logf(String s, Object... args);
+
+		public void warn(String s);
+
+		public void warnf(String s, Object... args);
 	}
 
 	public static class NullLogger implements ILogger {
@@ -31,6 +35,16 @@ public class JavaUtil {
 		@Override
 		public void logf(String s, Object... args) {
 			// do nothing
+		}
+
+		@Override
+		public void warn(String s) {
+			stdLogger.warn(s);
+		}
+
+		@Override
+		public void warnf(String s, Object... args) {
+			stdLogger.warnf(s, args);
 		}
 	}
 
@@ -77,6 +91,16 @@ public class JavaUtil {
 		public void logf(String s, Object... args) {
 			log(String.format(s, args));
 		}
+
+		@Override
+		public void warn(String s) {
+			log(s);
+		}
+
+		@Override
+		public void warnf(String s, Object... args) {
+			logf(s, args);
+		}
 	}
 
 	public static final String JAVA_EXTRA_URI_PATH_CHARS = "/()'$";
@@ -119,7 +143,7 @@ public class JavaUtil {
 	public static String decodeDescriptor(String owner, String name, String desc) {
 		StringBuilder b = new StringBuilder();
 
-		JavaUtil.decodeDescriptor(owner + "::" + name, Type.getType(desc), b);
+		JavaUtil.decodeDescriptor(owner + "." + name, Type.getType(desc), b);
 		return b.toString();
 	}
 

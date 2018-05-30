@@ -7,34 +7,44 @@ import org.nuthatchery.ontology.standard.RdfVocabulary;
 
 public class CommonVocabulary {
 	public static final String PREFIX = "http://model.nuthatchery.org/common/";
-	private static CommonVocabulary instance;
-	private final Model vocab;
-	private RdfVocabulary rdfVocab;
+	private static final Model vocab;
 
-	public static CommonVocabulary getInstance() {
-		if(instance == null) {
-			instance = new CommonVocabulary(ModelFactory.getInstance());
-		}
-		return instance;
-	}
+	public static final IRI P_NAME;
+	public static final IRI P_IDNAME;
+	/**
+	 * Should have NAME, IDNAME.
+	 */
+	public static final IRI C_DEF;
+	public static final IRI P_DEFINES;
+	public static final IRI P_DECLARES;
 
-	public CommonVocabulary(ModelFactory fac) {
+	public static final IRI C_NAMED;
+	public static final IRI C_TYPE;
+	public static final IRI C_OP;
+	public static final IRI P_LINE_NUMBER;
+	static {
+		ModelFactory fac = ModelFactory.getInstance();
 		vocab = fac.createModel(PREFIX);
-		rdfVocab = fac.rdfVocabulary();
-		NAMED = vocab.node("named");
-		vocab.add(NAMED, rdfVocab.RDF_TYPE, rdfVocab.RDFS_CLASS);
-		TYPE = vocab.node("type");
-		vocab.add(TYPE, rdfVocab.RDF_TYPE, rdfVocab.RDFS_CLASS);
-		vocab.add(TYPE, rdfVocab.RDFS_SUBCLASS_OF, NAMED);
-		OP = vocab.node("op");
-		vocab.add(OP, rdfVocab.RDF_TYPE, rdfVocab.RDFS_CLASS);
-		vocab.add(OP, rdfVocab.RDFS_SUBCLASS_OF, NAMED);
-		LINE_NUMBER = vocab.node("lineNumber");
+		P_NAME = vocab.node("name");
+		P_IDNAME = vocab.node("idName");
+		C_DEF = vocab.node("def");
+		P_DEFINES = vocab.node("defines");
+		P_DECLARES = vocab.node("declares");
+
+		vocab.add(P_DEFINES, RdfVocabulary.RDFS_SUBPROPERTY_OF, P_DECLARES);
+		C_NAMED = vocab.node("named");
+		vocab.add(C_NAMED, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
+		C_TYPE = vocab.node("type");
+		vocab.add(C_TYPE, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
+		vocab.add(C_TYPE, RdfVocabulary.RDFS_SUBCLASS_OF, C_NAMED);
+		C_OP = vocab.node("op");
+		vocab.add(C_OP, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
+		vocab.add(C_OP, RdfVocabulary.RDFS_SUBCLASS_OF, C_NAMED);
+		P_LINE_NUMBER = vocab.node("lineNumber");
 
 	}
 
-	public final IRI NAMED;
-	public final IRI TYPE;
-	public final IRI OP;
-	public final IRI LINE_NUMBER;
+	public static final Model getModel() {
+		return vocab;
+	}
 }

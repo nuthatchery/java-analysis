@@ -7,7 +7,6 @@ import org.apache.commons.rdf.api.RDFTerm;
 import org.nuthatchery.ontology.Model;
 import org.nuthatchery.ontology.ModelFactory;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
-import org.nuthatchery.ontology.basic.Predicates;
 import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.util.Printer;
@@ -66,25 +65,25 @@ public abstract class JavaFacts {
 		public static final IRI VOID = javaTypesModel.node("void");
 
 		static {
-			javaTypesModel.add(JAVA_TYPE, rdf.RDFS_SUBCLASS_OF, common.TYPE);
-			javaTypesModel.add(PRIMITIVE_TYPE, rdf.RDFS_SUBCLASS_OF, JAVA_TYPE);
-			javaTypesModel.add(BOOLEAN, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(BYTE, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(SHORT, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(INT, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(LONG, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(FLOAT, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(DOUBLE, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(CHAR, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(TOP, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(VOID, rdf.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(REFERENCE_TYPE, rdf.RDFS_SUBCLASS_OF, JAVA_TYPE);
-			javaTypesModel.add(UNINITIALIZED_THIS, rdf.RDFS_SUBCLASS_OF, REFERENCE_TYPE);
+			javaTypesModel.add(JAVA_TYPE, RdfVocabulary.RDFS_SUBCLASS_OF, CommonVocabulary.C_TYPE);
+			javaTypesModel.add(PRIMITIVE_TYPE, RdfVocabulary.RDFS_SUBCLASS_OF, JAVA_TYPE);
+			javaTypesModel.add(BOOLEAN, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(BYTE, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(SHORT, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(INT, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(LONG, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(FLOAT, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(DOUBLE, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(CHAR, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(TOP, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(VOID, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(REFERENCE_TYPE, RdfVocabulary.RDFS_SUBCLASS_OF, JAVA_TYPE);
+			javaTypesModel.add(UNINITIALIZED_THIS, RdfVocabulary.RDFS_SUBCLASS_OF, REFERENCE_TYPE);
 		}
 
 		public static BlankNodeOrIRI array(Model m, int dim, BlankNodeOrIRI type) {
 			BlankNode t = javaTypesModel.blank();
-			m.add(t, Predicates.IS_A, ARRAY_REF);
+			m.add(t, RdfVocabulary.RDF_TYPE, ARRAY_REF);
 			m.add(t, ARRAY_DIM, m.literal(dim));
 			m.add(t, ARRAY_ELEMENT_TYPE, type);
 			return t;
@@ -92,13 +91,11 @@ public abstract class JavaFacts {
 
 		public static IRI object(Model m, String typeName) {
 			IRI t = m.node(typeName);
-			m.add(t, rdf.RDF_TYPE, REFERENCE_TYPE);
+			m.add(t, RdfVocabulary.RDF_TYPE, REFERENCE_TYPE);
 			return t;
 		}
 	}
 
-	private static final RdfVocabulary rdf = RdfVocabulary.getInstance();
-	private static final CommonVocabulary common = CommonVocabulary.getInstance();
 	public static final String javaPrefix = "http://model.nuthatchery.org/java/";
 	public static final String javaFlagsPrefix = javaPrefix + "flags/";
 	public static final String javaMethodsPrefix = javaPrefix + "methods/";
@@ -116,6 +113,8 @@ public abstract class JavaFacts {
 	public static final IRI ACCESS = javaModel.node("access");
 	public static final IRI CALLS = javaModel.node("calls");
 	public static final IRI C_CLASS = javaModel.node("class");
+	public static final IRI C_INTERFACE = javaModel.node("interface");
+	public static final IRI C_ENUM = javaModel.node("enum");
 	public static final IRI C_CONSTRUCTOR = javaModel.node("constructor");
 	public static final IRI CONSTRUCTS = javaModel.node("constructs");
 	public static final IRI CREATES = javaModel.node("creates");
@@ -160,7 +159,9 @@ public abstract class JavaFacts {
 	public static final IRI P_NEXT_IF_FALSE = javaModel.node("nextIfFalse");
 	public static final IRI R_END = javaModel.node("end");
 	public static final IRI P_CALL = javaModel.node("call");
-	public static final IRI P_LINE = common.LINE_NUMBER;
+	public static final IRI P_LINE = CommonVocabulary.P_LINE_NUMBER;
+	public static final IRI P_SRC_START = javaModel.node("srcStart");
+	public static final IRI P_SRC_END = javaModel.node("srcEnd");
 	public static final IRI C_INSTRUCTION = javaModel.node("jvmInstruction");
 	public static final IRI C_JVM_INSN = javaModel.node("jvmInsn");
 	public static final IRI P_OPERAND_INT = javaModel.node("intOperand");
@@ -172,39 +173,50 @@ public abstract class JavaFacts {
 	public static final IRI P_OPERAND_LABEL = javaModel.node("labelOperand");
 	public static final IRI P_OPERAND_LIST = javaModel.node("listOperand");
 	public static final IRI P_TRY_CATCH_BLOCK =  javaModel.node("tryCatchBlock");
+	public static final IRI P_TYPE = javaModel.node("type");
+	public static final IRI P_RETURN_TYPE = javaModel.node("rType");
+	public static final IRI P_PARAMETERS = javaModel.node("params");
+	public static final IRI P_MAX_STACK = javaModel.node("maxStack");
+	public static final IRI P_MAX_LOCALS = javaModel.node("maxLocals");
+	public static final IRI P_MEMBER_OF = javaModel.node("memberOf");
 
 	static {
+		javaModel.add(C_CLASS, RdfVocabulary.RDFS_SUBCLASS_OF, Types.REFERENCE_TYPE);
+		javaModel.add(C_ENUM, RdfVocabulary.RDFS_SUBCLASS_OF, Types.REFERENCE_TYPE);
+		javaModel.add(C_INTERFACE, RdfVocabulary.RDFS_SUBCLASS_OF, Types.REFERENCE_TYPE);
+
+
 		isProperty(javaModel, P_CODE, C_METHOD, C_INSTRUCTION);
 		isProperty(javaModel, P_NEXT, C_INSTRUCTION, C_INSTRUCTION);
 		isProperty(javaModel, P_NEXT_IF_TRUE, C_INSTRUCTION, C_INSTRUCTION, //
-				rdf.RDFS_SUBPROPERTY_OF, P_NEXT);
+				RdfVocabulary.RDFS_SUBPROPERTY_OF, P_NEXT);
 		isProperty(javaModel, P_NEXT_IF_FALSE, C_INSTRUCTION, C_INSTRUCTION, //
-				rdf.RDFS_SUBPROPERTY_OF, P_NEXT);
-		javaModel.add(R_END, Predicates.IS_A, C_INSTRUCTION);
+				RdfVocabulary.RDFS_SUBPROPERTY_OF, P_NEXT);
+		javaModel.add(R_END, RdfVocabulary.RDF_TYPE, C_INSTRUCTION);
 		isProperty(javaModel, P_OPERAND, C_INSTRUCTION, null);
-		isProperty(javaModel, P_OPERAND_CONSTANT, C_INSTRUCTION, rdf.RDFS_RESOURCE, //
-				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+		isProperty(javaModel, P_OPERAND_CONSTANT, C_INSTRUCTION, RdfVocabulary.RDFS_RESOURCE, //
+				RdfVocabulary.RDFS_SUBPROPERTY_OF, P_OPERAND);
 		isProperty(javaModel, P_OPERAND_INT, C_INSTRUCTION, org.apache.commons.rdf.simple.Types.XSD_INTEGER, //
-				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+				RdfVocabulary.RDFS_SUBPROPERTY_OF, P_OPERAND);
 		isProperty(javaModel, P_OPERAND_MEMBER, C_INSTRUCTION, C_MEMBER, //
-				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+				RdfVocabulary.RDFS_SUBPROPERTY_OF, P_OPERAND);
 		isProperty(javaModel, P_OPERAND_TYPE, C_INSTRUCTION, Types.JAVA_TYPE, //
-				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+				RdfVocabulary.RDFS_SUBPROPERTY_OF, P_OPERAND);
 		isProperty(javaModel, P_OPERAND_VAR, C_INSTRUCTION, org.apache.commons.rdf.simple.Types.XSD_INTEGER, //
-				rdf.RDFS_SUBPROPERTY_OF, P_OPERAND);
+				RdfVocabulary.RDFS_SUBPROPERTY_OF, P_OPERAND);
 		isProperty(javaModel, P_CALL, C_INSTRUCTION, C_JVM_INSN);
 		isProperty(javaModel, P_LINE, C_INSTRUCTION, org.apache.commons.rdf.simple.Types.XSD_INTEGER);
-		javaModel.add(C_INSTRUCTION, Predicates.IS_A, rdf.RDFS_CLASS);
-		javaModel.add(C_JVM_INSN, Predicates.IS_A, rdf.RDFS_CLASS);
+		javaModel.add(C_INSTRUCTION, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
+		javaModel.add(C_JVM_INSN, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
 	}
 
 	private static void isProperty(Model m, IRI prop, BlankNodeOrIRI sub, RDFTerm obj, RDFTerm... more) {
-		m.add(prop, rdf.RDF_TYPE, rdf.RDF_PROPERTY);
+		m.add(prop, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDF_PROPERTY);
 		if (sub != null) {
-			m.add(prop, rdf.RDFS_RANGE, sub);
+			m.add(prop, RdfVocabulary.RDFS_RANGE, sub);
 		}
 		if (obj != null) {
-			m.add(prop, rdf.RDFS_DOMAIN, obj);
+			m.add(prop, RdfVocabulary.RDFS_DOMAIN, obj);
 		}
 		for (int i = 0; i < more.length; i += 2) {
 			m.add(prop, (IRI) more[i], more[i + 1]);

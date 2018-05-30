@@ -1,7 +1,10 @@
 package org.nuthatchery.analysis.java.extractor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.rdf.api.BlankNode;
@@ -11,6 +14,8 @@ import org.apache.commons.rdf.api.RDFTerm;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
 import org.nuthatchery.ontology.Model;
 import org.nuthatchery.ontology.Model.ListBuilder;
+import org.nuthatchery.ontology.basic.CommonVocabulary;
+import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -27,10 +32,15 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	private BlankNodeOrIRI currentInsn;
 	private ILogger log;
 	private final Model model;
+	private final List<VarUsage> localVarUse = new ArrayList<>();
+	private final List<Label> labels = new ArrayList<>();
 	/**
 	 *
 	 */
 	private final ClassFactExtractor parent;
+	private final String descName;
+	private String methodName;
+	private int startLine;
 
 	public MethodFactExtractor(ClassFactExtractor parent, IRI methodId, int access, String name, String desc,
 			ILogger log) {
@@ -39,6 +49,9 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		this.currentMethodId = methodId;
 		this.log = log;
 		this.model = parent.getModel();
+		this.methodName = name;
+		this.descName = ClassFactExtractor.className + "." + name + ":" + desc;
+		parent.currentLine = -1;
 	}
 
 	protected void putInstruction(int opcode, Object... args) {
@@ -133,17 +146,19 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+		log.warnf("unimplemented: MethodFactExtractor.visitAnnotation(desc=%s,visible=%b)%n", desc, visible);
 		return super.visitAnnotation(desc, visible);
 	}
 
 	@Override
 	public AnnotationVisitor visitAnnotationDefault() {
+		log.warnf("unimplemented: MethodFactExtractor.visitAnnotationDefault()%n");
 		return super.visitAnnotationDefault();
 	}
 
 	@Override
 	public void visitAttribute(Attribute attr) {
-		log.logf("visitAttribue(attr=%s)%n", attr);
+		log.warnf("unimplemented: visitAttribue(attr=%s)%n", attr);
 		super.visitAttribute(attr);
 	}
 
@@ -158,9 +173,17 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitEnd() {
+		if(startLine != -1 && parent.currentLine != -1) {
+			BlankNode start = model.blank();
+			model.add(start, JavaFacts.P_LINE, model.literal(startLine));
+			BlankNode end = model.blank();
+			model.add(end, JavaFacts.P_LINE, model.literal(parent.currentLine));
+			model.add(currentMethodId, JavaFacts.P_SRC_START, start);
+			model.add(currentMethodId, JavaFacts.P_SRC_END, end);
+		}
 		parent.currentLine = -1;
 		log.log("} // end of " + currentMethodId);
-		if(insnList != null) {
+		if (insnList != null) {
 			model.add(currentMethodId, JavaFacts.P_CODE, insnList.build());
 		}
 		insnList = null;
@@ -189,6 +212,9 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public AnnotationVisitor visitInsnAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+		log.warnf(
+				"unimplemented: MethodFactExtractor.visitInsnAnnotation(typeRef=%d, typePath=%s, desc=%s, visible=%b)%n", //
+				typeRef, typePath.toString(), desc, visible);
 		return super.visitInsnAnnotation(typeRef, typePath, desc, visible);
 	}
 
@@ -219,6 +245,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitLabel(Label label) {
 		log.log(label + ":");
 		currentInsn = model.blank(label.toString());
+		labels.add(label);
 		super.visitLabel(label);
 	}
 
@@ -237,6 +264,9 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	@Override
 	public void visitLineNumber(int line, Label start) {
 		log.log(parent.currentSource.peek() + ":" + line + "\tlabel=" + start);
+		if (parent.currentLine == -1) {
+			startLine = line;
+		}
 		parent.currentLine = line;
 		currentInsn = model.blank(start.toString());
 		model.add(currentInsn, JavaFacts.P_LINE, model.literal(line));
@@ -247,13 +277,29 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
 		log.logf("visitLocalVariable(name=%s, desc=%s, signature=%s, start=%s, end=%s, index=%d)%n",
 				JavaUtil.decodeDescriptor(name, desc), desc, signature, start, end, index);
-		// TODO
+		int startIndex = labels.indexOf(start);
+		int endIndex = labels.indexOf(end);
+		if (startIndex < 0 || endIndex < 0) {
+			throw new IllegalStateException("wrong labels!");
+		}
+		for (VarUsage vu : localVarUse) {
+			if (vu.varNum == index && startIndex <= vu.lastLabel && endIndex > vu.lastLabel) {
+				model.add(vu.varId, CommonVocabulary.P_NAME, model.literal(name));
+				model.add(vu.varId, JavaFacts.P_TYPE, //
+						JavaUtil.typeToId(model, Type.getType(desc)));
+				model.add(vu.varId, CommonVocabulary.P_IDNAME, //
+						model.literal(name + ":" + desc + (signature == null ? "" : signature)));
+			}
+		}
 		super.visitLocalVariable(name, desc, signature, start, end, index);
 	}
 
 	@Override
 	public AnnotationVisitor visitLocalVariableAnnotation(int typeRef, TypePath typePath, Label[] start, Label[] end,
 			int[] index, String desc, boolean visible) {
+		log.warnf(
+				"unimplemented: MethodFactExtractor.visitInsnAnnotation(typeRef=%d, typePath=%s, start=%s, end=%s, desc=%s, visible=%b)%n", //
+				typeRef, typePath.toString(), Arrays.toString(start), Arrays.toString(end), desc, visible);
 		return super.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, desc, visible);
 	}
 
@@ -273,6 +319,10 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitMaxs(int maxStack, int maxLocals) {
+		log.logf("visitMaxs(maxStack=%d, maxLocals=%d)%n", //
+				maxStack, maxLocals);
+		model.add(currentMethodId, JavaFacts.P_MAX_STACK, model.literal(maxStack));
+		model.add(currentMethodId, JavaFacts.P_MAX_LOCALS, model.literal(maxLocals));
 		super.visitMaxs(maxStack, maxLocals);
 	}
 
@@ -293,10 +343,12 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			int ars = methType.getArgumentsAndReturnSizes();
 			int argSize = (ars >>> 2) - (objType == null ? 1 : 0);
 			int retSize = ars & 3;
+			log.log("# INVOKE: " + owner + "." + name + ":" + desc);
 			log.log("# INVOKE METHOD: " + JavaUtil.decodeDescriptor(owner, name, desc));
 			log.logf("  Environment: argSize=%d, retSize=%d", argSize, retSize);
 			log.log("   * Stack: " + stackTypes + " <- top of stack");
-			log.log("   * Locals: " + locals.stream().map(JavaUtil::frameTypeToString).collect(Collectors.toList()));
+			log.log("   * Locals: "
+					+ super.locals.stream().map(JavaUtil::frameTypeToString).collect(Collectors.toList()));
 			log.log("   * Uninitialized: " + uninitializedTypes);
 			List<String> paramTypes = Arrays.stream(argumentTypes).map((Type t) -> JavaUtil.typeToString(t))
 					.collect(Collectors.toList());
@@ -351,6 +403,9 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
+		log.warnf(
+				"unimplemented: MethodFactExtractor.visitParameterAnnotation(typeRef=%d, typePath=%s, desc=%s, visible=%b)%n", //
+				parameter, desc, visible);
 		return super.visitParameterAnnotation(parameter, desc, visible);
 	}
 
@@ -382,6 +437,9 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public AnnotationVisitor visitTryCatchAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+		log.warnf(
+				"unimplemented: MethodFactExtractor.visitTryCatchAnnotation(typeRef=%d, typePath=%s, desc=%s, visible=%b)%n", //
+				typeRef, typePath.toString(), desc, visible);
 		return super.visitTryCatchAnnotation(typeRef, typePath, desc, visible);
 	}
 
@@ -409,6 +467,9 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+		log.warnf(
+				"unimplemented: MethodFactExtractor.visitTypeAnnotation(typeRef=%d, typePath=%s, desc=%s, visible=%b)%n", //
+				typeRef, typePath.toString(), desc, visible);
 		// TODO
 		return super.visitTypeAnnotation(typeRef, typePath, desc, visible);
 	}
@@ -421,12 +482,26 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitVarInsn(int opcode, int var) {
+		VarUsage vu = new VarUsage();
+		vu.lastLabel = labels.size() - 1;
+		vu.varNum = var;
+		vu.varId = model.blank();
+		model.add(vu.varId, RdfVocabulary.RDF_VALUE, model.literal(var));
+		if (super.locals != null && super.locals.size() > var) {
+			model.add(vu.varId, JavaFacts.P_TYPE, JavaUtil.frameTypeToId(model, super.locals.get(var)));
+		}
+		localVarUse.add(vu);
 		log.logf("visitVarInsn(opcode=%s, var=%d)%n", opcode, var);
-		if (opcode == Opcodes.RET) {
-			putInstruction(opcode, JavaFacts.P_OPERAND_VAR, var);
-		} else {
-			putInstruction(opcode, JavaFacts.P_OPERAND_VAR, var);
+
+		putInstruction(opcode, JavaFacts.P_OPERAND_VAR, vu.varId);
+		if (opcode != Opcodes.RET) {
 			super.visitVarInsn(opcode, var);
 		}
+	}
+
+	class VarUsage {
+		int lastLabel;
+		int varNum;
+		BlankNodeOrIRI varId;
 	}
 }

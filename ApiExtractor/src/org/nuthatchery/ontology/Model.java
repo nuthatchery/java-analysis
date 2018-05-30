@@ -19,10 +19,7 @@ import org.nuthatchery.ontology.standard.RdfVocabulary;
 
 public class Model {
 	public static class ListBuilder implements AutoCloseable {
-		private static final IRI NIL = RdfVocabulary.getInstance().RDF_NIL;
-		private static final IRI FIRST = RdfVocabulary.getInstance().RDF_FIRST;
-		private static final IRI REST = RdfVocabulary.getInstance().RDF_REST;
-		private BlankNodeOrIRI head = NIL;
+		private BlankNodeOrIRI head = RdfVocabulary.RDF_NIL;
 		private BlankNodeOrIRI current = null;
 		private final Model model;
 
@@ -32,17 +29,17 @@ public class Model {
 
 		public void add(RDFTerm t) {
 			BlankNode node = model.blank();
-			model.add(node, FIRST, t);
+			model.add(node, RdfVocabulary.RDF_FIRST, t);
 			if(current == null) {
 				head = node;
 			} else {
-				model.add(current, REST, node);
+				model.add(current, RdfVocabulary.RDF_REST, node);
 			}
 			current = node;
 		}
 		public BlankNodeOrIRI build() {
 			if(current != null) {
-				model.add(current, REST, NIL);
+				model.add(current, RdfVocabulary.RDF_REST, RdfVocabulary.RDF_NIL);
 			}
 			return head;
 		}
