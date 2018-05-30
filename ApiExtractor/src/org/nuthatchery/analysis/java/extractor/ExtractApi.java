@@ -122,11 +122,10 @@ public class ExtractApi {
 
 	public static String fill(String s, int size, String ellipsis, boolean flushRight) {
 		if (s.length() > size) {
-			if (flushRight) {
+			if (flushRight)
 				return ellipsis + s.substring(s.length() - (size - ellipsis.length()), s.length());
-			} else {
+			else
 				return s.substring(0, s.length() - (size - ellipsis.length())) + ellipsis;
-			}
 		}
 		if (flushRight) {
 			for (; s.length() < size; s = " " + s) {
@@ -193,8 +192,29 @@ public class ExtractApi {
 		for (Iterator<String> it = arguments.iterator(); it.hasNext();) {
 			String arg = it.next();
 			switch (arg) {
+			case "-h":
+				System.err.println(
+						"arguments: [options] [-d dbDir | -o outFile.trig | -m modelName | fileOrDir]... [-s]");
+				System.err.println("Inputs: fileOrDir can be zero or more of");
+				System.err.println("     *.class        Java class files");
+				System.err.println("     *.jar          JAR files (contained class files are extracted)");
+				System.err.println("     */             Directory (all classes and jars extracted recursively)");
+				System.err.println("General options:");
+				System.err.println("    -h     help");
+				System.err.println("    -v     verbose logging");
+				System.err.println("Special options: (take effect when encountered)");
+				System.err.println("    -m modelName    set model name for subsequent input");
+				System.err.println("    -d dbDir        set TDB database directory");
+				System.err.println("    -o outFile.trig set output TRiG file (when not using TDB)");
+				System.err.println("    -s              start server on http://localhost:3330/");
+				break;
 			case "-v":
 				logLevel = 10;
+				break;
+			case "-o":
+				if (outFile == null)
+					throw new IllegalArgumentException("-o option incompatible with -d");
+				outFile = it.next();
 				break;
 			case "-d":
 				String dbDir = it.next();
@@ -206,9 +226,9 @@ public class ExtractApi {
 				break;
 			case "-s":
 				FusekiServer server = FusekiServer.create()//
-						.add("/dataset", dataset, true)//
-						.enableStats(true)//
-						.build();
+				.add("/dataset", dataset, true)//
+				.enableStats(true)//
+				.build();
 				server.start();
 				TDB.sync(dataset);
 				server.join();
