@@ -24,7 +24,7 @@ import org.objectweb.asm.TypePath;
 import org.objectweb.asm.commons.AnalyzerAdapter;
 
 class MethodFactExtractor extends AnalyzerAdapter {
-	class VarUsage {
+	private class VarUsage {
 		int lastLabel;
 		int varNum;
 		BlankNodeOrIRI varId;

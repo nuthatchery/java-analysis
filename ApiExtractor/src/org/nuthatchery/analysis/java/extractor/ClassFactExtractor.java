@@ -22,7 +22,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 
 public class ClassFactExtractor extends ClassVisitor {
-	public String className; // TODO
+	protected String className;
 	protected String context;
 
 	protected final Stack<IRI> currentClass = new Stack<>();
