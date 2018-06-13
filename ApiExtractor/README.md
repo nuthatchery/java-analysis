@@ -1,8 +1,9 @@
 # Java Bytecode Fact Extractor
 
 ## Usage
+From the root folder of this project:
 
-* Build `jar` file with `mvn package`; output `jar` file is in `target/` subfolder
+* Build a `jar` file of this project with the command `mvn package`; output `jar` file is in `target/` subfolder
 * Try applying it to itself:
 ```
 java -jar target/jvm-fact-extractor-0.0.1-SNAPSHOT.jar  target/jvm-fact-extractor-0.0.1-SNAPSHOT.jar
