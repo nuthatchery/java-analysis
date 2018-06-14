@@ -6,6 +6,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.function.IntPredicate;
 
 public class UriEncoding {
 	/**
@@ -64,7 +66,7 @@ public class UriEncoding {
 		}
 	}
 
-	public static String[] checkCharacters(int first, int last) {
+	public static String[] checkCharacters(int first, int last, IntPredicate p) {
 		String allowed = "";
 		String disallowed = "";
 		int firstOk = -1;
@@ -75,7 +77,9 @@ public class UriEncoding {
 		for (int i = first; i <= last; i++) {
 			String s = String.valueOf(Character.toChars(i));
 			try {
-				new URI("http://example.com/" + s);
+				// TEST URIS: new URI("http://example.com/" + s);
+				if (!p.test(i))
+					throw new Exception();
 				if (firstOk == -1) {
 					firstOk = i;
 				}
@@ -110,22 +114,49 @@ public class UriEncoding {
 	}
 
 	private static String encodeCheck(String prefix, int first, int last) {
-		if (first == last) {
+		if (first == last)
 			return String.format("  %s c == 0x%04X  // %s%n", prefix, first, Character.getName(first));
-		} else {
+		else
 			return String.format("  %s (c >= 0x%04X && c <= 0x%04X)  // %s – %s%n", prefix, first, last,
 					Character.getName(first), Character.getName(last));
-		}
 
 	}
 
+	static class CharTest {
+		IntPredicate pred;
+		String name;
+
+		public CharTest(IntPredicate pred, String name) {
+			super();
+			this.pred = pred;
+			this.name = name;
+		}
+
+	}
 	public static void main(String[] args) {
 		System.out.println("Characters allowed in Java URI paths:");
 
-		String[] ss = checkCharacters(0, 0x10ffff);
+		for (CharTest ct : Arrays.asList(//
+				new CharTest(Character::isLetter, "letter"), //
+				new CharTest(Character::isAlphabetic, "alphabetic"), //
+				new CharTest(Character::isIdeographic, "ideographic"), //
+				new CharTest(Character::isUpperCase, "upperCase"), //
+				new CharTest(Character::isLowerCase, "lowerCase"), //
+				new CharTest(Character::isDigit, "digit"), //
+				new CharTest(Character::isLetterOrDigit, "letterOrDigit"), //
+				new CharTest(Character::isWhitespace, "whitespace"), //
+				new CharTest(Character::isLetterOrDigit, "letterOrDigit"), //
+				new CharTest(Character::isJavaIdentifierStart, "javaIdentifierStart"), //
+				new CharTest(Character::isJavaIdentifierPart, "javaIdentifierPart"), //
+				new CharTest(Character::isUnicodeIdentifierStart, "unicodeIdentifierStart"), //
+				new CharTest(Character::isUnicodeIdentifierPart, "unicodeIdentifierPart") //
+				)) {
+			String[] ss = checkCharacters(0, 0x10ffff, ct.pred);
 
-		System.out.println("allowed = " + ss[0]);
-		System.out.println("disallowed = " + ss[1]);
+			// System.out.println("allowed = " + ss[0]);
+			// System.out.println("disallowed = " + ss[1]);
+			System.out.printf("%-24s: %3d ranges%n", ct.name, ss[0].split("\n").length);
+		}
 	}
 
 	/**
@@ -319,26 +350,26 @@ public class UriEncoding {
 					break;
 				}
 			} else if (
-			// these are the disallowed characters according to RFC3987:
-			c < 0xA0 //
+					// these are the disallowed characters according to RFC3987:
+					c < 0xA0 //
 					|| (c > 0xd7ff && c < 0xf900) //
 					|| (c > 0xfdcf && c < 0xfdf0) //
 					|| (c > 0xffef && c < 0x10000) //
 					|| ((c & 0xffff) > 0xfffd) //
-			// these seem to be disallowed by Java's URI class
-			// (see #checkCharacters() below)
+					// these seem to be disallowed by Java's URI class
+					// (see #checkCharacters() below)
 					|| (javaEncoding && (//
-			c == 0x00A0 // NO-BREAK SPACE
-					|| c == 0x1680 // OGHAM SPACE MARK
-					|| c == 0x180E // MONGOLIAN VOWEL SEPARATOR
-					|| (c >= 0x2000 && c <= 0x200A) // EN QUAD – HAIR SPACE
-					|| (c >= 0x2028 && c <= 0x2029) // LINE SEPARATOR –
-													// PARAGRAPH SEPARATOR
-					|| c == 0x202F // NARROW NO-BREAK SPACE
-					|| c == 0x205F // MEDIUM MATHEMATICAL SPACE
-					|| c == 0x3000 // IDEOGRAPHIC SPACE
+							c == 0x00A0 // NO-BREAK SPACE
+							|| c == 0x1680 // OGHAM SPACE MARK
+							|| c == 0x180E // MONGOLIAN VOWEL SEPARATOR
+							|| (c >= 0x2000 && c <= 0x200A) // EN QUAD – HAIR SPACE
+							|| (c >= 0x2028 && c <= 0x2029) // LINE SEPARATOR –
+							// PARAGRAPH SEPARATOR
+							|| c == 0x202F // NARROW NO-BREAK SPACE
+							|| c == 0x205F // MEDIUM MATHEMATICAL SPACE
+							|| c == 0x3000 // IDEOGRAPHIC SPACE
 
-			))) {
+							))) {
 				ByteBuffer bb = StandardCharsets.UTF_8.encode(CharBuffer.wrap(Character.toChars(c)));
 				for (byte b : bb.array()) {
 					result.append(String.format("%%%02X", b));
