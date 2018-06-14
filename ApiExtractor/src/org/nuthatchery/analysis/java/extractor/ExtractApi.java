@@ -276,7 +276,7 @@ public class ExtractApi {
 		dataset.getDefaultModel().setNsPrefix("nh", CommonVocabulary.PREFIX);
 	}
 
-	private static org.apache.jena.rdf.model.Model toJenaModel(Model m) {
+	public static org.apache.jena.rdf.model.Model toJenaModel(Model m) {
 		return org.apache.jena.rdf.model.ModelFactory.createModelForGraph(jenaRDF.asJenaGraph(m.getGraph()));
 	}
 

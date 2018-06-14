@@ -9,6 +9,7 @@ import org.nuthatchery.ontology.ModelFactory;
 public class RdfVocabulary {
 	public static final String RDFS_PREFIX = "http://www.w3.org/2000/01/rdf-schema#";
 	public static final String RDF_PREFIX = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+	public static final String XSD_PREFIX = "http://www.w3.org/2001/XMLSchema#";
 	private static final Model rdfModel;
 	private static final Model rdfsModel;
 
@@ -213,9 +214,8 @@ public class RdfVocabulary {
 	 * @requires index >= 1
 	 */
 	public IRI index(int index) {
-		if (index < 1) {
+		if (index < 1)
 			throw new IllegalArgumentException(String.valueOf(index));
-		}
 		return rdfModel.node(String.format("_%d", index));
 	}
 }

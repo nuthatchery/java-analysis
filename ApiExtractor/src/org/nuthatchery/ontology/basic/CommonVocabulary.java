@@ -22,6 +22,7 @@ public class CommonVocabulary {
 	public static final IRI C_TYPE;
 	public static final IRI C_OP;
 	public static final IRI P_LINE_NUMBER;
+	public static final IRI P_SHORT_DESC;
 	static {
 		ModelFactory fac = ModelFactory.getInstance();
 		vocab = fac.createModel(PREFIX);
@@ -30,6 +31,7 @@ public class CommonVocabulary {
 		C_DEF = vocab.node("def");
 		P_DEFINES = vocab.node("defines");
 		P_DECLARES = vocab.node("declares");
+		P_SHORT_DESC = vocab.node("shortDesc");
 
 		vocab.add(P_DEFINES, RdfVocabulary.RDFS_SUBPROPERTY_OF, P_DECLARES);
 		C_NAMED = vocab.node("named");
