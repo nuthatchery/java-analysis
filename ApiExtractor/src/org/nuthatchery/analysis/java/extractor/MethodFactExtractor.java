@@ -396,7 +396,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	@Override
 	public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
 		log.warnf(
-				"unimplemented: MethodFactExtractor.visitParameterAnnotation(typeRef=%d, typePath=%s, desc=%s, visible=%b)%n", //
+				"unimplemented: MethodFactExtractor.visitParameterAnnotation(typePath=%s, desc=%s, visible=%b)%n", //
 				parameter, desc, visible);
 		return super.visitParameterAnnotation(parameter, desc, visible);
 	}
