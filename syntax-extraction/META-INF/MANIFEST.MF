@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: syntax-extraction
+Bundle-SymbolicName: syntax-extraction
+Bundle-Version: 0.1.0
+Require-Bundle: rascal_eclipse
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
