@@ -21,6 +21,7 @@ import java.util.jar.JarFile;
 
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.jena.JenaRDF;
+import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.fuseki.embedded.FusekiServer;
 import org.apache.jena.query.Dataset;
@@ -93,6 +94,7 @@ public class ExtractApi {
 					int j = 0;
 					for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
 						JarEntry nextElement = entries.nextElement();
+						System.out.println("Processing JarEntry " + nextElement.getName());
 						if (nextElement.getName().endsWith(".class")) {
 							try (InputStream stream = jarFile.getInputStream(nextElement)) {
 
@@ -243,7 +245,11 @@ public class ExtractApi {
 
 		if (outFile != null) {
 			try (OutputStream output = new FileOutputStream(outFile)) {
-				RDFDataMgr.write(output, dataset, Lang.TRIG);
+				RDFDataMgr.write(output, dataset, Lang.TRIG); //throws java.nio.charset.MalformedInputException when dataset is not UTF-8? http://mail-archives.apache.org/mod_mbox/jena-users/201502.mbox/%3C54E6FFFE.7010308@apache.org%3E
+				// bug at
+				// https://github.com/apache/jena/blob/master/jena-base/src/main/java/org/apache/jena/atlas/io/IndentedWriter.java,
+				// in print, line nr 123: should be codepoints, ikke chars
+
 				// jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
 			}
 		}
