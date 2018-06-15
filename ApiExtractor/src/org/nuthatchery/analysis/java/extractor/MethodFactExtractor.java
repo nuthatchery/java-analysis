@@ -250,7 +250,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		} else {
 			operand = model.literal(cst);
 		}
-		putInstruction(Opcodes.LDC, JavaFacts.P_OPERAND_CONSTANT, operand);
+		putInstruction(Opcodes.LDC);// , JavaFacts.P_OPERAND_CONSTANT, operand);
 		super.visitLdcInsn(cst);
 	}
 
