@@ -107,7 +107,7 @@ public class ExtractApi {
 								ClassReader cr = new ClassReader(stream);
 								cr.accept(ea, ClassReader.EXPAND_FRAMES);
 							}
-						} else if (nextElement.getName().equals("pom.properties")) {
+						} else if (nextElement.getName().equals("pom.xml")) {
 							// read POM.properties, potentially using the Maven Model library
 							org.apache.maven.model.Model result = null;
 							try (InputStream stream = jarFile.getInputStream(nextElement)) {
@@ -115,7 +115,7 @@ public class ExtractApi {
 									MavenXpp3Reader reader = new MavenXpp3Reader();
 									result = reader.read(stream);
 								} catch (XmlPullParserException e) {
-									System.out.println("Failed parsing pom.properties");
+									System.out.println("Failed parsing pom.xml");
 								}
 								String artifactId = result.getArtifactId();
 								if (artifactId == null) {
