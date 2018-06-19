@@ -117,6 +117,10 @@ public class ExtractApi {
 								} catch (XmlPullParserException e) {
 									System.out.println("Failed parsing pom.properties");
 								}
+								String artifactId = result.getArtifactId();
+								if (artifactId == null) {
+									artifactId = result.getParent().getArtifactId();
+								}
 								String groupId = result.getGroupId();
 								String version = result.getVersion();
 								if (groupId == null) {
