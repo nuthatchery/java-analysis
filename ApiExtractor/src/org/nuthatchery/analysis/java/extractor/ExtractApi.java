@@ -20,6 +20,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.jena.JenaRDF;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.atlas.logging.LogCtl;
@@ -133,6 +134,9 @@ public class ExtractApi {
 								// TODO Add to other model
 								System.out.println(
 										"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
+								m.add(m.getName(), MavenFacts.ARTIFACT_ID, model.literal(artifactId));
+								m.add(m.getName(), MavenFacts.GROUP_ID, model.literal(groupId));
+								m.add(m.getName(), MavenFacts.VERSION, model.literal(version));
 							}
 						} else if (console != null) {
 							console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,

@@ -19,5 +19,6 @@ public abstract class MavenFacts {
 	public static final Model mavenProjectModel = //
 			ModelFactory.getInstance().createModel(mavenProjectPrefix);
 	public static final IRI ARTIFACT_ID = mavenProjectModel.node("artifactID");
-
+	public static final IRI GROUP_ID = mavenProjectModel.node("groupID");
+	public static final IRI VERSION = mavenProjectModel.node("version");
 }
