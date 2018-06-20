@@ -12,6 +12,13 @@ java -jar target/jvm-fact-extractor-0.0.1-SNAPSHOT.jar  target/jvm-fact-extracto
 
 * Run with -s to invoke SPARQL server at http://localhost:3330/
 
+Interesting queries: 
+http://localhost:3330/dataset?query=PREFIX m: <http://model.nuthatchery.org/maven/> SELECT ?x ?p ?y FROM <http://db.nuthatchery.org/java/guava-18.0.jar> WHERE {?x ?p ?y}
+
+http://localhost:3330/dataset?query=PREFIX m: <http://model.nuthatchery.org/maven/project/> SELECT ?x ?p ?y FROM <http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar> WHERE {?x ?p ?y}
+
+http://localhost:3330/dataset?query=PREFIX m: <http://model.nuthatchery.org/maven/project/> SELECT ?x ?p ?y FROM <http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar> WHERE {?x m:artifactID ?y}
+
 ### With Graal
 
 Run the application (App.java) in graal-getting-started. It'll load `/tmp/data.trig`, set up a few inference rules, run a couple of queries, and then expect further queries on stdin.
