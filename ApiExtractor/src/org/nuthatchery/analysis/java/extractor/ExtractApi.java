@@ -107,8 +107,9 @@ public class ExtractApi {
 								ClassReader cr = new ClassReader(stream);
 								cr.accept(ea, ClassReader.EXPAND_FRAMES);
 							}
-						} else if (nextElement.getName().equals("pom.xml")) {
-							// read POM.properties, potentially using the Maven Model library
+						} else if (nextElement.getName().endsWith("pom.xml")) {
+							// TODO extract to class
+							System.out.println("found POM.XML, trying to parse");
 							org.apache.maven.model.Model result = null;
 							try (InputStream stream = jarFile.getInputStream(nextElement)) {
 								try {
@@ -129,7 +130,9 @@ public class ExtractApi {
 								if (version == null) {
 									version = result.getParent().getVersion();
 								}
-								// Add to other model
+								// TODO Add to other model
+								System.out.println(
+										"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
 							}
 						} else if (console != null) {
 							console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
@@ -276,7 +279,7 @@ public class ExtractApi {
 				// http://mail-archives.apache.org/mod_mbox/jena-users/201502.mbox/%3C54E6FFFE.7010308@apache.org%3E
 				// bug at
 				// https://github.com/apache/jena/blob/master/jena-base/src/main/java/org/apache/jena/atlas/io/IndentedWriter.java,
-				// in print, line nr 123: should be codepoints, ikke chars
+				// in print, line nr 123: should be codepoints, not chars
 
 				/*
 				 * clone Jena Fix bug
@@ -302,13 +305,16 @@ public class ExtractApi {
 			defaultModel.add(defaultModel.iri(s), RdfVocabulary.RDFS_IS_DEFINED_BY, defaultModel.iri(s));
 		}
 
+		// need to manually add prefixes and things
 		dataset.getDefaultModel().removeAll();
 		dataset.addNamedModel(JavaFacts.javaPrefix, toJenaModel(JavaFacts.javaModel));
 		dataset.addNamedModel(JavaFacts.javaTypesPrefix, toJenaModel(JavaFacts.javaTypesModel));
+		dataset.addNamedModel(MavenFacts.mavenProjectPrefix, toJenaModel(MavenFacts.mavenProjectModel));
 		dataset.getDefaultModel().setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
 		dataset.getDefaultModel().setNsPrefix("rdf", RdfVocabulary.RDF_PREFIX);
 		dataset.getDefaultModel().setNsPrefix("rdfs", RdfVocabulary.RDFS_PREFIX);
 		dataset.getDefaultModel().setNsPrefix("j", JavaFacts.javaPrefix);
+		dataset.getDefaultModel().setNsPrefix("m", MavenFacts.mavenProjectPrefix);
 		dataset.getDefaultModel().setNsPrefix("jType", JavaFacts.javaTypesPrefix);
 		dataset.getDefaultModel().setNsPrefix("jFlag", JavaFacts.javaFlagsPrefix);
 		dataset.getDefaultModel().setNsPrefix("db", DB_PREFIX);
