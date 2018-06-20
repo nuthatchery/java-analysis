@@ -11,6 +11,12 @@ import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.util.Printer;
 
+/**
+ * Java-spesifikt, diktet opp selv
+ *
+ * @author anna, anya
+ *
+ */
 public abstract class JavaFacts {
 	/**
 	 * Copied from JVM specs: Flags
@@ -45,6 +51,12 @@ public abstract class JavaFacts {
 		public static final IRI PACKAGE = javaFlagsModel.node("package");
 	}
 
+	/**
+	 * JVM types
+	 *
+	 * @author anna, anya
+	 *
+	 */
 	public static class Types {
 		public static final IRI ARRAY_REF = javaTypesModel.node("array-ref");
 		public static final IRI ARRAY_DIM = javaTypesModel.node("array-dim");
@@ -66,7 +78,9 @@ public abstract class JavaFacts {
 		public static final IRI VOID = javaTypesModel.node("void");
 
 		static {
-			javaTypesModel.add(JAVA_TYPE, RdfVocabulary.RDFS_SUBCLASS_OF, CommonVocabulary.C_TYPE);
+			javaTypesModel.add(JAVA_TYPE, RdfVocabulary.RDFS_SUBCLASS_OF, CommonVocabulary.C_TYPE); // all JAVA_TYPEs
+			// are subclasses in
+			// C-like languages
 			javaTypesModel.add(PRIMITIVE_TYPE, RdfVocabulary.RDFS_SUBCLASS_OF, JAVA_TYPE);
 			javaTypesModel.add(BOOLEAN, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
 			javaTypesModel.add(BYTE, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
@@ -76,7 +90,10 @@ public abstract class JavaFacts {
 			javaTypesModel.add(FLOAT, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
 			javaTypesModel.add(DOUBLE, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
 			javaTypesModel.add(CHAR, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
-			javaTypesModel.add(TOP, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
+			javaTypesModel.add(TOP, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE); // TOP of stack when top element
+			// takes up two spots on the
+			// stack; real time is on
+			// element top-1
 			javaTypesModel.add(VOID, RdfVocabulary.RDFS_SUBCLASS_OF, PRIMITIVE_TYPE);
 			javaTypesModel.add(REFERENCE_TYPE, RdfVocabulary.RDFS_SUBCLASS_OF, JAVA_TYPE);
 			javaTypesModel.add(UNINITIALIZED_THIS, RdfVocabulary.RDFS_SUBCLASS_OF, REFERENCE_TYPE);
@@ -108,6 +125,8 @@ public abstract class JavaFacts {
 
 	public static final Model javaMethodsModel = //
 			ModelFactory.getInstance().createModel(javaMethodsPrefix);
+
+	// funnet på selv, bruker for å enkode ting fra bytecode
 
 	public static final Model javaTypesModel = //
 			ModelFactory.getInstance().createModel(javaTypesPrefix);
