@@ -10,6 +10,8 @@ java -jar target/jvm-fact-extractor-0.0.1-SNAPSHOT.jar  target/jvm-fact-extracto
 ```
 * Output is in `/tmp/data.trig` (in [TriG](https://en.wikipedia.org/wiki/TriG_(syntax)) syntax); you can also specify output file with `-o filename`, or use a persistent [Jena TDB store](https://jena.apache.org/documentation/tdb/) with `-d dbDir`.
 
+* Run with -s to invoke SPARQL server at http://localhost:3330/
+
 ### With Graal
 
 Run the application (App.java) in graal-getting-started. It'll load `/tmp/data.trig`, set up a few inference rules, run a couple of queries, and then expect further queries on stdin.
