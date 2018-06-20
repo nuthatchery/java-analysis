@@ -6,6 +6,14 @@ import org.apache.commons.rdf.simple.Types;
 import org.nuthatchery.ontology.Model;
 import org.nuthatchery.ontology.ModelFactory;
 
+/**
+ * Class for subset of RDF standard. Slått sammen RDF og RDFs i samme dingsen
+ *
+ * TODO: kanskje bedre å bruke Jena biblioteket
+ *
+ * @author anna
+ *
+ */
 public class RdfVocabulary {
 	public static final String RDFS_PREFIX = "http://www.w3.org/2000/01/rdf-schema#";
 	public static final String RDF_PREFIX = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -213,9 +221,8 @@ public class RdfVocabulary {
 	 * @requires index >= 1
 	 */
 	public IRI index(int index) {
-		if (index < 1) {
+		if (index < 1)
 			throw new IllegalArgumentException(String.valueOf(index));
-		}
 		return rdfModel.node(String.format("_%d", index));
 	}
 }
