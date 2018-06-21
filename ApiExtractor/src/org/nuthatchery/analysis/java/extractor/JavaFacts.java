@@ -184,6 +184,7 @@ public abstract class JavaFacts {
 	public static final IRI P_SRC_END = javaModel.node("srcEnd");
 	public static final IRI C_INSTRUCTION = javaModel.node("jvmInstruction");
 	public static final IRI C_JVM_INSN = javaModel.node("jvmInsn");
+	public static final IRI P_ANNOTATION = javaModel.node("annotation");
 	public static final IRI P_OPERAND_INT = javaModel.node("intOperand");
 	public static final IRI P_OPERAND = javaModel.node("operand");
 	public static final IRI P_OPERAND_CONSTANT = javaModel.node("constantOperand");

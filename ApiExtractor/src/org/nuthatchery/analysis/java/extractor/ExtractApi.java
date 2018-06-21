@@ -150,6 +150,7 @@ public class ExtractApi {
 							j++;
 						}
 					}
+					i++;
 				}
 				if (dataset.supportsTransactions()) {
 					dataset.commit();

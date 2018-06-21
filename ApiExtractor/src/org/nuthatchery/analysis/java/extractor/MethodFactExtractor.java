@@ -140,7 +140,15 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		log.warnf("unimplemented: MethodFactExtractor.visitAnnotation(desc=%s,visible=%b)%n", desc, visible);
+		// log.warnf("unimplemented:
+		// MethodFactExtractor.visitAnnotation(desc=%s,visible=%b)%n", desc, visible);
+		BlankNode anno = model.blank();
+		model.add(currentMethodId, JavaFacts.P_ANNOTATION, anno);
+		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, desc));
+		// TODO: also traverse the annotation
+		// return new AnnotationVisitor(Opcodes.ASM6) {
+		//
+		// };
 		return super.visitAnnotation(desc, visible);
 	}
 

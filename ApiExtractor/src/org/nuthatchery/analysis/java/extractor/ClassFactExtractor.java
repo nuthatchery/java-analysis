@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import org.apache.commons.rdf.api.BlankNode;
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
@@ -196,9 +197,13 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		log.warnf("unimplemented: ClassFactExtractor.visitAnnotation(desc=%s, visible=%b)%n", desc, visible);
-		super.visitAnnotation(desc, visible);
-		return null;
+		// log.warnf("unimplemented: ClassFactExtractor.visitAnnotation(desc=%s,
+		// visible=%b)%n", desc, visible);
+		BlankNode anno = model.blank();
+		model.add(getClassId(), JavaFacts.P_ANNOTATION, anno);
+		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, desc));
+		// TODO: also traverse the annotation
+		return super.visitAnnotation(desc, visible);
 	}
 
 	@Override
