@@ -298,7 +298,7 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	@Override
 	public ModuleVisitor visitModule(String name, int access, String version) {
-		log.warnf("unimplemented: visitModule(name=%s, access=%d, version=%d)%n", name, access, version);
+		log.warnf("unimplemented: visitModule(name=%s, access=%d, version=%s)%n", name, access, version);
 		super.visitModule(name, access, version);
 		return null;
 	}

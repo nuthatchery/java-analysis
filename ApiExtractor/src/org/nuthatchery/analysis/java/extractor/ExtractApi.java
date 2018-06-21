@@ -134,6 +134,7 @@ public class ExtractApi {
 								// TODO Add to other model
 								System.out.println(
 										"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
+								m.add(m.getName(), RdfVocabulary.RDF_TYPE, MavenFacts.C_PROJECT);
 								m.add(m.getName(), MavenFacts.ARTIFACT_ID, model.literal(artifactId));
 								m.add(m.getName(), MavenFacts.GROUP_ID, model.literal(groupId));
 								m.add(m.getName(), MavenFacts.VERSION, model.literal(version));
