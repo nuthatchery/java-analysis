@@ -20,7 +20,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.jena.JenaRDF;
+import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.fuseki.embedded.FusekiServer;
 import org.apache.jena.query.Dataset;
@@ -29,6 +31,8 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.tdb.TDB;
 import org.apache.jena.tdb.TDBFactory;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.nuthatchery.ontology.Model;
 import org.nuthatchery.ontology.ModelFactory;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
@@ -93,6 +97,7 @@ public class ExtractApi {
 					int j = 0;
 					for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
 						JarEntry nextElement = entries.nextElement();
+						System.out.println("Processing JarEntry " + nextElement.getName());
 						if (nextElement.getName().endsWith(".class")) {
 							try (InputStream stream = jarFile.getInputStream(nextElement)) {
 
@@ -102,6 +107,37 @@ public class ExtractApi {
 								}
 								ClassReader cr = new ClassReader(stream);
 								cr.accept(ea, ClassReader.EXPAND_FRAMES);
+							}
+						} else if (nextElement.getName().endsWith("pom.xml")) {
+							// TODO extract to class
+							System.out.println("found POM.XML, trying to parse");
+							org.apache.maven.model.Model result = null;
+							try (InputStream stream = jarFile.getInputStream(nextElement)) {
+								try {
+									MavenXpp3Reader reader = new MavenXpp3Reader();
+									result = reader.read(stream);
+								} catch (XmlPullParserException e) {
+									System.out.println("Failed parsing pom.xml");
+								}
+								String artifactId = result.getArtifactId();
+								if (artifactId == null) {
+									artifactId = result.getParent().getArtifactId();
+								}
+								String groupId = result.getGroupId();
+								String version = result.getVersion();
+								if (groupId == null) {
+									groupId = result.getParent().getGroupId();
+								}
+								if (version == null) {
+									version = result.getParent().getVersion();
+								}
+								// TODO Add to other model
+								System.out.println(
+										"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
+								m.add(m.getName(), RdfVocabulary.RDF_TYPE, MavenFacts.C_PROJECT);
+								m.add(m.getName(), MavenFacts.ARTIFACT_ID, model.literal(artifactId));
+								m.add(m.getName(), MavenFacts.GROUP_ID, model.literal(groupId));
+								m.add(m.getName(), MavenFacts.VERSION, model.literal(version));
 							}
 						} else if (console != null) {
 							console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
@@ -117,6 +153,9 @@ public class ExtractApi {
 			} else if (i % 10 == 5) {
 				msg = prc;
 			}
+		}
+		if (console != null) {
+			console.printf("\n");
 		}
 	}
 
@@ -243,12 +282,26 @@ public class ExtractApi {
 
 		if (outFile != null) {
 			try (OutputStream output = new FileOutputStream(outFile)) {
-				RDFDataMgr.write(output, dataset, Lang.TRIG);
+				RDFDataMgr.write(output, dataset, Lang.TRIG); // throws java.nio.charset.MalformedInputException when
+				// dataset is not UTF-8?
+				// http://mail-archives.apache.org/mod_mbox/jena-users/201502.mbox/%3C54E6FFFE.7010308@apache.org%3E
+				// bug at
+				// https://github.com/apache/jena/blob/master/jena-base/src/main/java/org/apache/jena/atlas/io/IndentedWriter.java,
+				// in print, line nr 123: should be codepoints, not chars
+
+				/*
+				 * clone Jena Fix bug
+				 *
+				 */
+
 				// jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
 			}
 		}
 		dataset.close();
-
+		Console console = System.console();
+		if (console != null) {
+			console.printf("ok\n");
+		}
 	}
 
 	private static void setupDataset(Dataset dataset) {
@@ -263,13 +316,16 @@ public class ExtractApi {
 			defaultModel.add(defaultModel.iri(s), RdfVocabulary.RDFS_IS_DEFINED_BY, defaultModel.iri(s));
 		}
 
+		// need to manually add prefixes and things
 		dataset.getDefaultModel().removeAll();
 		dataset.addNamedModel(JavaFacts.javaPrefix, toJenaModel(JavaFacts.javaModel));
 		dataset.addNamedModel(JavaFacts.javaTypesPrefix, toJenaModel(JavaFacts.javaTypesModel));
+		dataset.addNamedModel(MavenFacts.mavenProjectPrefix, toJenaModel(MavenFacts.mavenProjectModel));
 		dataset.getDefaultModel().setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
 		dataset.getDefaultModel().setNsPrefix("rdf", RdfVocabulary.RDF_PREFIX);
 		dataset.getDefaultModel().setNsPrefix("rdfs", RdfVocabulary.RDFS_PREFIX);
 		dataset.getDefaultModel().setNsPrefix("j", JavaFacts.javaPrefix);
+		dataset.getDefaultModel().setNsPrefix("m", MavenFacts.mavenProjectPrefix);
 		dataset.getDefaultModel().setNsPrefix("jType", JavaFacts.javaTypesPrefix);
 		dataset.getDefaultModel().setNsPrefix("jFlag", JavaFacts.javaFlagsPrefix);
 		dataset.getDefaultModel().setNsPrefix("db", DB_PREFIX);
