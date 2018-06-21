@@ -152,7 +152,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitAttribute(Attribute attr) {
-		log.warnf("unimplemented: visitAttribue(attr=%s)%n", attr);
+		log.warnf("unimplemented: MethodFactExtractor.visitAttribute(attr=%s)%n", attr);
 		super.visitAttribute(attr);
 	}
 

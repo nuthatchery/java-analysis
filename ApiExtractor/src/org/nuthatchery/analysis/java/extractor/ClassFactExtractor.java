@@ -196,14 +196,14 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		log.warnf("unimplemented: visitAnnotation(desc=%s, visible=%b)%n", desc, visible);
+		log.warnf("unimplemented: ClassFactExtractor.visitAnnotation(desc=%s, visible=%b)%n", desc, visible);
 		super.visitAnnotation(desc, visible);
 		return null;
 	}
 
 	@Override
 	public void visitAttribute(Attribute attr) {
-		log.warnf("unimplemented: visitAttribue(attr=%s)%n", attr);
+		log.warnf("unimplemented: ClassFactExtractor.visitAttribue(attr=%s)%n", attr);
 		super.visitAttribute(attr);
 	}
 
@@ -298,7 +298,8 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	@Override
 	public ModuleVisitor visitModule(String name, int access, String version) {
-		log.warnf("unimplemented: visitModule(name=%s, access=%d, version=%s)%n", name, access, version);
+		log.warnf("unimplemented: ClassFactExtractor.visitModule(name=%s, access=%d, version=%s)%n", name, access,
+				version);
 		super.visitModule(name, access, version);
 		return null;
 	}
@@ -335,7 +336,9 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	@Override
 	public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
-		log.warnf("unimplemented: visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n", typeRef,
+		log.warnf(
+				"unimplemented: ClassFactExtractor.visitTypeAnnotation(typeRed=%d, typePath=%s, desc=%s, visible=%b)%n",
+				typeRef,
 				typePath.toString(), desc, visible);
 		super.visitTypeAnnotation(typeRef, typePath, desc, visible);
 		return null;

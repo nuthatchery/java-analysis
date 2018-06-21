@@ -27,6 +27,7 @@ import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.fuseki.embedded.FusekiServer;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.ReadWrite;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.tdb.TDB;
@@ -55,9 +56,6 @@ public class ExtractApi {
 
 	private static void extractModel(Dataset dataset, Model mainModel, String modelName, String arg)
 			throws IOException, FileNotFoundException {
-		String prc = "Processing:  ";
-		String chk = "(checkpoint) ";
-		String msg = prc;
 		List<String> files = findFiles(arg);
 		Console console = System.console();
 		int i = 0;
@@ -68,93 +66,111 @@ public class ExtractApi {
 		}
 		Model model = mainModel.model(DB_PREFIX + modelName, "this:"); // DB_PREFIX + modelName + "/");
 		for (String file : files) {
-			System.out.println("Processing: " + file);
-			if (console != null) {
-				console.printf("[%02d%%] %s%s\r", (i * 100) / n, msg, fill(file, 60, "…", true));
-			}
-			if (demoMode && file.endsWith(".class")) {
-				addModelName(model.getName());
-				ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
-				ClassReader cr = new ClassReader(ExtractApi.class.getResourceAsStream(file));
-				cr.accept(ea, ClassReader.EXPAND_FRAMES);
-			} else if (file.endsWith(".class")) {
-				addModelName(model.getName());
-				try (InputStream stream = new FileInputStream(file)) {
+			// System.out.println("Processing: " + file);
+			try {
+				if (dataset.supportsTransactions()) {
+					// System.out.println("Begin write transaction");
+					dataset.begin(ReadWrite.WRITE);
+				}
+				if (console != null) {
+					console.printf("[%02d%%] %3s:     %s\r", (i * 100) / n, "CLS", fill(file, 70, "…", true));
+				}
+				if (demoMode && file.endsWith(".class")) {
+					addModelName(model.getName());
 					ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
-					ClassReader cr = new ClassReader(stream);
+					ClassReader cr = new ClassReader(ExtractApi.class.getResourceAsStream(file));
 					cr.accept(ea, ClassReader.EXPAND_FRAMES);
-				}
-			} else if (file.endsWith(".jar")) {
-				try (JarFile jarFile = new JarFile(file)) {
-					String name = file;
-					if (name.contains("/")) {
-						name = name.substring(name.lastIndexOf("/") + 1, name.length());
+				} else if (file.endsWith(".class")) {
+					addModelName(model.getName());
+					try (InputStream stream = new FileInputStream(file)) {
+						ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
+						ClassReader cr = new ClassReader(stream);
+						cr.accept(ea, ClassReader.EXPAND_FRAMES);
 					}
-					Model m = model.model(DB_PREFIX + name, "this:");
-					addModelName(m.getName());
-					ClassFactExtractor ea = new ClassFactExtractor(m, JavaUtil.logger(logLevel));
-					int nEntries = jarFile.size();
-					int j = 0;
-					for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
-						JarEntry nextElement = entries.nextElement();
-						System.out.println("Processing JarEntry " + nextElement.getName());
-						if (nextElement.getName().endsWith(".class")) {
-							try (InputStream stream = jarFile.getInputStream(nextElement)) {
-
-								if (console != null) {
-									console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
-											fill(file, 60, "…", true));
-								}
-								ClassReader cr = new ClassReader(stream);
-								cr.accept(ea, ClassReader.EXPAND_FRAMES);
-							}
-						} else if (nextElement.getName().endsWith("pom.xml")) {
-							// TODO extract to class
-							System.out.println("found POM.XML, trying to parse");
-							org.apache.maven.model.Model result = null;
-							try (InputStream stream = jarFile.getInputStream(nextElement)) {
-								try {
-									MavenXpp3Reader reader = new MavenXpp3Reader();
-									result = reader.read(stream);
-								} catch (XmlPullParserException e) {
-									System.out.println("Failed parsing pom.xml");
-								}
-								String artifactId = result.getArtifactId();
-								if (artifactId == null) {
-									artifactId = result.getParent().getArtifactId();
-								}
-								String groupId = result.getGroupId();
-								String version = result.getVersion();
-								if (groupId == null) {
-									groupId = result.getParent().getGroupId();
-								}
-								if (version == null) {
-									version = result.getParent().getVersion();
-								}
-								// TODO Add to other model
-								System.out.println(
-										"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
-								m.add(m.getName(), RdfVocabulary.RDF_TYPE, MavenFacts.C_PROJECT);
-								m.add(m.getName(), MavenFacts.ARTIFACT_ID, model.literal(artifactId));
-								m.add(m.getName(), MavenFacts.GROUP_ID, model.literal(groupId));
-								m.add(m.getName(), MavenFacts.VERSION, model.literal(version));
-							}
-						} else if (console != null) {
-							console.printf("[%2d%%] JAR: %2d%% %s\r", (i * 100) / n, (j * 100) / nEntries,
-									fill("", 60, "…", true));
+				} else if (file.endsWith(".jar")) {
+					try (JarFile jarFile = new JarFile(file)) {
+						String name = file;
+						if (name.contains("/")) {
+							name = name.substring(name.lastIndexOf("/") + 1, name.length());
 						}
-						j++;
+						Model m = model.model(DB_PREFIX + name, "this:");
+						addModelName(m.getName());
+						ClassFactExtractor ea = new ClassFactExtractor(m, JavaUtil.logger(logLevel));
+						int nEntries = jarFile.size();
+						int j = 0;
+						for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+							JarEntry nextElement = entries.nextElement();
+							// System.out.println("Processing JarEntry " + nextElement.getName());
+							if (nextElement.getName().endsWith(".class")) {
+								try (InputStream stream = jarFile.getInputStream(nextElement)) {
+
+									if (console != null) {
+										console.printf("[%2d%%] %3s: %2d%% %s\r", (i * 100) / n, "JAR",
+												(j * 100) / nEntries,
+												fill(file, 70, "…", true));
+									}
+									ClassReader cr = new ClassReader(stream);
+									cr.accept(ea, ClassReader.EXPAND_FRAMES);
+								}
+							} else if (nextElement.getName().endsWith("pom.xml")) {
+								// TODO extract to class
+								System.out.println("found POM.XML, trying to parse");
+								org.apache.maven.model.Model result = null;
+								try (InputStream stream = jarFile.getInputStream(nextElement)) {
+									try {
+										MavenXpp3Reader reader = new MavenXpp3Reader();
+										result = reader.read(stream);
+									} catch (XmlPullParserException e) {
+										System.out.println("Failed parsing pom.xml");
+									}
+									String artifactId = result.getArtifactId();
+									if (artifactId == null) {
+										artifactId = result.getParent().getArtifactId();
+									}
+									String groupId = result.getGroupId();
+									String version = result.getVersion();
+									if (groupId == null) {
+										groupId = result.getParent().getGroupId();
+									}
+									if (version == null) {
+										version = result.getParent().getVersion();
+									}
+									// TODO Add to other model
+									System.out.println(
+											"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
+									m.add(m.getName(), RdfVocabulary.RDF_TYPE, MavenFacts.C_PROJECT);
+									m.add(m.getName(), MavenFacts.ARTIFACT_ID, model.literal(artifactId));
+									m.add(m.getName(), MavenFacts.GROUP_ID, model.literal(groupId));
+									m.add(m.getName(), MavenFacts.VERSION, model.literal(version));
+								}
+							} else if (console != null) {
+								console.printf("[%2d%%] %3s: %2d%% %s\r", (i * 100) / n, "JAR", (j * 100) / nEntries,
+										fill("", 70, "…", true));
+							}
+							j++;
+						}
 					}
 				}
-			}
-			if (i++ % 10 == 0) {
-				TDB.sync(dataset);
-				msg = chk;
-			} else if (i % 10 == 5) {
-				msg = prc;
+				if (dataset.supportsTransactions()) {
+					dataset.commit();
+					// System.out.println("commit transaction");
+					dataset.end();
+					// System.out.println("end transaction");
+				}
+			} catch (RuntimeException e) {
+				if (dataset.supportsTransactionAbort()) {
+					dataset.abort();
+					// System.out.println("abort transaction");
+				}
+				if (dataset.supportsTransactions()) {
+					dataset.end();
+					// System.out.println("end transaction");
+				}
+				throw e;
 			}
 		}
 		if (console != null) {
+			console.printf("[%02d%%] ALL:     %s\r", (i * 100) / n, fill("done", 80, "…", false));
 			console.printf("\n");
 		}
 	}
@@ -228,76 +244,83 @@ public class ExtractApi {
 		// IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
 		Model model = mf.createModel(jenaRDF.asDataset(dataset), DB_PREFIX);
 		String modelName = null;
-		for (Iterator<String> it = arguments.iterator(); it.hasNext();) {
-			String arg = it.next();
-			switch (arg) {
-			case "-h":
-				System.err.println(
-						"arguments: [options] [-d dbDir | -o outFile.trig | -m modelName | fileOrDir]... [-s]");
-				System.err.println("Inputs: fileOrDir can be zero or more of");
-				System.err.println("     *.class        Java class files");
-				System.err.println("     *.jar          JAR files (contained class files are extracted)");
-				System.err.println("     */             Directory (all classes and jars extracted recursively)");
-				System.err.println("General options:");
-				System.err.println("    -h     help");
-				System.err.println("    -v     verbose logging");
-				System.err.println("Special options: (take effect when encountered)");
-				System.err.println("    -m modelName    set model name for subsequent input");
-				System.err.println("    -d dbDir        set TDB database directory");
-				System.err.println("    -o outFile.trig set output TRiG file (when not using TDB)");
-				System.err.println("    -s              start server on http://localhost:3330/");
-				break;
-			case "-v":
-				logLevel = 10;
-				break;
-			case "-o":
-				if (outFile == null)
-					throw new IllegalArgumentException("-o option incompatible with -d");
-				outFile = it.next();
-				break;
-			case "-d":
-				String dbDir = it.next();
+		try {
+			for (Iterator<String> it = arguments.iterator(); it.hasNext();) {
+				String arg = it.next();
+				switch (arg) {
+				case "-h":
+					System.err.println(
+							"arguments: [options] [-d dbDir | -o outFile.trig | -m modelName | fileOrDir]... [-s]");
+					System.err.println("Inputs: fileOrDir can be zero or more of");
+					System.err.println("     *.class        Java class files");
+					System.err.println("     *.jar          JAR files (contained class files are extracted)");
+					System.err.println("     */             Directory (all classes and jars extracted recursively)");
+					System.err.println("General options:");
+					System.err.println("    -h     help");
+					System.err.println("    -v     verbose logging");
+					System.err.println("Special options: (take effect when encountered)");
+					System.err.println("    -m modelName    set model name for subsequent input");
+					System.err.println("    -d dbDir        set TDB database directory");
+					System.err.println("    -o outFile.trig set output TRiG file (when not using TDB)");
+					System.err.println("    -s              start server on http://localhost:3330/");
+					break;
+				case "-v":
+					logLevel = 10;
+					break;
+				case "-o":
+					if (outFile == null)
+						throw new IllegalArgumentException("-o option incompatible with -d");
+					outFile = it.next();
+					break;
+				case "-d":
+					String dbDir = it.next();
+					dataset.close();
+					dataset = TDBFactory.createDataset(dbDir);
+					setupDataset(dataset);
+					model = mf.createModel(jenaRDF.asDataset(dataset), DB_PREFIX);
+					outFile = null;
+					break;
+				case "-s":
+					FusekiServer server = FusekiServer.create()//
+					.add("/dataset", dataset, true)//
+					.enableStats(true)//
+					.build();
+					server.start();
+					TDB.sync(dataset);
+					server.join();
+					break;
+				case "-m":
+					modelName = it.next();
+					break;
+				default:
+					extractModel(dataset, model, modelName, arg);
+				}
+			}
+
+			if (outFile != null) {
+				try (OutputStream output = new FileOutputStream(outFile)) {
+					RDFDataMgr.write(output, dataset, Lang.TRIG); // throws java.nio.charset.MalformedInputException
+					// when
+					// dataset is not UTF-8?
+					// http://mail-archives.apache.org/mod_mbox/jena-users/201502.mbox/%3C54E6FFFE.7010308@apache.org%3E
+					// bug at
+					// https://github.com/apache/jena/blob/master/jena-base/src/main/java/org/apache/jena/atlas/io/IndentedWriter.java,
+					// in print, line nr 123: should be codepoints, not chars
+
+					/*
+					 * clone Jena Fix bug
+					 *
+					 */
+
+					// jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
+				}
+			}
+		} finally {
+			if (dataset != null) {
 				dataset.close();
-				dataset = TDBFactory.createDataset(dbDir);
-				setupDataset(dataset);
-				model = mf.createModel(jenaRDF.asDataset(dataset), DB_PREFIX);
-				outFile = null;
-				break;
-			case "-s":
-				FusekiServer server = FusekiServer.create()//
-				.add("/dataset", dataset, true)//
-				.enableStats(true)//
-				.build();
-				server.start();
-				TDB.sync(dataset);
-				server.join();
-				break;
-			case "-m":
-				modelName = it.next();
-				break;
-			default:
-				extractModel(dataset, model, modelName, arg);
 			}
 		}
 
-		if (outFile != null) {
-			try (OutputStream output = new FileOutputStream(outFile)) {
-				RDFDataMgr.write(output, dataset, Lang.TRIG); // throws java.nio.charset.MalformedInputException when
-				// dataset is not UTF-8?
-				// http://mail-archives.apache.org/mod_mbox/jena-users/201502.mbox/%3C54E6FFFE.7010308@apache.org%3E
-				// bug at
-				// https://github.com/apache/jena/blob/master/jena-base/src/main/java/org/apache/jena/atlas/io/IndentedWriter.java,
-				// in print, line nr 123: should be codepoints, not chars
-
-				/*
-				 * clone Jena Fix bug
-				 *
-				 */
-
-				// jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
-			}
-		}
-		dataset.close();
 		Console console = System.console();
 		if (console != null) {
 			console.printf("ok\n");
