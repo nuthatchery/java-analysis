@@ -154,6 +154,9 @@ public class ExtractApi {
 				msg = prc;
 			}
 		}
+		if (console != null) {
+			console.printf("\n");
+		}
 	}
 
 	public static String fill(String s, int size, String ellipsis, boolean flushRight) {
@@ -295,7 +298,10 @@ public class ExtractApi {
 			}
 		}
 		dataset.close();
-
+		Console console = System.console();
+		if (console != null) {
+			console.printf("ok\n");
+		}
 	}
 
 	private static void setupDataset(Dataset dataset) {
