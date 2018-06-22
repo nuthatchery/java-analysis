@@ -25,6 +25,7 @@ public abstract class MavenFacts {
 	public static final IRI ARTIFACT_ID = mavenProjectModel.node("artifactID");
 	public static final IRI GROUP_ID = mavenProjectModel.node("groupID");
 	public static final IRI VERSION = mavenProjectModel.node("version");
+	public static final IRI DEPENDS_ON = mavenProjectModel.node("depends_on");
 	public static final IRI C_PROJECT = mavenProjectModel.node("");
 
 	static {
@@ -34,6 +35,26 @@ public abstract class MavenFacts {
 		isProperty(mavenProjectModel, VERSION, C_PROJECT, Types.XSD_STRING);
 	}
 
+	/**
+	 * State that something is a property
+	 *
+	 * TODO: extract to utility class and make public
+	 *
+	 * @param m
+	 *            A model
+	 * @param prop
+	 *            IRI of the property
+	 * @param sub
+	 *            An RDF class for the possible subjects, this will be the
+	 *            rdfs:range of the property; can be null for no range
+	 * @param obj
+	 *            An RDF class for the possible objects, this will be the
+	 *            rdfs:domain of the property; can be null for no range
+	 * @param more
+	 *            Pairs of additional terms that add extra information about the
+	 *            property. E.g, with more = [subPropertyOf, foo], we'll also get
+	 *            (prop, subPropertyOf foo)
+	 */
 	private static void isProperty(Model m, IRI prop, BlankNodeOrIRI sub, RDFTerm obj, RDFTerm... more) {
 		m.add(prop, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDF_PROPERTY);
 		if (sub != null) {
