@@ -27,6 +27,7 @@ public abstract class MavenFacts {
 	public static final IRI VERSION = mavenProjectModel.node("version");
 	public static final IRI DEPENDS_ON = mavenProjectModel.node("depends_on");
 	public static final IRI C_PROJECT = mavenProjectModel.node("");
+	public static final IRI MAVEN_COORDINATE = mavenProjectModel.node("Maven-coordinate");
 
 	static {
 		mavenProjectModel.add(C_PROJECT, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);

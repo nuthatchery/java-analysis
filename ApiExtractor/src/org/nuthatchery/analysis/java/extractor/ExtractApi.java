@@ -32,6 +32,7 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.tdb.TDB;
 import org.apache.jena.tdb.TDBFactory;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.nuthatchery.ontology.Model;
@@ -123,26 +124,31 @@ public class ExtractApi {
 									} catch (XmlPullParserException e) {
 										System.out.println("Failed parsing pom.xml");
 									}
+									String groupId = result.getGroupId();
+									if (groupId == null) {
+										groupId = result.getParent().getGroupId();
+									}
 									String artifactId = result.getArtifactId();
 									if (artifactId == null) {
 										artifactId = result.getParent().getArtifactId();
 									}
-									String groupId = result.getGroupId();
 									String version = result.getVersion();
-									if (groupId == null) {
-										groupId = result.getParent().getGroupId();
-									}
 									if (version == null) {
 										version = result.getParent().getVersion();
+									}
+									for (Dependency d : result.getDependencies()) {
+										//TODO intention is to bind dependency property directly to the other node, but Anna does not know how to do that
+										// m.add(m.getName(), MavenFacts.DEPENDS_ON, d.getManagementKey());
 									}
 									// TODO Add to other model
 									// TODO extract to POMFactExtractor or something like that
 									System.out.println(
 											"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
 									m.add(m.getName(), RdfVocabulary.RDF_TYPE, MavenFacts.C_PROJECT);
-									m.add(m.getName(), MavenFacts.ARTIFACT_ID, model.literal(artifactId));
 									m.add(m.getName(), MavenFacts.GROUP_ID, model.literal(groupId));
+									m.add(m.getName(), MavenFacts.ARTIFACT_ID, model.literal(artifactId));
 									m.add(m.getName(), MavenFacts.VERSION, model.literal(version));
+
 								}
 							} else if (console != null) {
 								console.printf("[%2d%%] %3s: %2d%% %s\r", (i * 100) / n, "JAR", (j * 100) / nEntries,
