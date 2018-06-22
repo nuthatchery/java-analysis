@@ -136,6 +136,7 @@ public class ExtractApi {
 										version = result.getParent().getVersion();
 									}
 									// TODO Add to other model
+									// TODO extract to POMFactExtractor or something like that
 									System.out.println(
 											"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
 									m.add(m.getName(), RdfVocabulary.RDF_TYPE, MavenFacts.C_PROJECT);
