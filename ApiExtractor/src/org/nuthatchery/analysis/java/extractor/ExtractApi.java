@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.apache.commons.rdf.api.BlankNode;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.jena.JenaRDF;
@@ -136,18 +137,25 @@ public class ExtractApi {
 									if (version == null) {
 										version = result.getParent().getVersion();
 									}
-									for (Dependency d : result.getDependencies()) {
-										//TODO intention is to bind dependency property directly to the other node, but Anna does not know how to do that
-										// m.add(m.getName(), MavenFacts.DEPENDS_ON, d.getManagementKey());
-									}
 									// TODO Add to other model
 									// TODO extract to POMFactExtractor or something like that
-									System.out.println(
-											"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
+									IRI b = model
+											.node("Maven-coordinate:" + groupId + ":" + artifactId + ":" + version);
 									m.add(m.getName(), RdfVocabulary.RDF_TYPE, MavenFacts.C_PROJECT);
-									m.add(m.getName(), MavenFacts.GROUP_ID, model.literal(groupId));
-									m.add(m.getName(), MavenFacts.ARTIFACT_ID, model.literal(artifactId));
-									m.add(m.getName(), MavenFacts.VERSION, model.literal(version));
+									m.add(m.getName(), MavenFacts.PROJECT_OBJECT, b);
+									m.add(b, MavenFacts.GROUP_ID, model.literal(groupId));
+									m.add(b, MavenFacts.ARTIFACT_ID, model.literal(artifactId));
+									m.add(b, MavenFacts.VERSION, model.literal(version));
+
+									System.out.println(result.getDependencies());
+									for (Dependency d : result.getDependencies()) {
+										// TODO intention is to bind dependency property directly to the other node, but
+										// Anna does not know how to do that
+										String maven_coordinate = d.getGroupId() + ":" + d.getArtifactId() + ":"
+												+ d.getVersion();
+										m.add(b, MavenFacts.DEPENDS_ON, model.node(maven_coordinate));
+										System.out.println(m.getName() + " depends on " + maven_coordinate);
+									}
 
 								}
 							} else if (console != null) {
