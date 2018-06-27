@@ -137,23 +137,21 @@ public class ExtractApi {
 									if (version == null) {
 										version = result.getParent().getVersion();
 									}
-									// TODO Add to other model
 									// TODO extract to POMFactExtractor or something like that
-									IRI b = model
+									IRI mvn_coord = model
 											.node("Maven-coordinate:" + groupId + ":" + artifactId + ":" + version);
 									m.add(m.getName(), RdfVocabulary.RDF_TYPE, MavenFacts.C_PROJECT);
-									m.add(m.getName(), MavenFacts.PROJECT_OBJECT, b);
-									m.add(b, MavenFacts.GROUP_ID, model.literal(groupId));
-									m.add(b, MavenFacts.ARTIFACT_ID, model.literal(artifactId));
-									m.add(b, MavenFacts.VERSION, model.literal(version));
+									m.add(m.getName(), MavenFacts.PROJECT_OBJECT, mvn_coord);
+									m.add(mvn_coord, MavenFacts.GROUP_ID, model.literal(groupId));
+									m.add(mvn_coord, MavenFacts.ARTIFACT_ID, model.literal(artifactId));
+									m.add(mvn_coord, MavenFacts.VERSION, model.literal(version));
 
 									System.out.println(result.getDependencies());
 									for (Dependency d : result.getDependencies()) {
-										// TODO intention is to bind dependency property directly to the other node, but
-										// Anna does not know how to do that
+										// TODO intention is to bind dependency property directly to the other node
 										String maven_coordinate = d.getGroupId() + ":" + d.getArtifactId() + ":"
 												+ d.getVersion();
-										m.add(b, MavenFacts.DEPENDS_ON, model.node(maven_coordinate));
+										m.add(mvn_coord, MavenFacts.DEPENDS_ON, model.node(maven_coordinate));
 										System.out.println(m.getName() + " depends on " + maven_coordinate);
 									}
 
