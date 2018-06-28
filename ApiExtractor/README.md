@@ -12,6 +12,8 @@ java -jar target/jvm-fact-extractor-0.0.1-SNAPSHOT.jar  target/jvm-fact-extracto
 
 * Run with -s to invoke SPARQL server at http://localhost:3330/
 
+* Run with -jung to invoke JFrame Jung visualisation of the (manually in-code selected) graph
+
 Interesting queries: 
 http://localhost:3330/dataset?query=PREFIX m: <http://model.nuthatchery.org/maven/> SELECT ?x ?p ?y FROM <http://db.nuthatchery.org/java/guava-18.0.jar> WHERE {?x ?p ?y}
 
