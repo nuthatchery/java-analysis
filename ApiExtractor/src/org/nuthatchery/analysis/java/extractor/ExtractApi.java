@@ -340,7 +340,7 @@ public class ExtractApi {
 				}
 			}
 			if (jung) {
-				dataset.listNames().forEachRemaining(i -> System.out.println(i));
+				// dataset.listNames().forEachRemaining(i -> System.out.println(i));
 				/*
 				 * http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar
 				 * http://model.nuthatchery.org/java/types/
@@ -349,6 +349,7 @@ public class ExtractApi {
 				 *
 				 */
 				// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
+				// TODO let you pick which graph to visualise
 				JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/java/"));
 			}
 		} finally {
