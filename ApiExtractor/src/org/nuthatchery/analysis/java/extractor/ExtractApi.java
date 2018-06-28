@@ -1,5 +1,7 @@
 package org.nuthatchery.analysis.java.extractor;
 
+import net.rootdev.jenajung.JenaJungJFrame;
+
 import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -155,6 +157,10 @@ public class ExtractApi {
 										System.out.println(m.getName() + " depends on " + maven_coordinate);
 									}
 
+									{// TODO build methods into handlers into maven graph
+
+									}
+
 								}
 							} else if (console != null) {
 								console.printf("[%2d%%] %3s: %2d%% %s\r", (i * 100) / n, "JAR", (j * 100) / nEntries,
@@ -257,6 +263,7 @@ public class ExtractApi {
 		// IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
 		Model model = mf.createModel(jenaRDF.asDataset(dataset), DB_PREFIX);
 		String modelName = null;
+		boolean jung = false;
 		try {
 			for (Iterator<String> it = arguments.iterator(); it.hasNext();) {
 				String arg = it.next();
@@ -274,6 +281,7 @@ public class ExtractApi {
 					System.err.println("Special options: (take effect when encountered)");
 					System.err.println("    -m modelName    set model name for subsequent input");
 					System.err.println("    -d dbDir        set TDB database directory");
+					System.err.println("    -jung           starts a JFrame with a visualisation of the graph");
 					System.err.println("    -o outFile.trig set output TRiG file (when not using TDB)");
 					System.err.println("    -s              start server on http://localhost:3330/");
 					break;
@@ -305,6 +313,9 @@ public class ExtractApi {
 				case "-m":
 					modelName = it.next();
 					break;
+				case "-jung":
+					jung = true;
+					break;
 				default:
 					extractModel(dataset, model, modelName, arg);
 				}
@@ -327,6 +338,18 @@ public class ExtractApi {
 
 					// jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
 				}
+			}
+			if (jung) {
+				dataset.listNames().forEachRemaining(i -> System.out.println(i));
+				/*
+				 * http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar
+				 * http://model.nuthatchery.org/java/types/
+				 * http://model.nuthatchery.org/maven/project/
+				 * http://model.nuthatchery.org/java/
+				 *
+				 */
+				// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
+				JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/java/"));
 			}
 		} finally {
 			if (dataset != null) {
