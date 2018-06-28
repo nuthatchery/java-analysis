@@ -114,7 +114,7 @@ public class ExtractApi {
 								}
 							} else if (nextElement.getName().endsWith("pom.xml")) {
 								// TODO extract to class
-								System.out.println("found POM.XML, trying to parse");
+								System.out.println("found POM, trying to parse " + nextElement.getName());
 								org.apache.maven.model.Model result = null;
 								try (InputStream stream = jarFile.getInputStream(nextElement)) {
 									try {
