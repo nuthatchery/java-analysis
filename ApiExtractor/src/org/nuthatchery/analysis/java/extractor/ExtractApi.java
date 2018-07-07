@@ -1,5 +1,7 @@
 package org.nuthatchery.analysis.java.extractor;
 
+import net.rootdev.jenajung.JenaJungJFrame;
+
 import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.apache.commons.rdf.api.BlankNode;
 import org.apache.commons.rdf.api.IRI;
 import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.jena.JenaRDF;
@@ -32,6 +35,7 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.tdb.TDB;
 import org.apache.jena.tdb.TDBFactory;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.nuthatchery.ontology.Model;
@@ -123,25 +127,40 @@ public class ExtractApi {
 									} catch (XmlPullParserException e) {
 										System.out.println("Failed parsing pom.xml");
 									}
+									String groupId = result.getGroupId();
+									if (groupId == null) {
+										groupId = result.getParent().getGroupId();
+									}
 									String artifactId = result.getArtifactId();
 									if (artifactId == null) {
 										artifactId = result.getParent().getArtifactId();
 									}
-									String groupId = result.getGroupId();
 									String version = result.getVersion();
-									if (groupId == null) {
-										groupId = result.getParent().getGroupId();
-									}
 									if (version == null) {
 										version = result.getParent().getVersion();
 									}
-									// TODO Add to other model
-									System.out.println(
-											"Parsed POM.XML: (" + artifactId + ", " + groupId + ", " + version + ")");
+									// TODO extract to POMFactExtractor or something like that
+									IRI mvn_coord = model
+											.node("Maven-coordinate:" + groupId + ":" + artifactId + ":" + version);
 									m.add(m.getName(), RdfVocabulary.RDF_TYPE, MavenFacts.C_PROJECT);
-									m.add(m.getName(), MavenFacts.ARTIFACT_ID, model.literal(artifactId));
-									m.add(m.getName(), MavenFacts.GROUP_ID, model.literal(groupId));
-									m.add(m.getName(), MavenFacts.VERSION, model.literal(version));
+									m.add(m.getName(), MavenFacts.PROJECT_OBJECT, mvn_coord);
+									m.add(mvn_coord, MavenFacts.GROUP_ID, model.literal(groupId));
+									m.add(mvn_coord, MavenFacts.ARTIFACT_ID, model.literal(artifactId));
+									m.add(mvn_coord, MavenFacts.VERSION, model.literal(version));
+
+									System.out.println(result.getDependencies());
+									for (Dependency d : result.getDependencies()) {
+										// TODO intention is to bind dependency property directly to the other node
+										String maven_coordinate = d.getGroupId() + ":" + d.getArtifactId() + ":"
+												+ d.getVersion();
+										m.add(mvn_coord, MavenFacts.DEPENDS_ON, model.node(maven_coordinate));
+										System.out.println(m.getName() + " depends on " + maven_coordinate);
+									}
+
+									{// TODO build methods into handlers into maven graph
+
+									}
+
 								}
 							} else if (console != null) {
 								console.printf("[%2d%%] %3s: %2d%% %s\r", (i * 100) / n, "JAR", (j * 100) / nEntries,
@@ -245,6 +264,7 @@ public class ExtractApi {
 		// IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
 		Model model = mf.createModel(jenaRDF.asDataset(dataset), DB_PREFIX);
 		String modelName = null;
+		boolean jung = false;
 		try {
 			for (Iterator<String> it = arguments.iterator(); it.hasNext();) {
 				String arg = it.next();
@@ -262,6 +282,7 @@ public class ExtractApi {
 					System.err.println("Special options: (take effect when encountered)");
 					System.err.println("    -m modelName    set model name for subsequent input");
 					System.err.println("    -d dbDir        set TDB database directory");
+					System.err.println("    -jung           starts a JFrame with a visualisation of the graph");
 					System.err.println("    -o outFile.trig set output TRiG file (when not using TDB)");
 					System.err.println("    -s              start server on http://localhost:3330/");
 					break;
@@ -293,6 +314,9 @@ public class ExtractApi {
 				case "-m":
 					modelName = it.next();
 					break;
+				case "-jung":
+					jung = true;
+					break;
 				default:
 					extractModel(dataset, model, modelName, arg);
 				}
@@ -315,6 +339,19 @@ public class ExtractApi {
 
 					// jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
 				}
+			}
+			if (jung) {
+				// dataset.listNames().forEachRemaining(i -> System.out.println(i));
+				/*
+				 * http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar
+				 * http://model.nuthatchery.org/java/types/
+				 * http://model.nuthatchery.org/maven/project/
+				 * http://model.nuthatchery.org/java/
+				 *
+				 */
+				// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
+				// TODO let you pick which graph to visualise
+				JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/java/"));
 			}
 		} finally {
 			if (dataset != null) {

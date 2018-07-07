@@ -25,7 +25,10 @@ public abstract class MavenFacts {
 	public static final IRI ARTIFACT_ID = mavenProjectModel.node("artifactID");
 	public static final IRI GROUP_ID = mavenProjectModel.node("groupID");
 	public static final IRI VERSION = mavenProjectModel.node("version");
+	public static final IRI DEPENDS_ON = mavenProjectModel.node("depends_on");
 	public static final IRI C_PROJECT = mavenProjectModel.node("");
+	public static final IRI MAVEN_COORDINATE = mavenProjectModel.node("Maven-coordinate");
+	public static final IRI PROJECT_OBJECT = mavenProjectModel.node("Maven-project-object");;
 
 	static {
 		mavenProjectModel.add(C_PROJECT, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
