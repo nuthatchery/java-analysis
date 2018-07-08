@@ -1,53 +1,39 @@
 package org.nuthatchery.ontology;
 
-import java.util.function.Supplier;
 
-import org.apache.commons.rdf.api.Dataset;
-import org.apache.commons.rdf.api.Graph;
-import org.apache.commons.rdf.api.RDF;
-import org.apache.commons.rdf.simple.SimpleRDF;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.rdf.model.Model;
 
 public class ModelFactory {
 	private static ModelFactory instance;
 
 	public static synchronized ModelFactory getInstance() {
 		if (instance == null) {
-			instance = new ModelFactory(() -> new SimpleRDF());
+			instance = new ModelFactory();
 		}
 		return instance;
 	}
 
-	public static synchronized void setFactory(Supplier<RDF> constructor) {
-		instance = new ModelFactory(constructor);
+	private ModelFactory() {
 	}
 
-	private final Supplier<RDF> constructor;
-
-	private ModelFactory(Supplier<RDF> constructor) {
-		this.constructor = constructor;
+	public NModel createModel(Dataset ds, String prefix) {
+		return new NModel(ds, prefix);
 	}
 
-	public Model createModel(Dataset ds, String prefix) {
-		return new Model(ds, prefix, createRDF());
+	public NModel createModel(Dataset ds, String name, String prefix) {
+		return new NModel(ds, name, prefix);
 	}
 
-	public Model createModel(Dataset ds, String name, String prefix) {
-		return new Model(ds, name, prefix, createRDF());
+	public NModel createModel(Model model, String prefix) {
+		return new NModel(model, prefix);
 	}
 
-	public Model createModel(Graph graph, String prefix) {
-		return new Model(graph, prefix, createRDF());
+	public NModel createModel(String prefix) {
+		return new NModel(prefix);
 	}
 
-	public Model createModel(String prefix) {
-		return new Model(prefix, createRDF());
-	}
-
-	public Model createModel(String name, String prefix) {
-		return new Model(null, name, prefix, createRDF());
-	}
-
-	public RDF createRDF() {
-		return constructor.get();
+	public NModel createModel(String name, String prefix) {
+		return new NModel(null, name, prefix);
 	}
 }

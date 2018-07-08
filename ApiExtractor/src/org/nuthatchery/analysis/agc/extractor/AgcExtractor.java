@@ -20,26 +20,24 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.rdf.api.BlankNode;
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.jena.JenaRDF;
-import org.apache.jena.graph.Graph;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFList;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 import org.nuthatchery.analysis.agc.extractor.AgcInstructions.Instruction;
 import org.nuthatchery.analysis.agc.extractor.AgcInstructions.InstructionUse;
 import org.nuthatchery.analysis.java.extractor.ExtractApi;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
-import org.nuthatchery.ontology.Model;
-import org.nuthatchery.ontology.Model.ListBuilder;
-import org.nuthatchery.ontology.ModelFactory;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
-import org.nuthatchery.ontology.standard.RdfVocabulary;
 
-import com.hp.hpl.jena.graph.Triple;
 
 public class AgcExtractor {
 	public static final List<String> registers = Arrays.asList("A", "L", "Q", "EB", "FB", "Z", "BB", "=0", //
@@ -75,8 +73,8 @@ public class AgcExtractor {
 	 * 0 = BOL, 1 =
 	 */
 	private int mode = 0;
-	private IRI node;
-	private ListBuilder list;
+	private Resource node;
+	private RDFList list;
 	private String dir;
 	private boolean comment;
 
@@ -92,7 +90,7 @@ public class AgcExtractor {
 	public void extract() throws IOException {
 		StringBuilder b = new StringBuilder(80);
 		lineNum = 1;
-		list = model.list();
+		list = model.createList();
 		header = true;
 		headerText = "";
 		while ((currentLine = reader.readLine()) != null) {
@@ -108,8 +106,8 @@ public class AgcExtractor {
 				subEx.extract();
 				pageNum = subEx.pageNum;
 				lineInPage = subEx.lineInPage;
-				BlankNode blank = model.blank();
-				model.add(blank, AgcInstructions.P_CODE, model.node(file));
+				Resource blank = model.createResource();
+				model.add(blank, AgcInstructions.P_CODE, model.createResource(file));
 				list.add(blank);
 			} else {
 				visitLineStart();
@@ -155,9 +153,9 @@ public class AgcExtractor {
 			lineInPage++;
 		}
 
-		BlankNodeOrIRI code = list.build();
-		model.add(model.node(fileName), AgcInstructions.P_CODE, code);
-		model.add(model.node(fileName), AgcInstructions.P_COMMENT, model.literal(headerText));
+		Resource code = list;
+		model.add(model.createResource(fileName), AgcInstructions.P_CODE, code);
+		model.add(model.createResource(fileName), AgcInstructions.P_COMMENT, model.createTypedLiteral(headerText));
 
 	}
 
@@ -174,7 +172,7 @@ public class AgcExtractor {
 					if (header) {
 						headerText += mr.group(1) + "\n";
 					} else {
-						model.add(node, AgcInstructions.P_COMMENT, model.literal(mr.group(1)));
+						model.add(node, AgcInstructions.P_COMMENT, model.createTypedLiteral(mr.group(1)));
 					}
 				})
 				;
@@ -192,9 +190,10 @@ public class AgcExtractor {
 
 	private void visitLineEnd() {
 		list.add(node);
-		model.getGraph().stream(node, null, null).forEachOrdered((triple) -> {
-			System.out.printf("    %s --%s-> %s%n", triple.getSubject(), triple.getPredicate(), triple.getObject());
-		});
+		// model.stream(node, null, null).forEachOrdered((triple) -> {
+		// System.out.printf(" %s --%s-> %s%n", triple.getSubject(),
+		// triple.getPredicate(), triple.getObject());
+		// });
 		System.out.println("---");
 	}
 
@@ -207,7 +206,7 @@ public class AgcExtractor {
 		label = null;
 		falseLabel = null;
 		comment = false;
-		node = model.node("p" + pageNum + "l" + lineInPage);
+		node = model.createResource("p" + pageNum + "l" + lineInPage);
 
 	}
 
@@ -217,7 +216,7 @@ public class AgcExtractor {
 			if (col == 1) { // it's a label
 				label = string;
 				labelsDefined.add(string);
-				model.add(node, AgcInstructions.P_LABEL, model.node(label));
+				model.add(node, AgcInstructions.P_LABEL, model.createResource(label));
 			} else if (col < 9) { // it's a false label
 				falseLabel = string;
 			} else {
@@ -230,26 +229,26 @@ public class AgcExtractor {
 			if (iDef != null) {
 				model.add(node, AgcInstructions.P_CALL, iDef.node);
 			} else {
-				model.add(node, AgcInstructions.P_CALL_PSEUDO, model.literal(instr));
+				model.add(node, AgcInstructions.P_CALL_PSEUDO, model.createTypedLiteral(instr));
 			}
 
 			break;
 		case 2: // the operand
 			if (registers.contains(string)) {
-				model.add(node, AgcInstructions.P_OPERAND, AgcInstructions.AGC_MODEL.node("reg" + string));
+				model.add(node, AgcInstructions.P_OPERAND, AgcInstructions.AGC_MODEL.createResource("reg" + string));
 			} else if (instr.equals("COUNT") || instr.equals("COUNT*")) {
-				model.add(node, AgcInstructions.P_OPERAND, model.literal(string));
+				model.add(node, AgcInstructions.P_OPERAND, model.createTypedLiteral(string));
 			} else {
 				PatternMatcher pm = PatternMatcher.matcher()//
 						.matchCase("^[-+]?[0-7]+$", (mr) -> {
-							model.add(node, AgcInstructions.P_OPERAND, model.literal(string));
+							model.add(node, AgcInstructions.P_OPERAND, model.createTypedLiteral(string));
 						}).matchCase("^[-+]?[0-9]+D$", (mr) -> {
-							model.add(node, AgcInstructions.P_OPERAND, model.literal(string));
+							model.add(node, AgcInstructions.P_OPERAND, model.createTypedLiteral(string));
 						}).matchCase("^[-+]?[0-9]*\\.[0-9]*", (mr) -> {
-							model.add(node, AgcInstructions.P_OPERAND, model.literal(string));
+							model.add(node, AgcInstructions.P_OPERAND, model.createTypedLiteral(string));
 						});
 				if (!pm.match(string)) {
-					model.add(node, AgcInstructions.P_OPERAND, model.node(string));
+					model.add(node, AgcInstructions.P_OPERAND, model.createResource(string));
 					labelsUsed.add(string);
 					operand = string;
 				}
@@ -258,11 +257,11 @@ public class AgcExtractor {
 			break;
 		case 3:
 			mod1 = string;
-			model.add(node, AgcInstructions.P_MOD1, model.literal(mod1));
+			model.add(node, AgcInstructions.P_MOD1, model.createTypedLiteral(mod1));
 			break;
 		case 4:
 			mod2 = string;
-			model.add(node, AgcInstructions.P_MOD2, model.literal(mod2));
+			model.add(node, AgcInstructions.P_MOD2, model.createTypedLiteral(mod2));
 			break;
 		default:
 			System.err.println("ERROR: extra token '" + string + "' at line " + lineNum + " column " + col);
@@ -270,13 +269,12 @@ public class AgcExtractor {
 	}
 
 	public static void main(String[] args) {
-		ModelFactory.setFactory(() -> new JenaRDF());
 		Dataset dataset = DatasetFactory.create();
-		JenaRDF jenaRDF = new JenaRDF();
 
 		try {
 
-			Model model = ModelFactory.getInstance().createModel(jenaRDF.asDataset(dataset), "Comanche055/");
+			Model model = ModelFactory.createDefaultModel();
+			dataset.addNamedModel("Comanche055/", model);
 			AgcExtractor ex = new AgcExtractor(model, null,
 					"/home/anya/git/virtualagc/Comanche055/", "MAIN.agc");
 			ex.extract();
@@ -286,13 +284,12 @@ public class AgcExtractor {
 				}
 			}
 			try (OutputStream output = new FileOutputStream("/tmp/dataProg.trig")) {
-				dataset.addNamedModel(AgcInstructions.AGC_PREFIX, org.apache.jena.rdf.model.ModelFactory
-						.createModelForGraph(jenaRDF.asJenaGraph(AgcInstructions.AGC_MODEL.getGraph())));
-				dataset.getDefaultModel().setNsPrefix("b2", AgcInstructions.AGC_PREFIX);
-				dataset.getDefaultModel().setNsPrefix("nh", CommonVocabulary.PREFIX);
-				dataset.getDefaultModel().setNsPrefix("rdf", RdfVocabulary.RDF_PREFIX);
-				dataset.getDefaultModel().setNsPrefix("rdfs", RdfVocabulary.RDFS_PREFIX);
-				dataset.getDefaultModel().setNsPrefix("xsd", RdfVocabulary.XSD_PREFIX);
+				dataset.addNamedModel(AgcInstructions.AGC, AgcInstructions.AGC_MODEL);
+				dataset.getDefaultModel().setNsPrefix("b2", AgcInstructions.AGC);
+				dataset.getDefaultModel().setNsPrefix("nh", CommonVocabulary.NS);
+				dataset.getDefaultModel().setNsPrefix("rdf", RDF.uri);
+				dataset.getDefaultModel().setNsPrefix("rdfs", RDFS.uri);
+				dataset.getDefaultModel().setNsPrefix("xsd", XSD.NS);
 				RDFDataMgr.write(output, dataset, Lang.TRIG);
 			}
 		} catch (FileNotFoundException e) {

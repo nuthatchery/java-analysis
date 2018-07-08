@@ -1,31 +1,27 @@
 package org.nuthatchery.ontology.uri;
 
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
+import org.apache.jena.rdf.model.Resource;
 
 public class IRIUtil {
-	private final RDF rdf;
 
-	public IRIUtil(RDF rdf) {
-		this.rdf = rdf;
+	public static Resource addFragment(Resource base, String frag) {
+		if (!base.isURIResource())
+			throw new IllegalArgumentException("Must be IRI");
+		String iriBase = base.getURI();
+		if (iriBase.endsWith("#"))
+			return base.getModel().createResource(iriBase + frag);
+		else
+			return base.getModel().createResource(iriBase + "#" + frag);
 	}
 
-	public IRI addFragment(IRI base, String frag) {
-		String iriBase = base.getIRIString();
-		if (iriBase.endsWith("#")) {
-			return rdf.createIRI(iriBase + frag);
-		} else {
-			return rdf.createIRI(iriBase + "#" + frag);
-		}
-	}
-
-	public IRI addPath(IRI base, String path) {
-		String iriBase = base.getIRIString();
-		if (iriBase.endsWith("/") || iriBase.endsWith(":")) {
-			return rdf.createIRI(iriBase + path);
-		} else {
-			return rdf.createIRI(iriBase + "/" + path);
-		}
+	public static Resource addPath(Resource base, String path) {
+		if (!base.isURIResource())
+			throw new IllegalArgumentException("Must be IRI");
+		String iriBase = base.getURI();
+		if (iriBase.endsWith("/") || iriBase.endsWith(":"))
+			return base.getModel().createResource(iriBase + path);
+		else
+			return base.getModel().createResource(iriBase + "/" + path);
 	}
 
 }

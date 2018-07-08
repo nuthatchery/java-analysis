@@ -1,52 +1,47 @@
 package org.nuthatchery.ontology.basic;
 
-import org.apache.commons.rdf.api.IRI;
-import org.nuthatchery.ontology.Model;
-import org.nuthatchery.ontology.ModelFactory;
-import org.nuthatchery.ontology.standard.RdfVocabulary;
-
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 public class CommonVocabulary {
-	public static final String PREFIX = "http://model.nuthatchery.org/common/";
-	private static final Model vocab;
+	public static final String NS = "http://model.nuthatchery.org/common/";
+	private static final OntModel vocab = ModelFactory.createOntologyModel();
 
-	public static final IRI P_NAME;
-	public static final IRI P_IDNAME;
+	public static final Property P_NAME;
+	public static final Property P_IDNAME;
 	/**
 	 * Should have NAME, IDNAME.
 	 */
-	public static final IRI C_DEF;
-	public static final IRI P_DEFINES;
-	public static final IRI P_DECLARES;
+	public static final OntClass C_DEF;
+	public static final Property P_DEFINES;
+	public static final Property P_DECLARES;
 
-	public static final IRI C_NAMED;
-	public static final IRI C_TYPE;
-	public static final IRI C_OP;
-	public static final IRI P_LINE_NUMBER;
-	public static final IRI P_SHORT_DESC;
+	public static final Property C_NAMED;
+	public static final Property C_TYPE;
+	public static final Property C_OP;
+	public static final Property P_LINE_NUMBER;
+	public static final Property P_SHORT_DESC;
 	static {
-		ModelFactory fac = ModelFactory.getInstance();
-		vocab = fac.createModel(PREFIX);
-		P_NAME = vocab.node("name");
-		P_IDNAME = vocab.node("idName");
-		C_DEF = vocab.node("def");
-		P_DEFINES = vocab.node("defines");
-		P_DECLARES = vocab.node("declares");
-		P_SHORT_DESC = vocab.node("shortDesc");
+		P_NAME = vocab.createProperty(NS + "name");
+		P_IDNAME = vocab.createProperty(NS + "idName");
+		C_DEF = vocab.createClass(NS + "def");
+		P_DEFINES = vocab.createProperty(NS + "defines");
+		P_DECLARES = vocab.createProperty(NS + "declares");
+		P_SHORT_DESC = vocab.createProperty(NS + "shortDesc");
 
-		vocab.add(P_DEFINES, RdfVocabulary.RDFS_SUBPROPERTY_OF, P_DECLARES);
-		C_NAMED = vocab.node("named");
-		vocab.add(C_NAMED, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
-		C_TYPE = vocab.node("type");
-		vocab.add(C_TYPE, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
-		vocab.add(C_TYPE, RdfVocabulary.RDFS_SUBCLASS_OF, C_NAMED);
-		C_OP = vocab.node("op");
-		vocab.add(C_OP, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
-		vocab.add(C_OP, RdfVocabulary.RDFS_SUBCLASS_OF, C_NAMED);
-		P_LINE_NUMBER = vocab.node("lineNumber");
+		vocab.add(P_DEFINES, RDFS.subPropertyOf, P_DECLARES);
+		C_NAMED = vocab.createProperty(NS + "named");
+		vocab.add(C_NAMED, RDF.type, RDFS.Class);
+		C_TYPE = vocab.createProperty(NS + "type");
+		vocab.add(C_TYPE, RDF.type, RDFS.Class);
+		vocab.add(C_TYPE, RDFS.subClassOf, C_NAMED);
+		C_OP = vocab.createProperty(NS + "op");
+		vocab.add(C_OP, RDF.type, RDFS.Class);
+		vocab.add(C_OP, RDFS.subClassOf, C_NAMED);
+		P_LINE_NUMBER = vocab.createProperty(NS + "lineNumber");
 
-	}
-
-	public static final Model getModel() {
-		return vocab;
 	}
 }

@@ -88,23 +88,6 @@
 			<version>6.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-rdf-api</artifactId>
-			<version>0.5.0</version>
-			<!-- should also have one of the implementations: -simple, -jdonld-java, 
-				-jena, -rdf4j -->
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-rdf-jena</artifactId>
-			<version>0.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-rdf-simple</artifactId>
-			<version>0.5.0</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>apache-jena-libs</artifactId>
 			<type>pom</type>
@@ -114,31 +97,6 @@
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-fuseki-embedded</artifactId>
 			<version>3.5.0</version> <!-- Set the version -->
-		</dependency>
-		<dependency>
-			<groupId>fr.lirmm.graphik</groupId>
-			<artifactId>graal-core</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>fr.lirmm.graphik</groupId>
-			<artifactId>graal-io-rdf</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>fr.lirmm.graphik</groupId>
-			<artifactId>graal-io-dlgp</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>fr.lirmm.graphik</groupId>
-			<artifactId>graal-store-rdf4j</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>fr.lirmm.graphik</groupId>
-			<artifactId>graal-kb</artifactId>
-			<version>1.3.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.maven/maven-model -->
 		<dependency>

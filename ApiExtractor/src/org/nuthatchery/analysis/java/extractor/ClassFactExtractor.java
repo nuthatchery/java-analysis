@@ -5,13 +5,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-import org.apache.commons.rdf.api.BlankNode;
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
-import org.apache.commons.rdf.api.IRI;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
-import org.nuthatchery.ontology.Model;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
-import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -26,15 +25,15 @@ public class ClassFactExtractor extends ClassVisitor {
 	protected String className;
 	protected String context;
 
-	protected final Stack<IRI> currentClass = new Stack<>();
+	protected final Stack<Resource> classStack = new Stack<>();
 
 	protected int currentLine = -1;
 
-	protected final Stack<String> currentSource = new Stack<>();
+	protected final Stack<String> sourceStack = new Stack<>();
 
 	private final Model model;
 	private final ILogger log;
-	private IRI memberId;
+	private Resource memberId;
 
 	protected Set<String> seen = new HashSet<>();
 
@@ -44,15 +43,15 @@ public class ClassFactExtractor extends ClassVisitor {
 		this.log = logger.indent(this::indentLevel);
 	}
 
-	public void addAccessFlags(int access, BlankNodeOrIRI id) {
+	public void addAccessFlags(int access, Resource id) {
 		if ((access & Opcodes.ACC_PUBLIC) != 0) {
-			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PUBLIC);
+			id.addProperty(JavaFacts.hasAccess, JavaFacts.Flags.PUBLIC);
 		} else if ((access & Opcodes.ACC_PRIVATE) != 0) {
-			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PRIVATE);
+			id.addProperty(JavaFacts.hasAccess, JavaFacts.Flags.PRIVATE);
 		} else if ((access & Opcodes.ACC_PROTECTED) != 0) {
-			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PROTECTED);
+			id.addProperty(JavaFacts.hasAccess, JavaFacts.Flags.PROTECTED);
 		} else {
-			model.add(id, JavaFacts.ACCESS, JavaFacts.Flags.PACKAGE);
+			id.addProperty(JavaFacts.hasAccess, JavaFacts.Flags.PACKAGE);
 		}
 		if ((access & Opcodes.ACC_STATIC) != 0) {
 			putFlag(id, JavaFacts.Flags.STATIC);
@@ -83,7 +82,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		}
 	}
 
-	public void addClassAccessFlags(int access, BlankNodeOrIRI id) {
+	public void addClassAccessFlags(int access, Resource id) {
 		addAccessFlags(access, id);
 		if ((access & Opcodes.ACC_MODULE) != 0) { // class
 			putFlag(id, JavaFacts.Flags.MODULE);
@@ -96,7 +95,7 @@ public class ClassFactExtractor extends ClassVisitor {
 	 * @param access
 	 * @param id
 	 */
-	public void addFieldAccessFlags(int access, BlankNodeOrIRI id) {
+	public void addFieldAccessFlags(int access, Resource id) {
 		addAccessFlags(access, id);
 		if ((access & Opcodes.ACC_VOLATILE) != 0) { // 0x40, field
 			putFlag(id, JavaFacts.Flags.VOLATILE);
@@ -109,7 +108,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		}
 	}
 
-	public void addMethodAccessFlags(int access, BlankNodeOrIRI id) {
+	public void addMethodAccessFlags(int access, Resource id) {
 		addAccessFlags(access, id);
 		if ((access & Opcodes.ACC_SYNCHRONIZED) != 0) { // method
 			putFlag(id, JavaFacts.Flags.SUPER);
@@ -122,7 +121,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		}
 	}
 
-	public void addModuleAccessFlags(int access, BlankNodeOrIRI id) {
+	public void addModuleAccessFlags(int access, Resource id) {
 		addAccessFlags(access, id);
 		if ((access & Opcodes.ACC_STATIC_PHASE) != 0) { // 0x40, module
 			putFlag(id, JavaFacts.Flags.STATIC_PHASE);
@@ -132,15 +131,15 @@ public class ClassFactExtractor extends ClassVisitor {
 		}
 	}
 
-	protected IRI getClassId() {
-		return currentClass.peek();
+	protected Resource getClassId() {
+		return classStack.peek();
 	}
 
-	BlankNodeOrIRI getMemberId(String owner, String name, String desc) {
+	Resource getMemberId(String owner, String name, String desc) {
 		return JavaFacts.method(model, JavaFacts.Types.object(model, owner), name, desc);
 	}
 
-	BlankNodeOrIRI getMemberName(String name, String desc) {
+	Resource getMemberName(String name, String desc) {
 		return JavaFacts.method(model, getClassId(), name, desc);
 	}
 
@@ -149,11 +148,11 @@ public class ClassFactExtractor extends ClassVisitor {
 	}
 
 	protected Integer indentLevel() {
-		return currentClass.size();
+		return classStack.size();
 	}
 
-	public void putFlag(BlankNodeOrIRI id, IRI flag) {
-		model.add(id, JavaFacts.P_HAS_FLAG, flag);
+	public void putFlag(Resource id, Resource flag) {
+		id.addProperty(JavaFacts.P_HAS_FLAG, flag);
 	}
 
 	@Override
@@ -165,30 +164,30 @@ public class ClassFactExtractor extends ClassVisitor {
 		int minor = (version >>> 16) & 0xffff;
 
 		className = name;
-		IRI id = JavaFacts.Types.object(model, name);
-		currentClass.push(id);
+		Resource id = JavaFacts.Types.object(model, name);
+		classStack.push(id);
 		if (!className.contains("$")) {
-			model.add(id, CommonVocabulary.P_NAME, model.literal(className));
+			id.addProperty(CommonVocabulary.P_NAME, model.createTypedLiteral(className));
 		}
-		model.add(id, CommonVocabulary.P_IDNAME, model.literal(className));
-		model.add(id, RdfVocabulary.RDF_TYPE, CommonVocabulary.C_DEF);
-		model.add(id, JavaFacts.P_CLASS_FILE_VERSION, model.literal(major));
+		id.addProperty(CommonVocabulary.P_IDNAME, model.createTypedLiteral(className));
+		id.addProperty(RDF.type, CommonVocabulary.C_DEF);
+		id.addProperty(JavaFacts.P_CLASS_FILE_VERSION, model.createTypedLiteral(major));
 		if (minor != 0) {
-			model.add(id, JavaFacts.P_CLASS_FILE_MINOR, model.literal(minor));
+			id.addProperty(JavaFacts.P_CLASS_FILE_MINOR, model.createTypedLiteral(minor));
 		}
 		if ((access & Opcodes.ACC_INTERFACE) != 0) {
-			model.add(id, CommonVocabulary.P_DEFINES, JavaFacts.C_INTERFACE);
+			id.addProperty(CommonVocabulary.P_DEFINES, JavaFacts.C_INTERFACE);
 		} else if ((access & Opcodes.ACC_ENUM) != 0) {
-			model.add(id, CommonVocabulary.P_DEFINES, JavaFacts.C_ENUM);
+			id.addProperty(CommonVocabulary.P_DEFINES, JavaFacts.C_ENUM);
 		} else {
-			model.add(id, CommonVocabulary.P_DEFINES, JavaFacts.C_CLASS);
+			id.addProperty(CommonVocabulary.P_DEFINES, JavaFacts.C_CLASS);
 		}
 		if (superName != null) {
-			model.add(id, JavaFacts.P_EXTENDS, JavaFacts.Types.object(model, superName));
+			id.addProperty(JavaFacts.P_EXTENDS, JavaFacts.Types.object(model, superName));
 		}
 		if (interfaces != null) {
 			for (String s : interfaces) {
-				model.add(id, JavaFacts.P_SUBTYPE_OF, JavaFacts.Types.object(model, s));
+				id.addProperty(JavaFacts.P_SUBTYPE_OF, JavaFacts.Types.object(model, s));
 			}
 		}
 		addClassAccessFlags(access, id);
@@ -199,7 +198,7 @@ public class ClassFactExtractor extends ClassVisitor {
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		// log.warnf("unimplemented: ClassFactExtractor.visitAnnotation(desc=%s,
 		// visible=%b)%n", desc, visible);
-		BlankNode anno = model.blank();
+		Resource anno = model.createResource();
 		model.add(getClassId(), JavaFacts.P_ANNOTATION, anno);
 		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, desc));
 		// TODO: also traverse the annotation
@@ -214,8 +213,8 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	@Override
 	public void visitEnd() {
-		BlankNodeOrIRI s = getClassId();
-		currentClass.pop();
+		Resource s = getClassId();
+		classStack.pop();
 		log.log("} // end of " + s + "\n");
 		super.visitEnd();
 	}
@@ -228,14 +227,14 @@ public class ClassFactExtractor extends ClassVisitor {
 		log.log("\n" + "field " + JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(model, getClassId(), name, desc);
 		String descName = className + "." + name + ":" + desc;
-		model.add(memberId, CommonVocabulary.P_NAME, model.literal(name));
-		model.add(memberId, CommonVocabulary.P_IDNAME, model.literal(descName));
-		model.add(memberId, RdfVocabulary.RDF_TYPE, CommonVocabulary.C_DEF);
+		model.add(memberId, CommonVocabulary.P_NAME, model.createLiteral(name));
+		model.add(memberId, CommonVocabulary.P_IDNAME, model.createLiteral(descName));
+		model.add(memberId, RDF.type, CommonVocabulary.C_DEF);
 		model.add(memberId, JavaFacts.P_TYPE, JavaUtil.typeToId(model, Type.getType(desc)));
 		model.add(memberId, JavaFacts.P_MEMBER_OF, getClassId());
 		if (value != null) {
 			model.add(memberId, CommonVocabulary.P_DEFINES, JavaFacts.C_FIELD);
-			model.add(memberId, JavaFacts.INITIAL_VALUE, model.literal(value));
+			model.add(memberId, JavaFacts.INITIAL_VALUE, model.createTypedLiteral(value));
 		} else {
 			model.add(memberId, CommonVocabulary.P_DECLARES, JavaFacts.C_FIELD);
 		}
@@ -252,14 +251,14 @@ public class ClassFactExtractor extends ClassVisitor {
 		log.logf("visitInnerClass(name=%s, outerName=%s, innerName=%s, access=%s)%n", name, outerName, innerName,
 				access);
 
-		// model.add(id, CommonVocabulary.P_IDNAME, model.literal(className));
+		// id.addProperty(CommonVocabulary.P_IDNAME, model.createTypedLiteral(className));
 
 		if (outerName != null) {
-			IRI inner = JavaFacts.Types.object(model, name);
-			IRI outer = JavaFacts.Types.object(model, outerName);
+			Resource inner = JavaFacts.Types.object(model, name);
+			Resource outer = JavaFacts.Types.object(model, outerName);
 			model.add(inner, JavaFacts.P_MEMBER_OF, outer);
 			if (innerName != null) {
-				model.add(inner, CommonVocabulary.P_NAME, model.literal(innerName));
+				model.add(inner, CommonVocabulary.P_NAME, model.createLiteral(innerName));
 			}
 		}
 		super.visitInnerClass(name, outerName, innerName, access);
@@ -275,9 +274,9 @@ public class ClassFactExtractor extends ClassVisitor {
 		log.log("\n" + "method " + className + "." + name + desc);// JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(model, getClassId(), name, desc);
 		String descName = className + "." + name + ":" + desc;
-		model.add(memberId, CommonVocabulary.P_NAME, model.literal(name));
-		model.add(memberId, CommonVocabulary.P_IDNAME, model.literal(descName));
-		model.add(memberId, RdfVocabulary.RDF_TYPE, CommonVocabulary.C_DEF);
+		model.add(memberId, CommonVocabulary.P_NAME, model.createLiteral(name));
+		model.add(memberId, CommonVocabulary.P_IDNAME, model.createLiteral(descName));
+		model.add(memberId, RDF.type, CommonVocabulary.C_DEF);
 		model.add(memberId, JavaFacts.P_RETURN_TYPE, JavaUtil.typeToId(model, Type.getType(desc).getReturnType()));
 		model.add(memberId, JavaFacts.P_MEMBER_OF, getClassId());
 		if (name.equals("<init>")) {
@@ -290,7 +289,7 @@ public class ClassFactExtractor extends ClassVisitor {
 			model.add(memberId, CommonVocabulary.P_DEFINES, JavaFacts.C_METHOD);
 		}
 		if (signature != null) {
-			model.add(memberId, JavaFacts.GENERIC, model.literal(signature));
+			model.add(memberId, JavaFacts.GENERIC, model.createLiteral(signature));
 		}
 		if (exceptions != null) {
 			for (String s : exceptions) {
@@ -312,9 +311,9 @@ public class ClassFactExtractor extends ClassVisitor {
 	@Override
 	public void visitOuterClass(String owner, String name, String desc) {
 		log.logf("visitOuterClass(owner=%s, name=%s, desc=%s)%n", owner, name, desc);
-		IRI ownerId = JavaFacts.Types.object(model, owner);
+		Resource ownerId = JavaFacts.Types.object(model, owner);
 		if (name != null && desc != null) {
-			IRI methodId = JavaFacts.method(model, ownerId, name, desc);
+			Resource methodId = JavaFacts.method(model, ownerId, name, desc);
 			model.add(getClassId(), JavaFacts.P_MEMBER_OF, methodId);
 		} else {
 			model.add(getClassId(), JavaFacts.P_MEMBER_OF, ownerId);
@@ -325,13 +324,13 @@ public class ClassFactExtractor extends ClassVisitor {
 	@Override
 	public void visitSource(String source, String debug) {
 		if (source != null) {
-			model.add(getClassId(), JavaFacts.P_SOURCE_FILE, model.literal(source));
-			currentSource.push(source);
+			model.add(getClassId(), JavaFacts.P_SOURCE_FILE, model.createLiteral(source));
+			sourceStack.push(source);
 		} else {
-			currentSource.push("");
+			sourceStack.push("");
 		}
 		if (debug != null) {
-			model.add(getClassId(), JavaFacts.DEBUG, model.literal(source));
+			model.add(getClassId(), JavaFacts.DEBUG, model.createLiteral(source));
 			// logf("visitSource(source=%s, debug=%s)%n",
 			// source,
 			// debug);
