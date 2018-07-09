@@ -110,8 +110,8 @@ public abstract class JavaFacts {
 			return t;
 		}
 
-		public static Resource object(Model m, String typeName) {
-			Resource t = m.createResource(typeName)//
+		public static Resource object(Model m, String prefix, String typeName) {
+			Resource t = m.createResource(prefix + typeName)//
 					.addProperty(RDF.type, REFERENCE_TYPE);
 			return t;
 		}
@@ -287,7 +287,7 @@ public abstract class JavaFacts {
 				sb.append(type.getClassName());
 			}
 		}
-		return m.createResource(IRIUtil.addPath(owner, sb.toString()));
+		return IRIUtil.addPath(owner, sb.toString());
 		// + UriEncoding.percentEncodeIri(methodName,
 		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true)
 		// + UriEncoding.percentEncodeIri(methodDesc,

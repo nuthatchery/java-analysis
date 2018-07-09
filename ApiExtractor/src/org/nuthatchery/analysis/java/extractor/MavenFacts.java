@@ -21,21 +21,21 @@ import org.apache.jena.rdf.model.Property;
 public abstract class MavenFacts {
 	public static final String M = "http://model.nuthatchery.org/maven/";
 	public static final String MP = M + "project/";
-	public static final OntModel mavenProjectModel = //
+	public static final OntModel mavenModel = //
 			ModelFactory.createOntologyModel();
-	public static final Property ARTIFACT_ID = mavenProjectModel.createProperty(MP + "artifactID");
-	public static final Property GROUP_ID = mavenProjectModel.createProperty(MP + "groupID");
-	public static final Property VERSION = mavenProjectModel.createProperty(MP + "version");
-	public static final Property DEPENDS_ON = mavenProjectModel.createProperty(MP + "depends_on");
-	public static final OntClass C_PROJECT = mavenProjectModel.createClass(MP + "");
-	public static final Property MAVEN_COORDINATE = mavenProjectModel.createProperty(MP + "Maven-coordinate");
-	public static final Property PROJECT_OBJECT = mavenProjectModel.createProperty(MP + "Maven-project-object");;
+	public static final Property artifactId = mavenModel.createProperty(M + "artifactId");
+	public static final Property groupId = mavenModel.createProperty(M + "groupId");
+	public static final Property version = mavenModel.createProperty(M + "version");
+	public static final Property dependsOn = mavenModel.createProperty(M + "dependsOn");
+	public static final OntClass MavenProject = mavenModel.createClass(M + "project");
+	public static final OntClass MavenCoordinate = mavenModel.createClass(M + "MavenCoordinate");
+	public static final Property hasCoord = mavenModel.createProperty(M + "hasCoordinate");;
 
 	static {
-		mavenProjectModel.add(C_PROJECT, RDF.type, RDFS.Class);
-		isProperty(mavenProjectModel, ARTIFACT_ID, C_PROJECT, XSD.xstring);
-		isProperty(mavenProjectModel, GROUP_ID, C_PROJECT, XSD.xstring);
-		isProperty(mavenProjectModel, VERSION, C_PROJECT, XSD.xstring);
+		mavenModel.add(MavenProject, RDF.type, RDFS.Class);
+		isProperty(mavenModel, artifactId, MavenProject, XSD.xstring);
+		isProperty(mavenModel, groupId, MavenProject, XSD.xstring);
+		isProperty(mavenModel, version, MavenProject, XSD.xstring);
 	}
 
 	/**

@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
-import org.nuthatchery.ontology.NModel;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
@@ -176,7 +175,7 @@ public class JavaUtil {
 		}
 	}
 
-	public static Resource frameTypeToId(Model m, Object o) {
+	public static Resource frameTypeToId(Model m, String prefix, Object o) {
 		if (o == Opcodes.TOP)
 			return JavaFacts.Types.TOP;
 		else if (o == Opcodes.INTEGER)
@@ -192,7 +191,7 @@ public class JavaUtil {
 		else if (o == Opcodes.UNINITIALIZED_THIS)
 			return JavaFacts.Types.UNINITIALIZED_THIS;
 		else if (o instanceof String)
-			return typeToId(m, Type.getObjectType((String) o));
+			return typeToId(m, prefix, Type.getObjectType((String) o));
 		throw new IllegalArgumentException("" + o);
 	}
 
@@ -226,7 +225,7 @@ public class JavaUtil {
 		return "\"" + s.replaceAll("([\\\"\'])", "\\\\$1").replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r") + "\"";
 	}
 
-	public static Resource typeToId(Model m, Type t) {
+	public static Resource typeToId(Model m, String prefix, Type t) {
 		switch (t.getSort()) {
 		case Type.VOID:
 			return JavaFacts.Types.VOID;
@@ -247,9 +246,9 @@ public class JavaUtil {
 		case Type.DOUBLE:
 			return JavaFacts.Types.DOUBLE;
 		case Type.ARRAY:
-			return JavaFacts.Types.array(m, t.getDimensions(), typeToId(m, t.getElementType()));
+			return JavaFacts.Types.array(m, t.getDimensions(), typeToId(m, prefix, t.getElementType()));
 		case Type.OBJECT:
-			return JavaFacts.Types.object(m, t.getInternalName());
+			return JavaFacts.Types.object(m, prefix, t.getInternalName());
 		default:
 			throw new IllegalArgumentException("" + t + t.getSort());
 		}

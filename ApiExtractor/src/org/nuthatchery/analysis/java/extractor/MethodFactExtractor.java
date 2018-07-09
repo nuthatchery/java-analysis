@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.apache.jena.rdf.model.AnonId;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
@@ -33,7 +32,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	private static int count = 0;
 	private final Resource currentMethodId;
-	private RDFList insnList;
+	private ListBuilder insnList;
 	private Resource currentInsn;
 	private ILogger log;
 	private final Model model;
@@ -44,6 +43,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	 */
 	private final ClassFactExtractor parent;
 	private int startLine;
+	private final String prefix;
 
 	public MethodFactExtractor(ClassFactExtractor parent, Resource memberId, int access, String name, String desc,
 			ILogger log) {
@@ -52,6 +52,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		this.currentMethodId = memberId;
 		this.log = log;
 		this.model = parent.getModel();
+		this.prefix = parent.prefix;
 		parent.currentLine = -1;
 	}
 
@@ -59,11 +60,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		if (args.length % 2 == 1)
 			throw new IllegalArgumentException();
 
-		if (insnList == null) {
-			insnList = model.createList(new RDFNode[] {currentInsn});
-		} else {
-			insnList.add(currentInsn);
-		}
+		insnList.add(currentInsn);
+
 		model.add(currentInsn, JavaFacts.P_CALL, JavaFacts.opcode(opcode));
 		for (int i = 0; i < args.length; i += 2) {
 			if (args[i] instanceof Property) {
@@ -149,7 +147,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		// MethodFactExtractor.visitAnnotation(desc=%s,visible=%b)%n", desc, visible);
 		Resource anno = model.createResource();
 		model.add(currentMethodId, JavaFacts.P_ANNOTATION, anno);
-		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, desc));
+		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, prefix, desc));
 		// TODO: also traverse the annotation
 		// return new AnnotationVisitor(Opcodes.ASM6) {
 		//
@@ -174,7 +172,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		log.log("{");
 		parent.currentLine = -1;
 		currentInsn = model.createResource();
-		insnList = null;
+		insnList = new ListBuilder(model);
 		super.visitCode();
 	}
 
@@ -191,7 +189,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		parent.currentLine = -1;
 		log.log("} // end of " + currentMethodId);
 		if (insnList != null) {
-			model.add(currentMethodId, JavaFacts.P_CODE, insnList);
+			model.add(currentMethodId, JavaFacts.P_CODE, insnList.build());
 		}
 		insnList = null;
 		super.visitEnd();
@@ -259,7 +257,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitLdcInsn(Object cst) {
 		RDFNode operand;
 		if (cst instanceof Type) {
-			operand = JavaUtil.typeToId(model, (Type) cst);
+			operand = JavaUtil.typeToId(model, prefix, (Type) cst);
 		} else {
 			operand = model.createTypedLiteral(cst);
 		}
@@ -291,7 +289,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			if (vu.varNum == index && startIndex <= vu.lastLabel && endIndex > vu.lastLabel) {
 				model.add(vu.varId, CommonVocabulary.P_NAME, model.createTypedLiteral(name));
 				model.add(vu.varId, JavaFacts.P_TYPE, //
-						JavaUtil.typeToId(model, Type.getType(desc)));
+						JavaUtil.typeToId(model, prefix, Type.getType(desc)));
 				model.add(vu.varId, CommonVocabulary.P_IDNAME, //
 						model.createTypedLiteral(name + ":" + desc + (signature == null ? "" : signature)));
 			}
@@ -310,14 +308,16 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-		RDFList list = model.createList();
+		ListBuilder list = new ListBuilder(model);
 		for (int i = 0; i < keys.length; i++) {
 			Resource node = model.createResource();
 			model.add(node, JavaFacts.P_OPERAND_INT, model.createTypedLiteral(keys[i]));
 			model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(labels[i].toString())));
 			list.add(node);
+
 		}
-		putInstruction(Opcodes.LOOKUPSWITCH, JavaFacts.P_OPERAND_LIST, list);
+
+		putInstruction(Opcodes.LOOKUPSWITCH, JavaFacts.P_OPERAND_LIST, list.build());
 
 		super.visitLookupSwitchInsn(dflt, keys, labels);
 	}
@@ -333,7 +333,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-		Resource classId = JavaFacts.Types.object(model, owner);
+		Resource classId = JavaFacts.Types.object(model, prefix, owner);
 		Resource methodId = JavaFacts.method(model, classId, name, desc);
 		// NOTE: Example of finding the types of actual arguments and formal
 		// parameters
@@ -392,14 +392,14 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		log.logf("visitMultiANewArrayInsn(desc=%s, dims=%d)%n", desc, dims);
 		putInstruction(Opcodes.MULTIANEWARRAY, JavaFacts.P_OPERAND_TYPE, //
 				JavaFacts.Types.array(model, dims, //
-						JavaFacts.Types.object(model, desc)));
+						JavaFacts.Types.object(model, prefix, desc)));
 		super.visitMultiANewArrayInsn(desc, dims);
 	}
 
 	@Override
 	public void visitParameter(String name, int access) {
 		log.logf("visitParameter(name=%s, access=%d)%n", name, access);
-		Resource paramId = model.createResource(IRIUtil.addPath(currentMethodId, name));
+		Resource paramId = IRIUtil.addPath(currentMethodId, name);
 		model.add(currentMethodId, JavaFacts.PARAMETER, paramId);
 		parent.addFieldAccessFlags(access, paramId);
 
@@ -408,15 +408,14 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
-		log.warnf(
-				"unimplemented: MethodFactExtractor.visitParameterAnnotation(typePath=%s, desc=%s, visible=%b)%n", //
+		log.warnf("unimplemented: MethodFactExtractor.visitParameterAnnotation(typePath=%s, desc=%s, visible=%b)%n", //
 				parameter, desc, visible);
 		return super.visitParameterAnnotation(parameter, desc, visible);
 	}
 
 	@Override
 	public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-		RDFList list = model.createList();
+		ListBuilder list = new ListBuilder(model);
 
 		Resource node = model.createResource();
 		model.add(node, JavaFacts.P_OPERAND_INT, model.createTypedLiteral(min));
@@ -435,7 +434,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(label.toString())));
 			list.add(node);
 		}
-		putInstruction(Opcodes.TABLESWITCH, JavaFacts.P_OPERAND_LIST, list);
+		putInstruction(Opcodes.TABLESWITCH, JavaFacts.P_OPERAND_LIST, list.build());
 
 		super.visitTableSwitchInsn(min, max, dflt, labels);
 	}
@@ -450,7 +449,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-		RDFList list = model.createList();
+		ListBuilder list = new ListBuilder(model);
 
 		Resource node = model.createResource();
 		model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(start.toString())));
@@ -462,10 +461,10 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 		node = model.createResource();
 		model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(handler.toString())));
-		model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, type));
+		model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, prefix, type));
 		list.add(node);
 
-		model.add(currentMethodId, JavaFacts.P_TRY_CATCH_BLOCK, list);
+		model.add(currentMethodId, JavaFacts.P_TRY_CATCH_BLOCK, list.build());
 
 		super.visitTryCatchBlock(start, end, handler, type);
 	}
@@ -481,7 +480,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
-		putInstruction(opcode, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, type));
+		putInstruction(opcode, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, prefix, type));
 		super.visitTypeInsn(opcode, type);
 	}
 
@@ -493,7 +492,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		vu.varId = model.createResource();
 		model.add(vu.varId, RDF.value, model.createTypedLiteral(var));
 		if (super.locals != null && super.locals.size() > var) {
-			model.add(vu.varId, JavaFacts.P_TYPE, JavaUtil.frameTypeToId(model, super.locals.get(var)));
+			model.add(vu.varId, JavaFacts.P_TYPE, JavaUtil.frameTypeToId(model, prefix, super.locals.get(var)));
 		}
 		localVarUse.add(vu);
 		log.logf("visitVarInsn(opcode=%s, var=%d)%n", opcode, var);

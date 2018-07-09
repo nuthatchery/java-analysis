@@ -36,6 +36,7 @@ import org.nuthatchery.analysis.agc.extractor.AgcInstructions.Instruction;
 import org.nuthatchery.analysis.agc.extractor.AgcInstructions.InstructionUse;
 import org.nuthatchery.analysis.java.extractor.ExtractApi;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
+import org.nuthatchery.analysis.java.extractor.ListBuilder;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
 
 
@@ -74,7 +75,7 @@ public class AgcExtractor {
 	 */
 	private int mode = 0;
 	private Resource node;
-	private RDFList list;
+	private ListBuilder list;
 	private String dir;
 	private boolean comment;
 
@@ -90,7 +91,7 @@ public class AgcExtractor {
 	public void extract() throws IOException {
 		StringBuilder b = new StringBuilder(80);
 		lineNum = 1;
-		list = model.createList();
+		list = new ListBuilder(model);
 		header = true;
 		headerText = "";
 		while ((currentLine = reader.readLine()) != null) {
@@ -153,7 +154,7 @@ public class AgcExtractor {
 			lineInPage++;
 		}
 
-		Resource code = list;
+		Resource code = list.build();
 		model.add(model.createResource(fileName), AgcInstructions.P_CODE, code);
 		model.add(model.createResource(fileName), AgcInstructions.P_COMMENT, model.createTypedLiteral(headerText));
 

@@ -76,3 +76,35 @@ http://localhost:3330/dataset?query=PREFIX m: <http://model.nuthatchery.org/mave
 ### With Graal
 
 Run the application (App.java) in graal-getting-started. It'll load `/tmp/data.trig`, set up a few inference rules, run a couple of queries, and then expect further queries on stdin.
+
+# Ontology conventions
+
+* To make an ontology model: `OntModel m = ModelFactory.createOntologyModel()`
+* Name space must be added manually
+* Class names are capitalised `CamelCase`
+   * Make them with `m.createClass(NS + uriString)`
+* Property names are uncapitalised `camelCase`
+   * Make them with `m.createProperty(NS + uriString)`
+   
+## Building models
+
+Create a typed resource:
+```
+Resource coord1 = model.createResource(depUri, MavenFacts.MavenCoordinate);
+Resource coord2 = model.createResource(depUri, MavenFacts.MavenCoordinate);
+```
+
+Add property:
+```
+coord1.addProperty(MavenFacts.dependsOn, coord2);
+```
+
+### Inference
+If `MavenFacts.dependsOn` is set up with `MavenFacts.MavenCoordinate` as `rdf:range` and `rdf:domain`, we can also infer that `coord1` and `coord2` are Maven coordinates.
+
+This also means that *anything* used with `MavenFacts.dependsOn` is a Maven coordinate, including something like:
+```
+coord1.addProperty(MavenFacts.dependsOn, JAVA_SE_8)
+```
+
+With `owl:inverseOf` we can also infer something like `coord2 mvn:hasDep coord1`.

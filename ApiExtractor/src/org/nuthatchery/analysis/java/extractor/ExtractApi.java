@@ -13,15 +13,19 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.fuseki.embedded.FusekiServer;
@@ -41,158 +45,100 @@ import org.apache.jena.vocabulary.RDFS;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.nuthatchery.analysis.java.explorer.Artifact;
+import org.nuthatchery.analysis.java.explorer.ArtifactHandle;
+import org.nuthatchery.analysis.java.explorer.FilesystemExplorer;
+import org.nuthatchery.analysis.java.explorer.PomContext;
+import org.nuthatchery.analysis.java.explorer.ProjectContext;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
 import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
 	private static final String DB_PREFIX = "http://db.nuthatchery.org/java/";
-	private static final List<String> DEFAULT_CLASSES = Arrays.asList("-m", "demo", "../../../../../Test.class",
+	private static final List<String> DEFAULT_CLASSES = Arrays.asList("-m", "demo", "..", "../../../../../Test.class",
 			"../../../../../Test$1.class", "../../../../../Test$Bar.class", "../../../../../IMutablePosition.class");
 	private static int logLevel;
 	private static boolean demoMode = false;
 	// "/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
+	public static final Map<String, String> prefixMapping = new HashMap<>();
+	static {
+		prefixMapping.put("xsd", "http://www.w3.org/2001/XMLSchema#");
+		prefixMapping.put("rdf", RDF.uri);
+		prefixMapping.put("rdfs", RDFS.uri);
+		prefixMapping.put("j", JavaFacts.J);
+		prefixMapping.put("m", MavenFacts.M);
+		prefixMapping.put("jType", JavaFacts.JT);
+		prefixMapping.put("jFlag", JavaFacts.JF);
+		prefixMapping.put("db", DB_PREFIX);
+		prefixMapping.put("nh", CommonVocabulary.NS);
+	}
 
-	private static void extractModel(Dataset dataset, Model mainModel, String modelName, String arg)
+	private static void extractModel(Dataset dataset, String modelName, String arg)
 			throws IOException, FileNotFoundException {
-		List<String> files = findFiles(arg);
-		Console console = System.console();
-		int i = 0;
-		int n = files.size();
+		List<Artifact> artifacts = FilesystemExplorer.explore(arg);
+		List<IOException> errors = new ArrayList<>();
 
-		if (modelName == null) {
-			modelName = "";
-		}
-		modelName = "/" + modelName;
-		Model model = ModelFactory.createDefaultModel();
-		Resource modelId = model.createResource(modelName);
-		dataset.addNamedModel(modelName, model);
-		for (String file : files) {
-			// System.out.println("Processing: " + file);
-			try {
-				if (dataset.supportsTransactions()) {
-					// System.out.println("Begin write transaction");
-					dataset.begin(ReadWrite.WRITE);
-				}
-				if (console != null) {
-					console.printf("[%02d%%] %3s:     %s\r", (i * 100) / n, "CLS", fill(file, 70, "…", true));
-				}
-				if (demoMode && file.endsWith(".class")) {
-					// addModelName(model.getName());
-					ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
-					ClassReader cr = new ClassReader(ExtractApi.class.getResourceAsStream(file));
-					cr.accept(ea, ClassReader.EXPAND_FRAMES);
-				} else if (file.endsWith(".class")) {
-					// addModelName(model.getName());
-					try (InputStream stream = new FileInputStream(file)) {
-						ClassFactExtractor ea = new ClassFactExtractor(model, JavaUtil.logger(logLevel));
-						ClassReader cr = new ClassReader(stream);
-						cr.accept(ea, ClassReader.EXPAND_FRAMES);
-					}
-				} else if (file.endsWith(".jar")) {
-					try (JarFile jarFile = new JarFile(file)) {
-						String name = file;
-						if (name.contains("/")) {
-							name = name.substring(name.lastIndexOf("/") + 1, name.length());
-						}
-						Model m = ModelFactory.createDefaultModel();
-						dataset.addNamedModel("/" + name, m);
-						// addModelName(m.getName());
-						ClassFactExtractor ea = new ClassFactExtractor(m, JavaUtil.logger(logLevel));
-						int nEntries = jarFile.size();
-						int j = 0;
-						for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
-							JarEntry nextElement = entries.nextElement();
-							// System.out.println("Processing JarEntry " + nextElement.getName());
-							if (nextElement.getName().endsWith(".class")) {
-								try (InputStream stream = jarFile.getInputStream(nextElement)) {
+		artifacts.parallelStream().forEach((art) -> {
+			ProjectContext info = art.getInfo();
+			Model model = ModelFactory.createDefaultModel();
+			model.setNsPrefixes(prefixMapping);
+			Resource modelId = model.createResource(info.getRdfId());
+			String prefix = "java://";
+			model.setNsPrefix("", modelId.getURI() + "/");
+			String groupId = info.getGroupId();
+			String artifactId = info.getArtifactId();
+			String version = info.getVersion();
 
-									if (console != null) {
-										console.printf("[%2d%%] %3s: %2d%% %s\r", (i * 100) / n, "JAR",
-												(j * 100) / nEntries,
-												fill(file, 70, "…", true));
-									}
-									ClassReader cr = new ClassReader(stream);
-									cr.accept(ea, ClassReader.EXPAND_FRAMES);
-								}
-							} else if (nextElement.getName().endsWith("pom.xml")) {
-								// TODO extract to class
-								System.out.println("found POM, trying to parse " + nextElement.getName());
-								org.apache.maven.model.Model result = null;
-								try (InputStream stream = jarFile.getInputStream(nextElement)) {
-									try {
-										MavenXpp3Reader reader = new MavenXpp3Reader();
-										result = reader.read(stream);
-									} catch (XmlPullParserException e) {
-										System.out.println("Failed parsing pom.xml");
-									}
-									String groupId = result.getGroupId();
-									if (groupId == null) {
-										groupId = result.getParent().getGroupId();
-									}
-									String artifactId = result.getArtifactId();
-									if (artifactId == null) {
-										artifactId = result.getParent().getArtifactId();
-									}
-									String version = result.getVersion();
-									if (version == null) {
-										version = result.getParent().getVersion();
-									}
-									// TODO extract to POMFactExtractor or something like that
-									Resource mvn_coord = model
-											.createResource(
-													"Maven-coordinate:" + groupId + ":" + artifactId + ":" + version);
-									m.add(modelId, RDF.type, MavenFacts.C_PROJECT);
-									m.add(modelId, MavenFacts.PROJECT_OBJECT, mvn_coord);
-									m.add(mvn_coord, MavenFacts.GROUP_ID, model.createTypedLiteral(groupId));
-									m.add(mvn_coord, MavenFacts.ARTIFACT_ID, model.createTypedLiteral(artifactId));
-									m.add(mvn_coord, MavenFacts.VERSION, model.createTypedLiteral(version));
-
-									System.out.println(result.getDependencies());
-									for (Dependency d : result.getDependencies()) {
-										// TODO intention is to bind dependency property directly to the other node
-										String maven_coordinate = d.getGroupId() + ":" + d.getArtifactId() + ":"
-												+ d.getVersion();
-										m.add(mvn_coord, MavenFacts.DEPENDS_ON, model.createResource(maven_coordinate));
-										System.out.println(modelName + " depends on " + maven_coordinate);
-									}
-
-									{// TODO build methods into handlers into maven graph
-
-									}
-
-								}
-							} else if (console != null) {
-								console.printf("[%2d%%] %3s: %2d%% %s\r", (i * 100) / n, "JAR", (j * 100) / nEntries,
-										fill("", 70, "…", true));
-							}
-							j++;
-						}
-					}
-					i++;
-				}
-				if (dataset.supportsTransactions()) {
-					dataset.commit();
-					// System.out.println("commit transaction");
-					dataset.end();
-					// System.out.println("end transaction");
-				}
-			} catch (RuntimeException e) {
-				if (dataset.supportsTransactionAbort()) {
-					dataset.abort();
-					// System.out.println("abort transaction");
-				}
-				if (dataset.supportsTransactions()) {
-					dataset.abort();
-					dataset.end();
-					// System.out.println("end transaction");
-				}
-				throw e;
+			if (groupId != null) {
+				modelId.addLiteral(MavenFacts.groupId, groupId);
 			}
-		}
-		if (console != null) {
-			console.printf("[%02d%%] ALL:     %s\r", (i * 100) / n, fill("done", 80, "…", false));
-			console.printf("\n");
-		}
+			if (artifactId != null) {
+				modelId.addLiteral(MavenFacts.artifactId, artifactId);
+			}
+			if (version != null) {
+				modelId.addLiteral(MavenFacts.version, version);
+			}
+
+			PomContext pomContext = info.getPomContext();
+			if (pomContext != null) {
+				Resource mvnCoord = model.createResource(pomContext.getMavenUri(), MavenFacts.MavenCoordinate);
+				modelId.addProperty(RDF.type, MavenFacts.MavenProject);
+				modelId.addProperty(MavenFacts.hasCoord, mvnCoord);
+				for (Dependency d : pomContext.getDependencies()) {
+					// TODO intention is to bind dependency property directly to the other node
+					String depUri = PomContext.getMavenUri(d);
+					mvnCoord.addProperty(MavenFacts.dependsOn,
+							model.createResource(depUri, MavenFacts.MavenCoordinate));
+					System.out.println(pomContext.getMavenUri() + " depends on " + depUri);
+				}
+				synchronized (dataset) {
+					dataset.getDefaultModel().add(mvnCoord.listProperties());
+				}
+			}
+			synchronized (dataset) {
+				dataset.getDefaultModel().add(modelId.listProperties());
+			}
+
+			try (ArtifactHandle h = art.open()) {
+				h.stream().forEach((bytes) -> {
+					ClassFactExtractor ea = new ClassFactExtractor(model, prefix, JavaUtil.logger(logLevel));
+					ClassReader cr = new ClassReader(bytes.getBytes());
+					cr.accept(ea, ClassReader.EXPAND_FRAMES);
+				});
+			}
+			if (Files.exists(art.getPath())) {
+				Path outPath = Paths.get(art.getPath().toString() + ".ttl");
+				try (OutputStream output = Files.newOutputStream(outPath)) {
+					System.out.println("Writing " + outPath);
+					RDFDataMgr.write(output, model, Lang.TURTLE);
+				} catch (IOException e) {
+					errors.add(e);
+					e.printStackTrace();
+				}
+			}
+			// dataset.addNamedModel(modelId.getURI(), model);
+		});
+
 	}
 
 	public static String fill(String s, int size, String ellipsis, boolean flushRight) {
@@ -215,39 +161,6 @@ public class ExtractApi {
 
 	}
 
-	private static List<String> findFiles(String loc) throws IOException {
-		List<String> files = new ArrayList<>();
-		if (demoMode) {
-			files.add(loc);
-			return files;
-		}
-		FileSystem fs = FileSystems.getDefault();
-		int nClasses = 0;
-		int nJars = 0;
-		List<String> todo = new ArrayList<>();
-		todo.add(loc);
-		for (int i = 0; i < todo.size(); i++) {
-			Path path = fs.getPath(todo.get(i));
-			String str = path.toString();
-			if (Files.isRegularFile(path)) {
-				if (str.endsWith(".class")) {
-					files.add(path.toString());
-					nClasses++;
-				} else if (str.endsWith(".jar")) {
-					files.add(path.toString());
-					nJars++;
-				}
-			} else if (Files.isDirectory(path)) {
-				System.out.println("Adding files from " + path);
-				Files.list(path).forEach((Path p) -> {
-					todo.add(p.toString());
-				});
-			}
-		}
-		System.out.println("" + nClasses + " class files and " + nJars + " jars found in " + loc + ".");
-		return files;
-	}
-
 	public static void main(String[] args) throws IOException {
 		Dataset dataset = DatasetFactory.create();
 		String outFile = "/tmp/data.trig";
@@ -257,9 +170,9 @@ public class ExtractApi {
 
 		demoMode = args.length == 0;
 		logLevel = args.length == 0 ? 10 : 0;
+		logLevel = 0;
 		List<String> arguments = new ArrayList<>(demoMode ? DEFAULT_CLASSES : Arrays.asList(args));
 		// IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
-		Model model = ModelFactory.createDefaultModel();
 		String modelName = null;
 		boolean jung = false;
 		try {
@@ -314,7 +227,7 @@ public class ExtractApi {
 					jung = true;
 					break;
 				default:
-					extractModel(dataset, model, modelName, arg);
+					extractModel(dataset, modelName, arg);
 				}
 			}
 
@@ -376,15 +289,7 @@ public class ExtractApi {
 		dataset.getDefaultModel().removeAll();
 		dataset.addNamedModel(JavaFacts.J, JavaFacts.javaModel);
 		dataset.addNamedModel(JavaFacts.JT, JavaFacts.javaTypesModel);
-		dataset.addNamedModel(MavenFacts.MP, MavenFacts.mavenProjectModel);
-		dataset.getDefaultModel().setNsPrefix("xsd", "http://www.w3.org/2001/XMLSchema#");
-		dataset.getDefaultModel().setNsPrefix("rdf", RDF.uri);
-		dataset.getDefaultModel().setNsPrefix("rdfs", RDFS.uri);
-		dataset.getDefaultModel().setNsPrefix("j", JavaFacts.J);
-		dataset.getDefaultModel().setNsPrefix("m", MavenFacts.MP);
-		dataset.getDefaultModel().setNsPrefix("jType", JavaFacts.JT);
-		dataset.getDefaultModel().setNsPrefix("jFlag", JavaFacts.JF);
-		dataset.getDefaultModel().setNsPrefix("db", DB_PREFIX);
-		dataset.getDefaultModel().setNsPrefix("nh", CommonVocabulary.NS);
+		dataset.addNamedModel(MavenFacts.M, MavenFacts.mavenModel);
+		dataset.getDefaultModel().setNsPrefixes(prefixMapping);
 	}
 }
