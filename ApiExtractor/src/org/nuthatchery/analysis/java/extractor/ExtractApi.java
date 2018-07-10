@@ -1,7 +1,5 @@
 package org.nuthatchery.analysis.java.extractor;
 
-import net.rootdev.jenajung.JenaJungJFrame;
-
 import java.io.Console;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -43,6 +41,8 @@ import org.nuthatchery.ontology.ModelFactory;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
 import org.nuthatchery.ontology.standard.RdfVocabulary;
 import org.objectweb.asm.ClassReader;
+
+import net.rootdev.jenajung.JenaJungJFrame;
 
 public class ExtractApi {
 	private static final String DB_PREFIX = "http://db.nuthatchery.org/java/";

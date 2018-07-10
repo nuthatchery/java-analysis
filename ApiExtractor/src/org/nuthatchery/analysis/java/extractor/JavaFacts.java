@@ -1,5 +1,7 @@
 package org.nuthatchery.analysis.java.extractor;
 
+import java.util.HashMap;
+
 import org.apache.commons.rdf.api.BlankNode;
 import org.apache.commons.rdf.api.BlankNodeOrIRI;
 import org.apache.commons.rdf.api.IRI;
@@ -292,4 +294,7 @@ public abstract class JavaFacts {
 	public static IRI opcode(int opcode) {
 		return javaModel.node(Printer.OPCODES[opcode].toLowerCase());
 	}
+
+	// public static HashMap<String, String> URIsimplifier = new HashMap<>();
+
 }
