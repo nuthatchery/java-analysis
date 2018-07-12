@@ -19,7 +19,7 @@ import org.apache.jena.rdf.model.Property;
  *
  */
 public abstract class MavenFacts {
-	public static final String M = "http://model.nuthatchery.org/maven/";
+	public static final String M = "https://model.nuthatchery.org/maven/";
 	public static final String MP = M + "project/";
 	public static final OntModel mavenModel = //
 			ModelFactory.createOntologyModel();

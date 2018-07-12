@@ -9,6 +9,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
 import org.objectweb.asm.AnnotationVisitor;
@@ -25,7 +26,8 @@ public class ClassFactExtractor extends ClassVisitor {
 	protected String className;
 	protected String context;
 
-	protected final Stack<Resource> classStack = new Stack<>();
+	private final Stack<Resource> classIdStack = new Stack<>();
+	private final Stack<Resource> classJnStack = new Stack<>();
 
 	protected int currentLine = -1;
 
@@ -37,6 +39,7 @@ public class ClassFactExtractor extends ClassVisitor {
 
 	protected Set<String> seen = new HashSet<>();
 	protected final String prefix;
+	private Resource memberJn;
 
 	public ClassFactExtractor(Model fw, String prefix, ILogger logger) {
 		super(Opcodes.ASM6);
@@ -133,24 +136,25 @@ public class ClassFactExtractor extends ClassVisitor {
 		}
 	}
 
-	protected Resource getClassId() {
-		return classStack.peek();
+	private Resource getClassId() {
+		return classIdStack.peek();
 	}
 
-	Resource getMemberId(String owner, String name, String desc) {
-		return JavaFacts.method(model, JavaFacts.Types.object(model, prefix, owner), name, desc);
+	private Resource getClassJn() {
+		return classJnStack.peek();
 	}
 
-	Resource getMemberName(String name, String desc) {
-		return JavaFacts.method(model, getClassId(), name, desc);
+	protected Resource getMemberId(String owner, String name, String desc) {
+		return JavaFacts.method(model, JavaFacts.Types.object(model, JavaFacts.JN, owner), name, desc);
 	}
+
 
 	public Model getModel() {
 		return model;
 	}
 
 	protected Integer indentLevel() {
-		return classStack.size();
+		return classIdStack.size();
 	}
 
 	public void putFlag(Resource id, Resource flag) {
@@ -165,9 +169,12 @@ public class ClassFactExtractor extends ClassVisitor {
 		int major = version & 0xffff;
 		int minor = (version >>> 16) & 0xffff;
 
-		className = name;
-		Resource id = JavaFacts.Types.object(model, model.getNsPrefixURI(""), name);
-		classStack.push(id);
+		className = name;// .replace('/', '.');
+		Resource id = JavaFacts.Types.object(model, model.getNsPrefixURI(""), className);
+		Resource javaName = JavaFacts.Types.object(model, JavaFacts.JN, className);
+		javaName.addProperty(RDFS.isDefinedBy, id);
+		classIdStack.push(id);
+		classJnStack.push(javaName);
 		if (!className.contains("$")) {
 			id.addProperty(CommonVocabulary.P_NAME, model.createTypedLiteral(className));
 		}
@@ -216,7 +223,8 @@ public class ClassFactExtractor extends ClassVisitor {
 	@Override
 	public void visitEnd() {
 		Resource s = getClassId();
-		classStack.pop();
+		classIdStack.pop();
+		classJnStack.pop();
 		log.log("} // end of " + s + "\n");
 		super.visitEnd();
 	}
@@ -228,7 +236,9 @@ public class ClassFactExtractor extends ClassVisitor {
 		// name, desc, signature, value);
 		log.log("\n" + "field " + JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(model, getClassId(), name, desc);
+		memberJn = JavaFacts.method(model, getClassJn(), name, desc);
 		String descName = className + "." + name + ":" + desc;
+		model.add(memberJn, RDFS.isDefinedBy, memberId);
 		model.add(memberId, CommonVocabulary.P_NAME, model.createLiteral(name));
 		model.add(memberId, CommonVocabulary.P_IDNAME, model.createLiteral(descName));
 		model.add(memberId, RDF.type, CommonVocabulary.C_DEF);
@@ -275,7 +285,9 @@ public class ClassFactExtractor extends ClassVisitor {
 
 		log.log("\n" + "method " + className + "." + name + desc);// JavaUtil.decodeDescriptor(className, name, desc));
 		memberId = JavaFacts.method(model, getClassId(), name, desc);
+		memberJn = JavaFacts.method(model, getClassJn(), name, desc);
 		String descName = className + "." + name + ":" + desc;
+		model.add(memberJn, RDFS.isDefinedBy, memberId);
 		model.add(memberId, CommonVocabulary.P_NAME, model.createLiteral(name));
 		model.add(memberId, CommonVocabulary.P_IDNAME, model.createLiteral(descName));
 		model.add(memberId, RDF.type, CommonVocabulary.C_DEF);

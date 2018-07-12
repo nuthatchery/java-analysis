@@ -7,7 +7,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 public class CommonVocabulary {
-	public static final String NS = "http://model.nuthatchery.org/common/";
+	public static final String NS = "https://model.nuthatchery.org/common/";
 	private static final OntModel vocab = ModelFactory.createOntologyModel();
 
 	public static final Property P_NAME;

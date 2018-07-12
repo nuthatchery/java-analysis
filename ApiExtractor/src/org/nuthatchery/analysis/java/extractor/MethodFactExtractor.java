@@ -61,8 +61,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			throw new IllegalArgumentException();
 
 		insnList.add(currentInsn);
-
-		model.add(currentInsn, JavaFacts.P_CALL, JavaFacts.opcode(opcode));
+		currentInsn.addProperty(JavaFacts.P_PART_OF, currentMethodId);
+		currentInsn.addProperty(JavaFacts.insn, JavaFacts.opcode(opcode));
 		for (int i = 0; i < args.length; i += 2) {
 			if (args[i] instanceof Property) {
 				Property pred = (Property) args[i];
@@ -72,7 +72,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 				} else {
 					obj = model.createTypedLiteral(args[i + 1]);
 				}
-				model.add(currentInsn, pred, obj);
+				currentInsn.addProperty(pred, obj);
 			} else
 				throw new IllegalArgumentException();
 		}
@@ -232,7 +232,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	@Override
 	public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
 		log.log("INVOKEDYNAMIC " + name + " [" + desc + "]" + " " + bsm + " " + Arrays.toString(bsmArgs));
-		putInstruction(Opcodes.INVOKEDYNAMIC, JavaFacts.P_OPERAND_MEMBER, parent.getMemberName(name, desc));
+		putInstruction(Opcodes.INVOKEDYNAMIC, JavaFacts.P_OPERAND_MEMBER, parent.getMemberId("", name, desc));
 		super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
 	}
 
@@ -490,6 +490,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		vu.lastLabel = labels.size() - 1;
 		vu.varNum = var;
 		vu.varId = model.createResource();
+
 		model.add(vu.varId, RDF.value, model.createTypedLiteral(var));
 		if (super.locals != null && super.locals.size() > var) {
 			model.add(vu.varId, JavaFacts.P_TYPE, JavaUtil.frameTypeToId(model, prefix, super.locals.get(var)));

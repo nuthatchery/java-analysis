@@ -1,0 +1,36 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX jFlag: <https://model.nuthatchery.org/java/flags/>
+PREFIX jType: <https://model.nuthatchery.org/java/types/>
+PREFIX nh:    <https://model.nuthatchery.org/common/>
+PREFIX j:     <https://model.nuthatchery.org/java/>
+PREFIX jvm:   <https://model.nuthatchery.org/jvm/>
+PREFIX m:     <https://model.nuthatchery.org/maven/>
+PREFIX duck-0.4.2: <https://db.nuthatchery.org/org.example/duck/0.4.2/>
+PREFIX duck-0.4.3: <https://db.nuthatchery.org/org.example/duck/0.4.3/>
+PREFIX frog-0.3.7: <https://db.nuthatchery.org/org.example/frog/0.3.7/>
+PREFIX frog-0.3.8: <https://db.nuthatchery.org/org.example/frog/0.3.8/>
+PREFIX pond-0.3.0: <https://db.nuthatchery.org/org.example/pond/0.3.0/>
+PREFIX pond-0.3.1: <https://db.nuthatchery.org/org.example/pond/0.3.1/>
+PREFIX pond-0.3.2: <https://db.nuthatchery.org/org.example/pond/0.3.2/>
+PREFIX rubberduck-0.1.2: <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/>
+PREFIX rubberduck-0.1.3: <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/>
+
+SELECT ?g ?caller ?callee
+WHERE {
+  GRAPH ?g {
+    #?class nh:name "org/apache/commons/collections/set/UnmodifiableSet" .
+    #?caller j:memberOf ?class.
+
+    ?anInstruction j:partOf ?caller .
+    
+#          {?anInstruction j:insn j:invokevirtual}
+#    UNION {?anInstruction j:insn j:invokespecial}
+#    UNION {?anInstruction j:insn j:invokeinterface}
+#    UNION {?anInstruction j:insn j:invokedynamic} .
+
+    ?anInstruction j:memberOperand ?callee .
+  }
+}
+

@@ -8,6 +8,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
 import org.nuthatchery.ontology.uri.IRIUtil;
@@ -21,6 +22,187 @@ import org.objectweb.asm.util.Printer;
  *
  */
 public abstract class JavaFacts {
+	public static final String J = "https://model.nuthatchery.org/java/";
+	public static final String JN = "java://";
+	public static final String JF = J; // + "flags/";
+	// public static final String JM = J + "methods/";
+	public static final String JVM = "https://model.nuthatchery.org/jvm/";
+	public static final String JT = J; // + "types/";
+	// funnet på selv, bruker for å enkode ting fra bytecode
+	public static final OntModel jvmModel = ModelFactory.createOntologyModel();
+	public static final OntModel javaModel = ModelFactory.createOntologyModel();
+	public static final OntModel javaFlagsModel = javaModel; // ModelFactory.createOntologyModel();
+	public static final OntModel javaMethodsModel = javaModel; // ModelFactory.createOntologyModel();
+	public static final OntModel javaTypesModel = javaModel; // ModelFactory.createOntologyModel();
+	public static final Property hasAccess = javaModel.createProperty(J + "hasAccess");
+	public static final OntClass C_CLASS = javaModel.createClass(J + "class");
+	public static final OntClass C_INTERFACE = javaModel.createClass(J + "interface");
+	public static final OntClass C_ENUM = javaModel.createClass(J + "enum");
+	public static final OntClass C_CONSTRUCTOR = javaModel.createClass(J + "constructor");
+	public static final Property CONSTRUCTS = javaModel.createProperty(J + "constructs");
+	public static final Property CREATES = javaModel.createProperty(J + "creates");
+	public static final Property DEBUG = javaModel.createProperty(J + "debug");
+	public static final Property DECLARES_THROW = javaModel.createProperty(J + "declaresThrow");
+	public static final Property P_EXTENDS = javaModel.createProperty(J + "extends");
+	public static final Property GENERIC = javaModel.createProperty(J + "generic");
+	public static final Property P_SUBTYPE_OF = javaModel.createProperty(J + "implements");
+
+	public static final Property INITIAL_VALUE = javaModel.createProperty(J + "initialValue");
+	public static final Property ACCESS_FIELD = javaModel.createProperty(J + "field");
+	public static final Property ACCESS_DYNAMIC = javaModel.createProperty(J + "dynamic");
+	public static final Property ACCESS_SPECIAL = javaModel.createProperty(J + "special");
+	public static final Property ACCESS_STATIC = javaModel.createProperty(J + "static");
+	public static final Property ACCESS_INTERFACE = javaModel.createProperty(J + "interface");
+
+	public static final Property ACCESS_VIRTUAL = javaModel.createProperty(J + "virtual");
+
+	public static final OntClass C_MEMBER = javaModel.createClass(J + "member");
+	public static final OntClass C_METHOD = javaModel.createClass(J + "method");
+	public static final OntClass C_FIELD = javaModel.createClass(J + "field");
+	public static final Property P_HAS_FLAG = javaModel.createProperty(J + "hasFlag");
+	public static final Property READS = javaModel.createProperty(J + "reads");
+	public static final Property SIGNATURE = javaModel.createProperty(J + "signature");
+	public static final Property P_SOURCE_FILE = javaModel.createProperty(J + "sourceFile");
+	public static final Property P_THROWS = javaModel.createProperty(J + "throws");
+	/*
+	 * public static final IRI USES_JSR = javaModel.createResource(J + "usesJsr");
+	 * public static final IRI USES_OBJ_EQUALS = javaModel.createResource(J +
+	 * "usesObjEquals"); public static final IRI USES_REF_EQUALS =
+	 * javaModel.createResource(J + "usesRefEquals"); public static final IRI
+	 * USES_REF_NULLCHECK = javaModel.createResource(J + "usesRefNullCheck"); public
+	 * static final IRI USES_TYPE = javaModel.createResource(J + "usesType");
+	 */
+	public static final Property WRITES = javaModel.createProperty(J + "writes");
+	public static final Property P_CLASS_FILE_VERSION = javaModel.createProperty(J + "classFileVersion");
+	public static final Property P_CLASS_FILE_MINOR = javaModel.createProperty(J + "classFileMinorVersion");
+	public static final Property PARAMETER = javaModel.createProperty(J + "parameter");
+
+	public static final Property P_CODE = javaModel.createProperty(J + "code");
+	public static final Property P_NEXT = javaModel.createProperty(J + "next");
+	public static final Property P_NEXT_IF_TRUE = javaModel.createProperty(J + "nextIfTrue");
+	public static final Property P_NEXT_IF_FALSE = javaModel.createProperty(J + "nextIfFalse");
+	public static final Resource R_END = javaModel.createResource(J + "end");
+	public static final Property insn = javaModel.createProperty(J + "insn");
+	public static final Property P_LINE = CommonVocabulary.P_LINE_NUMBER;
+	public static final Property P_SRC_START = javaModel.createProperty(J + "srcStart");
+	public static final Property P_SRC_END = javaModel.createProperty(J + "srcEnd");
+	public static final OntClass C_INSTRUCTION = javaModel.createClass(J + "JvmInstruction");
+	public static final OntClass C_JVM_INSN = javaModel.createClass(J + "JvmInsn");
+	public static final Property P_ANNOTATION = javaModel.createProperty(J + "annotation");
+	public static final Property P_OPERAND_INT = javaModel.createProperty(J + "intOperand");
+	public static final Property P_OPERAND = javaModel.createProperty(J + "operand");
+	public static final Property P_OPERAND_CONSTANT = javaModel.createProperty(J + "constantOperand");
+	public static final Property P_OPERAND_MEMBER = javaModel.createProperty(J + "memberOperand");
+	public static final Property P_OPERAND_TYPE = javaModel.createProperty(J + "typeOperand");
+	public static final Property P_OPERAND_VAR = javaModel.createProperty(J + "varOperand");
+	public static final Property P_OPERAND_LABEL = javaModel.createProperty(J + "labelOperand");
+	public static final Property P_OPERAND_LIST = javaModel.createProperty(J + "listOperand");
+	public static final Property P_TRY_CATCH_BLOCK = javaModel.createProperty(J + "tryCatchBlock");
+	public static final Property P_TYPE = javaModel.createProperty(J + "type");
+	public static final Property P_RETURN_TYPE = javaModel.createProperty(J + "rType");
+	public static final Property P_PARAMETERS = javaModel.createProperty(J + "params");
+	public static final Property P_MAX_STACK = javaModel.createProperty(J + "maxStack");
+	public static final Property P_MAX_LOCALS = javaModel.createProperty(J + "maxLocals");
+	public static final Property P_MEMBER_OF = javaModel.createProperty(J + "memberOf");
+	public static final Property P_PART_OF = javaModel.createProperty(J + "partOf");
+
+	static {
+		javaModel.add(C_CLASS, RDFS.subClassOf, Types.REFERENCE_TYPE);
+		javaModel.add(C_ENUM, RDFS.subClassOf, Types.REFERENCE_TYPE);
+		javaModel.add(C_INTERFACE, RDFS.subClassOf, Types.REFERENCE_TYPE);
+
+		isProperty(javaModel, P_CODE, C_METHOD, C_INSTRUCTION);
+		isProperty(javaModel, P_NEXT, C_INSTRUCTION, C_INSTRUCTION);
+		isProperty(javaModel, P_NEXT_IF_TRUE, C_INSTRUCTION, C_INSTRUCTION, //
+				RDFS.subPropertyOf, P_NEXT);
+		isProperty(javaModel, P_NEXT_IF_FALSE, C_INSTRUCTION, C_INSTRUCTION, //
+				RDFS.subPropertyOf, P_NEXT);
+		javaModel.add(R_END, RDF.type, C_INSTRUCTION);
+		isProperty(javaModel, P_OPERAND, C_INSTRUCTION, null);
+		isProperty(javaModel, P_OPERAND_CONSTANT, C_INSTRUCTION, RDFS.Resource, //
+				RDFS.subPropertyOf, P_OPERAND);
+		isProperty(javaModel, P_OPERAND_INT, C_INSTRUCTION, XSD.xint, //
+				RDFS.subPropertyOf, P_OPERAND);
+		isProperty(javaModel, P_OPERAND_MEMBER, C_INSTRUCTION, C_MEMBER, //
+				RDFS.subPropertyOf, P_OPERAND);
+		isProperty(javaModel, P_OPERAND_TYPE, C_INSTRUCTION, Types.JAVA_TYPE, //
+				RDFS.subPropertyOf, P_OPERAND);
+		isProperty(javaModel, P_OPERAND_VAR, C_INSTRUCTION, XSD.xint, //
+				RDFS.subPropertyOf, P_OPERAND);
+		isProperty(javaModel, insn, C_INSTRUCTION, C_JVM_INSN);
+		isProperty(javaModel, P_LINE, C_INSTRUCTION, XSD.xint);
+		javaModel.add(C_INSTRUCTION, RDF.type, RDFS.Class);
+		javaModel.add(C_JVM_INSN, RDF.type, RDFS.Class);
+	}
+
+	private static void isProperty(OntModel m, Property prop, Resource sub, RDFNode obj, RDFNode... more) {
+		m.add(prop, RDF.type, RDF.Property);
+		if (sub != null) {
+			m.add(prop, RDFS.range, sub);
+		}
+		if (obj != null) {
+			m.add(prop, RDFS.domain, obj);
+		}
+		for (int i = 0; i < more.length; i += 2) {
+			m.add(prop, (Property) more[i], more[i + 1]);
+		}
+	}
+
+	public static Resource method(Model m, Resource owner, String memberName, String memberDesc) {
+		memberName = memberName.replaceAll("[<>]", "--");
+		// return m.node(owner, memberName + "/" + memberDesc);
+		Type type = Type.getType(memberDesc);
+		StringBuilder sb = new StringBuilder();
+		sb.append(memberName); // .re.replaceAll("[<>]", "-"));
+		if (type.getSort() == Type.METHOD) {
+			sb.append("-");
+			String sep = "";
+			for (Type t : type.getArgumentTypes()) {
+				sb.append(sep);
+				while (t.getSort() == Type.ARRAY) {
+					sb.append("A");
+					sb.append(t.getDimensions());
+					t = t.getElementType();
+				}
+				if (t.getSort() == Type.OBJECT) {
+					String name = "O" + t.getClassName();
+					name = name.replaceAll("^O(java\\.lang\\.|java\\.util\\.)", "");
+					sb.append(name);
+				} else {
+					sb.append(t.getClassName());
+				}
+				sep = "-";
+			}
+			sb.append("-");
+			type = type.getReturnType();
+		}
+
+		if (!memberName.equals("$init")) {
+			sb.append("-");
+			while (type.getSort() == Type.ARRAY) {
+				sb.append("A");
+				sb.append(type.getDimensions());
+				type = type.getElementType();
+			}
+			if (type.getSort() == Type.OBJECT) {
+				String name = "O" + type.getClassName();
+				name = name.replaceAll("^O(java\\.lang\\.|java\\.util\\.)", "");
+				sb.append(name);
+			} else {
+				sb.append(type.getClassName());
+			}
+		}
+		return IRIUtil.addPath(owner, sb.toString());
+		// + UriEncoding.percentEncodeIri(methodName,
+		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true)
+		// + UriEncoding.percentEncodeIri(methodDesc,
+		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true));
+	}
+
+	public static Resource opcode(int opcode) {
+		return jvmModel.createResource(JVM + Printer.OPCODES[opcode].toLowerCase());
+	}
+
 	/**
 	 * Copied from JVM specs: Flags
 	 *
@@ -60,7 +242,7 @@ public abstract class JavaFacts {
 	 * @author anna, anya
 	 *
 	 */
-	public static class Types {
+	public static final class Types {
 		public static final Resource ARRAY_REF = javaTypesModel.createResource(JT + "array-ref");
 		public static final Property ARRAY_DIM = javaTypesModel.createProperty(JT + "array-dim");
 		public static final Property ARRAY_ELEMENT_TYPE = javaTypesModel.createProperty(JT + "array-element-type");
@@ -115,186 +297,5 @@ public abstract class JavaFacts {
 					.addProperty(RDF.type, REFERENCE_TYPE);
 			return t;
 		}
-	}
-
-	public static final String J = "http://model.nuthatchery.org/java/";
-	public static final String JF = J + "flags/";
-	public static final String JM = J + "methods/";
-	public static final String JT = J + "types/";
-	public static final OntModel javaModel = //
-			org.apache.jena.rdf.model.ModelFactory.createOntologyModel();
-	public static final OntModel javaFlagsModel = //
-			org.apache.jena.rdf.model.ModelFactory.createOntologyModel();
-
-	public static final OntModel javaMethodsModel = //
-			org.apache.jena.rdf.model.ModelFactory.createOntologyModel();
-
-	// funnet på selv, bruker for å enkode ting fra bytecode
-
-	public static final OntModel javaTypesModel = //
-			org.apache.jena.rdf.model.ModelFactory.createOntologyModel();
-	public static final Property hasAccess = javaModel.createProperty(J + "hasAccess");
-	public static final Property CALLS = javaModel.createProperty(J + "calls");
-	public static final OntClass C_CLASS = javaModel.createClass(J + "class");
-	public static final OntClass C_INTERFACE = javaModel.createClass(J + "interface");
-	public static final OntClass C_ENUM = javaModel.createClass(J + "enum");
-	public static final OntClass C_CONSTRUCTOR = javaModel.createClass(J + "constructor");
-	public static final Property CONSTRUCTS = javaModel.createProperty(J + "constructs");
-	public static final Property CREATES = javaModel.createProperty(J + "creates");
-	public static final Property DEBUG = javaModel.createProperty(J + "debug");
-	public static final Property DECLARES_THROW = javaModel.createProperty(J + "declaresThrow");
-	public static final Property P_EXTENDS = javaModel.createProperty(J + "extends");
-	public static final Property GENERIC = javaModel.createProperty(J + "generic");
-	public static final Property P_SUBTYPE_OF = javaModel.createProperty(J + "implements");
-
-	public static final Property INITIAL_VALUE = javaModel.createProperty(J + "initialValue");
-	public static final Property ACCESS_FIELD = javaModel.createProperty(J + "field");
-	public static final Property ACCESS_DYNAMIC = javaModel.createProperty(J + "dynamic");
-	public static final Property ACCESS_SPECIAL = javaModel.createProperty(J + "special");
-	public static final Property ACCESS_STATIC = javaModel.createProperty(J + "static");
-	public static final Property ACCESS_INTERFACE = javaModel.createProperty(J + "interface");
-
-	public static final Property ACCESS_VIRTUAL = javaModel.createProperty(J + "virtual");
-
-	public static final OntClass C_MEMBER = javaModel.createClass(J + "member");
-	public static final OntClass C_METHOD = javaModel.createClass(J + "method");
-	public static final OntClass C_FIELD = javaModel.createClass(J + "field");
-	public static final Property P_HAS_FLAG = javaModel.createProperty(J + "hasFlag");
-	public static final Property READS = javaModel.createProperty(J + "reads");
-	public static final Property SIGNATURE = javaModel.createProperty(J + "signature");
-	public static final Property P_SOURCE_FILE = javaModel.createProperty(J + "sourceFile");
-	public static final Property P_THROWS = javaModel.createProperty(J + "throws");
-	/*
-	 * public static final IRI USES_JSR = javaModel.createResource(J + "usesJsr");
-	 * public static final IRI USES_OBJ_EQUALS = javaModel.createResource(J +
-	 * "usesObjEquals"); public static final IRI USES_REF_EQUALS =
-	 * javaModel.createResource(J + "usesRefEquals"); public static final IRI
-	 * USES_REF_NULLCHECK = javaModel.createResource(J + "usesRefNullCheck"); public
-	 * static final IRI USES_TYPE = javaModel.createResource(J + "usesType");
-	 */
-	public static final Property WRITES = javaModel.createProperty(J + "writes");
-	public static final Property P_CLASS_FILE_VERSION = javaModel.createProperty(J + "classFileVersion");
-	public static final Property P_CLASS_FILE_MINOR = javaModel.createProperty(J + "classFileMinorVersion");
-	public static final Property PARAMETER = javaModel.createProperty(J + "parameter");
-
-	public static final Property P_CODE = javaModel.createProperty(J + "code");
-	public static final Property P_NEXT = javaModel.createProperty(J + "next");
-	public static final Property P_NEXT_IF_TRUE = javaModel.createProperty(J + "nextIfTrue");
-	public static final Property P_NEXT_IF_FALSE = javaModel.createProperty(J + "nextIfFalse");
-	public static final Resource R_END = javaModel.createResource(J + "end");
-	public static final Property P_CALL = javaModel.createProperty(J + "call");
-	public static final Property P_LINE = CommonVocabulary.P_LINE_NUMBER;
-	public static final Property P_SRC_START = javaModel.createProperty(J + "srcStart");
-	public static final Property P_SRC_END = javaModel.createProperty(J + "srcEnd");
-	public static final OntClass C_INSTRUCTION = javaModel.createClass(J + "jvmInstruction");
-	public static final OntClass C_JVM_INSN = javaModel.createClass(J + "jvmInsn");
-	public static final Property P_ANNOTATION = javaModel.createProperty(J + "annotation");
-	public static final Property P_OPERAND_INT = javaModel.createProperty(J + "intOperand");
-	public static final Property P_OPERAND = javaModel.createProperty(J + "operand");
-	public static final Property P_OPERAND_CONSTANT = javaModel.createProperty(J + "constantOperand");
-	public static final Property P_OPERAND_MEMBER = javaModel.createProperty(J + "memberOperand");
-	public static final Property P_OPERAND_TYPE = javaModel.createProperty(J + "typeOperand");
-	public static final Property P_OPERAND_VAR = javaModel.createProperty(J + "varOperand");
-	public static final Property P_OPERAND_LABEL = javaModel.createProperty(J + "labelOperand");
-	public static final Property P_OPERAND_LIST = javaModel.createProperty(J + "listOperand");
-	public static final Property P_TRY_CATCH_BLOCK = javaModel.createProperty(J + "tryCatchBlock");
-	public static final Property P_TYPE = javaModel.createProperty(J + "type");
-	public static final Property P_RETURN_TYPE = javaModel.createProperty(J + "rType");
-	public static final Property P_PARAMETERS = javaModel.createProperty(J + "params");
-	public static final Property P_MAX_STACK = javaModel.createProperty(J + "maxStack");
-	public static final Property P_MAX_LOCALS = javaModel.createProperty(J + "maxLocals");
-	public static final Property P_MEMBER_OF = javaModel.createProperty(J + "memberOf");
-
-	static {
-		javaModel.add(C_CLASS, RDFS.subClassOf, Types.REFERENCE_TYPE);
-		javaModel.add(C_ENUM, RDFS.subClassOf, Types.REFERENCE_TYPE);
-		javaModel.add(C_INTERFACE, RDFS.subClassOf, Types.REFERENCE_TYPE);
-
-		isProperty(javaModel, P_CODE, C_METHOD, C_INSTRUCTION);
-		isProperty(javaModel, P_NEXT, C_INSTRUCTION, C_INSTRUCTION);
-		isProperty(javaModel, P_NEXT_IF_TRUE, C_INSTRUCTION, C_INSTRUCTION, //
-				RDFS.subPropertyOf, P_NEXT);
-		isProperty(javaModel, P_NEXT_IF_FALSE, C_INSTRUCTION, C_INSTRUCTION, //
-				RDFS.subPropertyOf, P_NEXT);
-		javaModel.add(R_END, RDF.type, C_INSTRUCTION);
-		isProperty(javaModel, P_OPERAND, C_INSTRUCTION, null);
-		isProperty(javaModel, P_OPERAND_CONSTANT, C_INSTRUCTION, RDFS.Resource, //
-				RDFS.subPropertyOf, P_OPERAND);
-		isProperty(javaModel, P_OPERAND_INT, C_INSTRUCTION, XSD.xint, //
-				RDFS.subPropertyOf, P_OPERAND);
-		isProperty(javaModel, P_OPERAND_MEMBER, C_INSTRUCTION, C_MEMBER, //
-				RDFS.subPropertyOf, P_OPERAND);
-		isProperty(javaModel, P_OPERAND_TYPE, C_INSTRUCTION, Types.JAVA_TYPE, //
-				RDFS.subPropertyOf, P_OPERAND);
-		isProperty(javaModel, P_OPERAND_VAR, C_INSTRUCTION, XSD.xint, //
-				RDFS.subPropertyOf, P_OPERAND);
-		isProperty(javaModel, P_CALL, C_INSTRUCTION, C_JVM_INSN);
-		isProperty(javaModel, P_LINE, C_INSTRUCTION, XSD.xint);
-		javaModel.add(C_INSTRUCTION, RDF.type, RDFS.Class);
-		javaModel.add(C_JVM_INSN, RDF.type, RDFS.Class);
-	}
-
-	private static void isProperty(OntModel m, Property prop, Resource sub, RDFNode obj, RDFNode... more) {
-		m.add(prop, RDF.type, RDF.Property);
-		if (sub != null) {
-			m.add(prop, RDFS.range, sub);
-		}
-		if (obj != null) {
-			m.add(prop, RDFS.domain, obj);
-		}
-		for (int i = 0; i < more.length; i += 2) {
-			m.add(prop, (Property) more[i], more[i + 1]);
-		}
-	}
-
-	public static Resource method(Model m, Resource owner, String memberName, String memberDesc) {
-		memberName = memberName.replaceAll("[<>]", "\\$");
-		// return m.node(owner, memberName + "/" + memberDesc);
-		Type type = Type.getType(memberDesc);
-		StringBuilder sb = new StringBuilder();
-		sb.append(memberName); // .re.replaceAll("[<>]", "-"));
-		if (type.getSort() == Type.METHOD) {
-			sb.append("(");
-			String sep = "";
-			for (Type t : type.getArgumentTypes()) {
-				sb.append(sep);
-				while (t.getSort() == Type.ARRAY) {
-					sb.append("A");
-					sb.append(t.getDimensions());
-					t = t.getElementType();
-				}
-				if (t.getSort() == Type.OBJECT) {
-					sb.append(t.getClassName());
-				} else {
-					sb.append(t.getClassName());
-				}
-				sep = ",";
-			}
-			sb.append(")");
-			type = type.getReturnType();
-		}
-
-		if (!memberName.equals("$init")) {
-			sb.append(":");
-			while (type.getSort() == Type.ARRAY) {
-				sb.append("A");
-				sb.append(type.getDimensions());
-				type = type.getElementType();
-			}
-			if (type.getSort() == Type.OBJECT) {
-				sb.append(type.getClassName());
-			} else {
-				sb.append(type.getClassName());
-			}
-		}
-		return IRIUtil.addPath(owner, sb.toString());
-		// + UriEncoding.percentEncodeIri(methodName,
-		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true)
-		// + UriEncoding.percentEncodeIri(methodDesc,
-		// JavaUtil.JAVA_EXTRA_URI_PATH_CHARS, true));
-	}
-
-	public static Resource opcode(int opcode) {
-		return javaModel.createResource(J + Printer.OPCODES[opcode].toLowerCase());
 	}
 }

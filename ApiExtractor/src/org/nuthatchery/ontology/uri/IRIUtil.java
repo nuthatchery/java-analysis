@@ -21,7 +21,7 @@ public class IRIUtil {
 		if (iriBase.endsWith("/") || iriBase.endsWith(":"))
 			return base.getModel().createResource(iriBase + path);
 		else
-			return base.getModel().createResource(iriBase + "/" + path);
+			return base.getModel().createResource(iriBase + "." + path);
 	}
 
 }

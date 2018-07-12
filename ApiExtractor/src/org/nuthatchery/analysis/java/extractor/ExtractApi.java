@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -29,6 +32,7 @@ import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.fuseki.embedded.FusekiServer;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ReadWrite;
@@ -54,21 +58,24 @@ import org.nuthatchery.ontology.basic.CommonVocabulary;
 import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
-	private static final String DB_PREFIX = "http://db.nuthatchery.org/java/";
+	private static final String DB_PREFIX = "https://db.nuthatchery.org/";
 	private static final List<String> DEFAULT_CLASSES = Arrays.asList("-m", "demo", "..", "../../../../../Test.class",
 			"../../../../../Test$1.class", "../../../../../Test$Bar.class", "../../../../../IMutablePosition.class");
 	private static int logLevel;
 	private static boolean demoMode = false;
+	private static boolean addGraphToDataset = false;
+	private static boolean addOntologyToDataset = false;
 	// "/home/anya/.m2/repository/com/lowagie/itext/2.1.5/itext-2.1.5.jar");
-	public static final Map<String, String> prefixMapping = new HashMap<>();
+	public static final Map<String, String> prefixMapping = new ConcurrentHashMap<>();
 	static {
 		prefixMapping.put("xsd", "http://www.w3.org/2001/XMLSchema#");
 		prefixMapping.put("rdf", RDF.uri);
 		prefixMapping.put("rdfs", RDFS.uri);
 		prefixMapping.put("j", JavaFacts.J);
+		prefixMapping.put("jvm", JavaFacts.JVM);
 		prefixMapping.put("m", MavenFacts.M);
-		prefixMapping.put("jType", JavaFacts.JT);
-		prefixMapping.put("jFlag", JavaFacts.JF);
+		// prefixMapping.put("jType", JavaFacts.JT);
+		// prefixMapping.put("jFlag", JavaFacts.JF);
 		prefixMapping.put("db", DB_PREFIX);
 		prefixMapping.put("nh", CommonVocabulary.NS);
 	}
@@ -78,17 +85,24 @@ public class ExtractApi {
 		List<Artifact> artifacts = FilesystemExplorer.explore(arg);
 		List<IOException> errors = new ArrayList<>();
 
+
 		artifacts.parallelStream().forEach((art) -> {
 			ProjectContext info = art.getInfo();
-			Model model = ModelFactory.createDefaultModel();
-			model.setNsPrefixes(prefixMapping);
-			Resource modelId = model.createResource(info.getRdfId());
-			String prefix = "java://";
-			model.setNsPrefix("", modelId.getURI() + "/");
 			String groupId = info.getGroupId();
 			String artifactId = info.getArtifactId();
 			String version = info.getVersion();
-
+			Model model = ModelFactory.createDefaultModel();
+			String mName = ExtractApi.DB_PREFIX + info.getRdfId() + "/";
+			try {
+				mName = new URI(mName).normalize().toString();
+			} catch (URISyntaxException e1) {
+				e1.printStackTrace();
+			}
+			Resource modelId = model.createResource(mName);
+			prefixMapping.put(artifactId + "-" + version, modelId.getURI());
+			model.setNsPrefixes(prefixMapping);
+			String prefix = "java://";
+			model.setNsPrefix("", modelId.getURI());
 			if (groupId != null) {
 				modelId.addLiteral(MavenFacts.groupId, groupId);
 			}
@@ -136,7 +150,9 @@ public class ExtractApi {
 					e.printStackTrace();
 				}
 			}
-			// dataset.addNamedModel(modelId.getURI(), model);
+			if (addGraphToDataset) {
+				dataset.addNamedModel(model.getNsPrefixURI(""), model);
+			}
 		});
 
 	}
@@ -191,7 +207,9 @@ public class ExtractApi {
 					System.err.println("    -v     verbose logging");
 					System.err.println("Special options: (take effect when encountered)");
 					System.err.println("    -m modelName    set model name for subsequent input");
-					System.err.println("    -d dbDir        set TDB database directory");
+					System.err.println("    -ont            add ontology to dataset");
+					System.err.println("    -mod            add models as named graphs in dataset");
+					System.err.println("    -db dbDir       set TDB database directory");
 					System.err.println("    -jung           starts a JFrame with a visualisation of the graph");
 					System.err.println("    -o outFile.trig set output TRiG file (when not using TDB)");
 					System.err.println("    -s              start server on http://localhost:3330/");
@@ -204,7 +222,13 @@ public class ExtractApi {
 						throw new IllegalArgumentException("-o option incompatible with -d");
 					outFile = it.next();
 					break;
-				case "-d":
+				case "-mod":
+					addGraphToDataset = true;
+					break;
+				case "-ont":
+					addOntologyToDataset = true;
+					break;
+				case "-db":
 					String dbDir = it.next();
 					dataset.close();
 					dataset = TDBFactory.createDataset(dbDir);
@@ -233,6 +257,7 @@ public class ExtractApi {
 
 			if (outFile != null) {
 				try (OutputStream output = new FileOutputStream(outFile)) {
+					dataset.getDefaultModel().setNsPrefixes(prefixMapping);
 					RDFDataMgr.write(output, dataset, Lang.TRIG); // throws java.nio.charset.MalformedInputException
 					// when
 					// dataset is not UTF-8?
@@ -275,21 +300,28 @@ public class ExtractApi {
 	}
 
 	private static void setupDataset(Dataset dataset) {
-		List<String> list = new ArrayList<>();
-		Model defaultModel = dataset.getDefaultModel();
-		for (Iterator<String> it = dataset.listNames(); it.hasNext(); list.add(it.next())) {
-			;
-		}
-		for (String s : list) {
-			System.out.println("setup: " + s);
-			defaultModel.add(defaultModel.createResource(s), RDFS.isDefinedBy, defaultModel.createResource(s));
-		}
 
-		// need to manually add prefixes and things
-		dataset.getDefaultModel().removeAll();
-		dataset.addNamedModel(JavaFacts.J, JavaFacts.javaModel);
-		dataset.addNamedModel(JavaFacts.JT, JavaFacts.javaTypesModel);
-		dataset.addNamedModel(MavenFacts.M, MavenFacts.mavenModel);
+		if (addOntologyToDataset) {
+			List<String> list = new ArrayList<>();
+			Model defaultModel = dataset.getDefaultModel();
+			for (Iterator<String> it = dataset.listNames(); it.hasNext(); list.add(it.next())) {
+				;
+			}
+			for (String s : list) {
+				System.out.println("setup: " + s);
+				defaultModel.add(defaultModel.createResource(s), RDFS.isDefinedBy, defaultModel.createResource(s));
+			}
+
+			// need to manually add prefixes and things
+			dataset.getDefaultModel().removeAll();
+			dataset.addNamedModel(JavaFacts.J, JavaFacts.javaModel);
+			// dataset.addNamedModel(JavaFacts.JT, JavaFacts.javaTypesModel);
+			dataset.addNamedModel(MavenFacts.M, MavenFacts.mavenModel);
+		}
+		else {
+			// force class loading / initialization
+			JavaFacts.javaModel.size();
+		}
 		dataset.getDefaultModel().setNsPrefixes(prefixMapping);
 	}
 }
