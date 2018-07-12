@@ -1,0 +1,28 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX jFlag: <https://model.nuthatchery.org/java/flags/>
+PREFIX jType: <https://model.nuthatchery.org/java/types/>
+PREFIX nh:    <https://model.nuthatchery.org/common/>
+PREFIX j:     <https://model.nuthatchery.org/java/>
+PREFIX jvm:   <https://model.nuthatchery.org/jvm/>
+PREFIX m:     <https://model.nuthatchery.org/maven/>
+PREFIX duck-0.4.2: <https://db.nuthatchery.org/org.example/duck/0.4.2/>
+PREFIX duck-0.4.3: <https://db.nuthatchery.org/org.example/duck/0.4.3/>
+PREFIX frog-0.3.7: <https://db.nuthatchery.org/org.example/frog/0.3.7/>
+PREFIX frog-0.3.8: <https://db.nuthatchery.org/org.example/frog/0.3.8/>
+PREFIX pond-0.3.0: <https://db.nuthatchery.org/org.example/pond/0.3.0/>
+PREFIX pond-0.3.1: <https://db.nuthatchery.org/org.example/pond/0.3.1/>
+PREFIX pond-0.3.2: <https://db.nuthatchery.org/org.example/pond/0.3.2/>
+PREFIX rubberduck-0.1.2: <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/>
+PREFIX rubberduck-0.1.3: <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/>
+
+CONSTRUCT {?s ?p ?o}
+WHERE {
+GRAPH pond-0.3.0: {
+	?s ?p ?o .
+	?s nh:declares j:field .
+	FILTER ( ?p = rdf:type || ?p = nh:declares || ?p = j:type ) .
+}
+}
+
