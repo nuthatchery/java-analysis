@@ -7,43 +7,43 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.rdf.api.BlankNode;
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDFTerm;
-import org.nuthatchery.ontology.Model;
-import org.nuthatchery.ontology.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
-import org.nuthatchery.ontology.standard.RdfVocabulary;
 
 
 public class AgcInstructions {
-	public static final String AGC_PREFIX = "https://model.nuthatchery.org/agc/block2/";
-	public static final Model AGC_MODEL = ModelFactory.getInstance().createModel(AGC_PREFIX);
-	public static final IRI K = AGC_MODEL.node("K");
-	public static final IRI KC = AGC_MODEL.node("KC");
-	public static final IRI ADDR_K10 = AGC_MODEL.node("address/10");
-	public static final IRI ADDR_K12 = AGC_MODEL.node("address/12");
-	public static final IRI ADDR_K12_FIXED = AGC_MODEL.node("address/12/fixed");
-	public static final IRI ADDR_KC = AGC_MODEL.node("address/9/io");
-	public static final IRI MEM_ANY = AGC_MODEL.node("memAny");
-	public static final IRI MEM_FIXED = AGC_MODEL.node("memFixed");
-	public static final IRI MEM_ERASABLE = AGC_MODEL.node("memErasable");
-	public static final IRI P_PARAM_NAME = AGC_MODEL.node("paramName");
-	public static final IRI P_PARAM_TYPE = AGC_MODEL.node("paramType");
-	public static final IRI P_MEM_AREA = AGC_MODEL.node("memArea");
-	public static final IRI P_OPERAND = AGC_MODEL.node("operand");
-	public static final IRI P_CALL = AGC_MODEL.node("call");
-	public static final IRI C_INSTRUCTION = AGC_MODEL.node("instruction");
-	public static final IRI C_BASIC = AGC_MODEL.node("basicInsn");
-	public static final IRI C_EXTRA = AGC_MODEL.node("extraInsn");
-	public static final IRI P_OPCODE_BASE = AGC_MODEL.node("opCode");
-	public static final IRI P_MOD1 = AGC_MODEL.node("mod1");
-	public static final IRI P_MOD2 = AGC_MODEL.node("mod2");
-	public static final IRI P_CALL_PSEUDO = AGC_MODEL.node("pseudoCall");
-	public static final IRI P_LABEL = AGC_MODEL.node("label");
-	public static final IRI P_CODE = AGC_MODEL.node("code");
-	public static final IRI P_COMMENT = AGC_MODEL.node("comment");
+	public static final String AGC = "https://model.nuthatchery.org/agc/block2/";
+	public static final OntModel AGC_MODEL = ModelFactory.createOntologyModel();
+	public static final Resource K = AGC_MODEL.createResource(AGC + "K");
+	public static final Resource KC = AGC_MODEL.createResource(AGC + "KC");
+	public static final Resource ADDR_K10 = AGC_MODEL.createResource(AGC + "address/10");
+	public static final Resource ADDR_K12 = AGC_MODEL.createResource(AGC + "address/12");
+	public static final Resource ADDR_K12_FIXED = AGC_MODEL.createResource(AGC + "address/12/fixed");
+	public static final Resource ADDR_KC = AGC_MODEL.createResource(AGC + "address/9/io");
+	public static final Resource MEM_ANY = AGC_MODEL.createResource(AGC + "memAny");
+	public static final Resource MEM_FIXED = AGC_MODEL.createResource(AGC + "memFixed");
+	public static final Resource MEM_ERASABLE = AGC_MODEL.createResource(AGC + "memErasable");
+	public static final Property P_PARAM_NAME = AGC_MODEL.createProperty(AGC + "paramName");
+	public static final Property P_PARAM_TYPE = AGC_MODEL.createProperty(AGC + "paramType");
+	public static final Property P_MEM_AREA = AGC_MODEL.createProperty(AGC + "memArea");
+	public static final Property P_OPERAND = AGC_MODEL.createProperty(AGC + "operand");
+	public static final Property P_CALL = AGC_MODEL.createProperty(AGC + "call");
+	public static final OntClass C_INSTRUCTION = AGC_MODEL.createClass(AGC + "instruction");
+	public static final OntClass C_BASIC = AGC_MODEL.createClass(AGC + "basicInsn");
+	public static final OntClass C_EXTRA = AGC_MODEL.createClass(AGC + "extraInsn");
+	public static final Property P_OPCODE_BASE = AGC_MODEL.createProperty(AGC + "opCode");
+	public static final Property P_MOD1 = AGC_MODEL.createProperty(AGC + "mod1");
+	public static final Property P_MOD2 = AGC_MODEL.createProperty(AGC + "mod2");
+	public static final Property P_CALL_PSEUDO = AGC_MODEL.createProperty(AGC + "pseudoCall");
+	public static final Property P_LABEL = AGC_MODEL.createProperty(AGC + "label");
+	public static final Property P_CODE = AGC_MODEL.createProperty(AGC + "code");
+	public static final Property P_COMMENT = AGC_MODEL.createProperty(AGC + "comment");
 
 	public static final Map<String, Instruction> opCodeMap = new HashMap<>();
 	public static final List<Instruction> instructions = new ArrayList<>();
@@ -133,11 +133,11 @@ public class AgcInstructions {
 
 	}
 
-	private static Instruction insnDesc(String name, String code, boolean extra, IRI arg, String desc) {
+	private static Instruction insnDesc(String name, String code, boolean extra, Resource arg, String desc) {
 		return insnDesc(name, code, extra, arg, MEM_ANY, desc);
 	}
 
-	private static Instruction insnDesc(String name, String code, boolean extra, IRI arg, IRI mem,
+	private static Instruction insnDesc(String name, String code, boolean extra, Resource arg, Resource mem,
 			String desc) {
 		String[] split = name.split(" ");
 		if (split.length < 1 || split.length > 2)
@@ -165,16 +165,16 @@ public class AgcInstructions {
 	static class Instruction implements Comparable<Instruction> {
 		public final String name;
 		public final String paramName;
-		public final IRI paramType;
+		public final Resource paramType;
 		public final int opCode;
 		public final boolean extraCode;
-		public final IRI memArea;
+		public final Resource memArea;
 		public final String desc;
 		public Instruction sameAs;
-		public RDFTerm sameAsArg;
-		IRI node;
+		public RDFNode sameAsArg;
+		Resource node;
 
-		public Instruction(String name, String paramName, IRI arg, int opCode, boolean extraCode, IRI memArea,
+		public Instruction(String name, String paramName, Resource arg, int opCode, boolean extraCode, Resource mem,
 				String desc) {
 			super();
 			this.name = name;
@@ -182,24 +182,24 @@ public class AgcInstructions {
 			this.paramType = arg;
 			this.opCode = opCode;
 			this.extraCode = extraCode;
-			this.memArea = memArea;
+			this.memArea = mem;
 			this.desc = desc;
-			this.node = AGC_MODEL.node(name);
-			AGC_MODEL.add(node, CommonVocabulary.P_NAME, AGC_MODEL.literal(name));
+			this.node = AGC_MODEL.createResource(AGC + name);
+			AGC_MODEL.add(node, CommonVocabulary.P_NAME, AGC_MODEL.createTypedLiteral(name));
 			if (extraCode) {
-				AGC_MODEL.add(node, RdfVocabulary.RDF_TYPE, C_BASIC);
+				AGC_MODEL.add(node, RDF.type, C_BASIC);
 			} else {
-				AGC_MODEL.add(node, RdfVocabulary.RDF_TYPE, C_EXTRA);
+				AGC_MODEL.add(node, RDF.type, C_EXTRA);
 			}
 			if (paramName != null) {
-				AGC_MODEL.add(node, P_PARAM_NAME, AGC_MODEL.literal(paramName));
+				AGC_MODEL.add(node, P_PARAM_NAME, AGC_MODEL.createTypedLiteral(paramName));
 			}
 			if (paramType != null) {
 				AGC_MODEL.add(node, P_PARAM_TYPE, paramType);
 			}
-			AGC_MODEL.add(node, P_OPCODE_BASE, AGC_MODEL.literal(opCode));
-			AGC_MODEL.add(node, P_MEM_AREA, memArea);
-			AGC_MODEL.add(node, CommonVocabulary.P_SHORT_DESC, AGC_MODEL.literal(desc));
+			AGC_MODEL.add(node, P_OPCODE_BASE, AGC_MODEL.createTypedLiteral(opCode));
+			AGC_MODEL.add(node, P_MEM_AREA, mem);
+			AGC_MODEL.add(node, CommonVocabulary.P_SHORT_DESC, AGC_MODEL.createTypedLiteral(desc));
 		}
 
 		@Override
@@ -212,11 +212,11 @@ public class AgcInstructions {
 			}
 			return String.format("%-10s %s%05o%-5s   %s %s", op, extraCode ? "*" : " ", opCode, offset,
 					sameAs != null ? sameAs.name : "",
-							sameAsArg != null ? sameAsArg.ntriplesString() : "");
+							sameAsArg != null ? sameAsArg.toString() : "");
 		}
 
 		private Instruction sameAs() {
-			BlankNode blank = AGC_MODEL.blank();
+			Resource blank = AGC_MODEL.createResource();
 			AGC_MODEL.add(node, P_CALL, blank);
 			AGC_MODEL.add(blank, P_CALL, sameAs.node);
 			if (sameAsArg != null) {
@@ -227,13 +227,13 @@ public class AgcInstructions {
 
 		public Instruction sameAs(String name, int arg) {
 			sameAs = opCodeMap.get(name);
-			sameAsArg = AGC_MODEL.literal(arg);
+			sameAsArg = AGC_MODEL.createTypedLiteral(arg);
 			return sameAs();
 		}
 
 		public Instruction sameAs(String name, String arg) {
 			sameAs = opCodeMap.get(name);
-			sameAsArg = AGC_MODEL.literal(arg);
+			sameAsArg = AGC_MODEL.createTypedLiteral(arg);
 			return sameAs();
 		}
 
@@ -261,12 +261,12 @@ public class AgcInstructions {
 
 	static class InstructionUse {
 		public final Instruction opcode;
-		public final BlankNodeOrIRI id;
+		public final Resource id;
 		public String operand = null;
 		public String mod1 = null;
 		public String mod2 = null;
 
-		public InstructionUse(Instruction opcode, BlankNodeOrIRI id) {
+		public InstructionUse(Instruction opcode, Resource id) {
 			super();
 			this.opcode = opcode;
 			this.id = id;

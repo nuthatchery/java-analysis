@@ -1,12 +1,13 @@
 package org.nuthatchery.analysis.java.extractor;
 
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDFTerm;
-import org.apache.commons.rdf.simple.Types;
-import org.nuthatchery.ontology.Model;
-import org.nuthatchery.ontology.ModelFactory;
-import org.nuthatchery.ontology.standard.RdfVocabulary;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.vocabulary.*;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
 
 /**
  * A class for MavenFacts For now this is just to test parsing the Maven POM
@@ -18,23 +19,23 @@ import org.nuthatchery.ontology.standard.RdfVocabulary;
  *
  */
 public abstract class MavenFacts {
-	public static final String mavenPrefix = "http://model.nuthatchery.org/maven/";
-	public static final String mavenProjectPrefix = mavenPrefix + "project/";
-	public static final Model mavenProjectModel = //
-			ModelFactory.getInstance().createModel(mavenProjectPrefix);
-	public static final IRI ARTIFACT_ID = mavenProjectModel.node("artifactID");
-	public static final IRI GROUP_ID = mavenProjectModel.node("groupID");
-	public static final IRI VERSION = mavenProjectModel.node("version");
-	public static final IRI DEPENDS_ON = mavenProjectModel.node("depends_on");
-	public static final IRI C_PROJECT = mavenProjectModel.node("");
-	public static final IRI MAVEN_COORDINATE = mavenProjectModel.node("Maven-coordinate");
-	public static final IRI PROJECT_OBJECT = mavenProjectModel.node("Maven-project-object");;
+	public static final String M = "https://model.nuthatchery.org/maven/";
+	public static final String MP = M + "project/";
+	public static final OntModel mavenModel = //
+			ModelFactory.createOntologyModel();
+	public static final Property artifactId = mavenModel.createProperty(M + "artifactId");
+	public static final Property groupId = mavenModel.createProperty(M + "groupId");
+	public static final Property version = mavenModel.createProperty(M + "version");
+	public static final Property dependsOn = mavenModel.createProperty(M + "dependsOn");
+	public static final OntClass MavenProject = mavenModel.createClass(M + "project");
+	public static final OntClass MavenCoordinate = mavenModel.createClass(M + "MavenCoordinate");
+	public static final Property hasCoord = mavenModel.createProperty(M + "hasCoordinate");;
 
 	static {
-		mavenProjectModel.add(C_PROJECT, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDFS_CLASS);
-		isProperty(mavenProjectModel, ARTIFACT_ID, C_PROJECT, Types.XSD_STRING);
-		isProperty(mavenProjectModel, GROUP_ID, C_PROJECT, Types.XSD_STRING);
-		isProperty(mavenProjectModel, VERSION, C_PROJECT, Types.XSD_STRING);
+		mavenModel.add(MavenProject, RDF.type, RDFS.Class);
+		isProperty(mavenModel, artifactId, MavenProject, XSD.xstring);
+		isProperty(mavenModel, groupId, MavenProject, XSD.xstring);
+		isProperty(mavenModel, version, MavenProject, XSD.xstring);
 	}
 
 	/**
@@ -57,16 +58,16 @@ public abstract class MavenFacts {
 	 *            property. E.g, with more = [subPropertyOf, foo], we'll also get
 	 *            (prop, subPropertyOf foo)
 	 */
-	private static void isProperty(Model m, IRI prop, BlankNodeOrIRI sub, RDFTerm obj, RDFTerm... more) {
-		m.add(prop, RdfVocabulary.RDF_TYPE, RdfVocabulary.RDF_PROPERTY);
+	private static void isProperty(Model m, Property prop, Resource sub, RDFNode obj, RDFNode... more) {
+		m.add(prop, RDF.type, RDF.Property);
 		if (sub != null) {
-			m.add(prop, RdfVocabulary.RDFS_RANGE, sub);
+			m.add(prop, RDFS.range, sub);
 		}
 		if (obj != null) {
-			m.add(prop, RdfVocabulary.RDFS_DOMAIN, obj);
+			m.add(prop, RDFS.domain, obj);
 		}
 		for (int i = 0; i < more.length; i += 2) {
-			m.add(prop, (IRI) more[i], more[i + 1]);
+			m.add(prop, (Property) more[i], more[i + 1]);
 		}
 	}
 

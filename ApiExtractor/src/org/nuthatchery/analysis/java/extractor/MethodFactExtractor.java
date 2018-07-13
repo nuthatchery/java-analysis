@@ -5,15 +5,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.rdf.api.BlankNode;
-import org.apache.commons.rdf.api.BlankNodeOrIRI;
-import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDFTerm;
+import org.apache.jena.rdf.model.AnonId;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 import org.nuthatchery.analysis.java.extractor.JavaUtil.ILogger;
-import org.nuthatchery.ontology.Model;
-import org.nuthatchery.ontology.Model.ListBuilder;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
-import org.nuthatchery.ontology.standard.RdfVocabulary;
+import org.nuthatchery.ontology.uri.IRIUtil;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -27,13 +27,13 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	private class VarUsage {
 		int lastLabel;
 		int varNum;
-		BlankNodeOrIRI varId;
+		Resource varId;
 	}
 
 	private static int count = 0;
-	private final IRI currentMethodId;
+	private final Resource currentMethodId;
 	private ListBuilder insnList;
-	private BlankNodeOrIRI currentInsn;
+	private Resource currentInsn;
 	private ILogger log;
 	private final Model model;
 	private final List<VarUsage> localVarUse = new ArrayList<>();
@@ -43,14 +43,16 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	 */
 	private final ClassFactExtractor parent;
 	private int startLine;
+	private final String prefix;
 
-	public MethodFactExtractor(ClassFactExtractor parent, IRI methodId, int access, String name, String desc,
+	public MethodFactExtractor(ClassFactExtractor parent, Resource memberId, int access, String name, String desc,
 			ILogger log) {
 		super(Opcodes.ASM6, parent.className, access, name, desc, null);
 		this.parent = parent;
-		this.currentMethodId = methodId;
+		this.currentMethodId = memberId;
 		this.log = log;
 		this.model = parent.getModel();
+		this.prefix = parent.prefix;
 		parent.currentLine = -1;
 	}
 
@@ -59,21 +61,22 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			throw new IllegalArgumentException();
 
 		insnList.add(currentInsn);
-		model.add(currentInsn, JavaFacts.P_CALL, JavaFacts.opcode(opcode));
+		currentInsn.addProperty(JavaFacts.P_PART_OF, currentMethodId);
+		currentInsn.addProperty(JavaFacts.insn, JavaFacts.opcode(opcode));
 		for (int i = 0; i < args.length; i += 2) {
-			if (args[i] instanceof IRI) {
-				IRI pred = (IRI) args[i];
-				RDFTerm obj;
-				if (args[i + 1] instanceof RDFTerm) {
-					obj = (RDFTerm) args[i + 1];
+			if (args[i] instanceof Property) {
+				Property pred = (Property) args[i];
+				RDFNode obj;
+				if (args[i + 1] instanceof RDFNode) {
+					obj = (RDFNode) args[i + 1];
 				} else {
-					obj = model.literal(args[i + 1]);
+					obj = model.createTypedLiteral(args[i + 1]);
 				}
-				model.add(currentInsn, pred, obj);
+				currentInsn.addProperty(pred, obj);
 			} else
 				throw new IllegalArgumentException();
 		}
-		currentInsn = model.blank(String.valueOf(count++));
+		currentInsn = model.createResource(AnonId.create(String.valueOf(count++)));
 	}
 
 	/**
@@ -140,7 +143,15 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-		log.warnf("unimplemented: MethodFactExtractor.visitAnnotation(desc=%s,visible=%b)%n", desc, visible);
+		// log.warnf("unimplemented:
+		// MethodFactExtractor.visitAnnotation(desc=%s,visible=%b)%n", desc, visible);
+		Resource anno = model.createResource();
+		model.add(currentMethodId, JavaFacts.P_ANNOTATION, anno);
+		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, prefix, desc));
+		// TODO: also traverse the annotation
+		// return new AnnotationVisitor(Opcodes.ASM6) {
+		//
+		// };
 		return super.visitAnnotation(desc, visible);
 	}
 
@@ -160,18 +171,18 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitCode() {
 		log.log("{");
 		parent.currentLine = -1;
-		currentInsn = model.blank();
-		insnList = model.list();
+		currentInsn = model.createResource();
+		insnList = new ListBuilder(model);
 		super.visitCode();
 	}
 
 	@Override
 	public void visitEnd() {
 		if (startLine != -1 && parent.currentLine != -1) {
-			BlankNode start = model.blank();
-			model.add(start, JavaFacts.P_LINE, model.literal(startLine));
-			BlankNode end = model.blank();
-			model.add(end, JavaFacts.P_LINE, model.literal(parent.currentLine));
+			Resource start = model.createResource();
+			model.add(start, JavaFacts.P_LINE, model.createTypedLiteral(startLine));
+			Resource end = model.createResource();
+			model.add(end, JavaFacts.P_LINE, model.createTypedLiteral(parent.currentLine));
 			model.add(currentMethodId, JavaFacts.P_SRC_START, start);
 			model.add(currentMethodId, JavaFacts.P_SRC_END, end);
 		}
@@ -187,7 +198,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String desc) {
 		log.log("# access field: " + JavaUtil.decodeDescriptor(owner, name, desc));
-		BlankNodeOrIRI memberId = parent.getMemberId(owner, name, desc);
+		Resource memberId = parent.getMemberId(owner, name, desc);
 		putInstruction(opcode, JavaFacts.P_OPERAND_MEMBER, memberId);
 		super.visitFieldInsn(opcode, owner, name, desc);
 	}
@@ -221,13 +232,13 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	@Override
 	public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
 		log.log("INVOKEDYNAMIC " + name + " [" + desc + "]" + " " + bsm + " " + Arrays.toString(bsmArgs));
-		putInstruction(Opcodes.INVOKEDYNAMIC, JavaFacts.P_OPERAND_MEMBER, parent.getMemberName(name, desc));
+		putInstruction(Opcodes.INVOKEDYNAMIC, JavaFacts.P_OPERAND_MEMBER, parent.getMemberId("", name, desc));
 		super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
 	}
 
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
-		BlankNode target = model.blank(label.toString());
+		Resource target = model.createResource(AnonId.create(label.toString()));
 		putInstruction(opcode, JavaFacts.P_OPERAND_LABEL, target);
 		if (opcode == Opcodes.JSR)
 			return;
@@ -237,18 +248,18 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	@Override
 	public void visitLabel(Label label) {
 		log.log(label + ":");
-		currentInsn = model.blank(label.toString());
+		currentInsn = model.createResource(AnonId.create(label.toString()));
 		labels.add(label);
 		super.visitLabel(label);
 	}
 
 	@Override
 	public void visitLdcInsn(Object cst) {
-		RDFTerm operand;
+		RDFNode operand;
 		if (cst instanceof Type) {
-			operand = JavaUtil.typeToId(model, (Type) cst);
+			operand = JavaUtil.typeToId(model, prefix, (Type) cst);
 		} else {
-			operand = model.literal(cst);
+			operand = model.createTypedLiteral(cst);
 		}
 		putInstruction(Opcodes.LDC);// , JavaFacts.P_OPERAND_CONSTANT, operand);
 		super.visitLdcInsn(cst);
@@ -256,13 +267,13 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitLineNumber(int line, Label start) {
-		log.log(parent.currentSource.peek() + ":" + line + "\tlabel=" + start);
+		log.log(parent.sourceStack.peek() + ":" + line + "\tlabel=" + start);
 		if (parent.currentLine == -1) {
 			startLine = line;
 		}
 		parent.currentLine = line;
-		currentInsn = model.blank(start.toString());
-		model.add(currentInsn, JavaFacts.P_LINE, model.literal(line));
+		currentInsn = model.createResource(AnonId.create(start.toString()));
+		model.add(currentInsn, JavaFacts.P_LINE, model.createTypedLiteral(line));
 		super.visitLineNumber(line, start);
 	}
 
@@ -276,11 +287,11 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			throw new IllegalStateException("wrong labels!");
 		for (VarUsage vu : localVarUse) {
 			if (vu.varNum == index && startIndex <= vu.lastLabel && endIndex > vu.lastLabel) {
-				model.add(vu.varId, CommonVocabulary.P_NAME, model.literal(name));
+				model.add(vu.varId, CommonVocabulary.P_NAME, model.createTypedLiteral(name));
 				model.add(vu.varId, JavaFacts.P_TYPE, //
-						JavaUtil.typeToId(model, Type.getType(desc)));
+						JavaUtil.typeToId(model, prefix, Type.getType(desc)));
 				model.add(vu.varId, CommonVocabulary.P_IDNAME, //
-						model.literal(name + ":" + desc + (signature == null ? "" : signature)));
+						model.createTypedLiteral(name + ":" + desc + (signature == null ? "" : signature)));
 			}
 		}
 		super.visitLocalVariable(name, desc, signature, start, end, index);
@@ -297,13 +308,15 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-		ListBuilder list = model.list();
+		ListBuilder list = new ListBuilder(model);
 		for (int i = 0; i < keys.length; i++) {
-			BlankNode node = model.blank();
-			model.add(node, JavaFacts.P_OPERAND_INT, model.literal(keys[i]));
-			model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(labels[i].toString()));
+			Resource node = model.createResource();
+			model.add(node, JavaFacts.P_OPERAND_INT, model.createTypedLiteral(keys[i]));
+			model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(labels[i].toString())));
 			list.add(node);
+
 		}
+
 		putInstruction(Opcodes.LOOKUPSWITCH, JavaFacts.P_OPERAND_LIST, list.build());
 
 		super.visitLookupSwitchInsn(dflt, keys, labels);
@@ -313,15 +326,15 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitMaxs(int maxStack, int maxLocals) {
 		log.logf("visitMaxs(maxStack=%d, maxLocals=%d)%n", //
 				maxStack, maxLocals);
-		model.add(currentMethodId, JavaFacts.P_MAX_STACK, model.literal(maxStack));
-		model.add(currentMethodId, JavaFacts.P_MAX_LOCALS, model.literal(maxLocals));
+		model.add(currentMethodId, JavaFacts.P_MAX_STACK, model.createTypedLiteral(maxStack));
+		model.add(currentMethodId, JavaFacts.P_MAX_LOCALS, model.createTypedLiteral(maxLocals));
 		super.visitMaxs(maxStack, maxLocals);
 	}
 
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-		IRI classId = JavaFacts.Types.object(model, owner);
-		IRI methodId = JavaFacts.method(model, classId, name, desc);
+		Resource classId = JavaFacts.Types.object(model, prefix, owner);
+		Resource methodId = JavaFacts.method(model, classId, name, desc);
 		// NOTE: Example of finding the types of actual arguments and formal
 		// parameters
 		Type objType = Type.getObjectType(owner);
@@ -365,7 +378,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			Object type = stackGetType(i);
 			if (type != null) {
 				// TODO
-				// model.add(model.literal("ACTUAL_ARGUMENT_TYPE" + i),
+				// model.add(model.createTypedLiteral("ACTUAL_ARGUMENT_TYPE" + i),
 				// JavaUtil.frameTypeToId(type));
 			}
 		}
@@ -379,14 +392,14 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		log.logf("visitMultiANewArrayInsn(desc=%s, dims=%d)%n", desc, dims);
 		putInstruction(Opcodes.MULTIANEWARRAY, JavaFacts.P_OPERAND_TYPE, //
 				JavaFacts.Types.array(model, dims, //
-						JavaFacts.Types.object(model, desc)));
+						JavaFacts.Types.object(model, prefix, desc)));
 		super.visitMultiANewArrayInsn(desc, dims);
 	}
 
 	@Override
 	public void visitParameter(String name, int access) {
 		log.logf("visitParameter(name=%s, access=%d)%n", name, access);
-		BlankNodeOrIRI paramId = model.node(currentMethodId, name);
+		Resource paramId = IRIUtil.addPath(currentMethodId, name);
 		model.add(currentMethodId, JavaFacts.PARAMETER, paramId);
 		parent.addFieldAccessFlags(access, paramId);
 
@@ -395,31 +408,30 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
-		log.warnf(
-				"unimplemented: MethodFactExtractor.visitParameterAnnotation(typePath=%s, desc=%s, visible=%b)%n", //
+		log.warnf("unimplemented: MethodFactExtractor.visitParameterAnnotation(typePath=%s, desc=%s, visible=%b)%n", //
 				parameter, desc, visible);
 		return super.visitParameterAnnotation(parameter, desc, visible);
 	}
 
 	@Override
 	public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-		ListBuilder list = model.list();
+		ListBuilder list = new ListBuilder(model);
 
-		BlankNode node = model.blank();
-		model.add(node, JavaFacts.P_OPERAND_INT, model.literal(min));
+		Resource node = model.createResource();
+		model.add(node, JavaFacts.P_OPERAND_INT, model.createTypedLiteral(min));
 		list.add(node);
 
-		node = model.blank();
-		model.add(node, JavaFacts.P_OPERAND_INT, model.literal(max));
+		node = model.createResource();
+		model.add(node, JavaFacts.P_OPERAND_INT, model.createTypedLiteral(max));
 		list.add(node);
 
-		node = model.blank();
-		model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(dflt.toString()));
+		node = model.createResource();
+		model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(dflt.toString())));
 		list.add(node);
 
 		for (Label label : labels) {
-			node = model.blank();
-			model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(label.toString()));
+			node = model.createResource();
+			model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(label.toString())));
 			list.add(node);
 		}
 		putInstruction(Opcodes.TABLESWITCH, JavaFacts.P_OPERAND_LIST, list.build());
@@ -437,19 +449,19 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-		ListBuilder list = model.list();
+		ListBuilder list = new ListBuilder(model);
 
-		BlankNode node = model.blank();
-		model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(start.toString()));
+		Resource node = model.createResource();
+		model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(start.toString())));
 		list.add(node);
 
-		node = model.blank();
-		model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(end.toString()));
+		node = model.createResource();
+		model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(end.toString())));
 		list.add(node);
 
-		node = model.blank();
-		model.add(node, JavaFacts.P_OPERAND_LABEL, model.blank(handler.toString()));
-		model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, type));
+		node = model.createResource();
+		model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(handler.toString())));
+		model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, prefix, type));
 		list.add(node);
 
 		model.add(currentMethodId, JavaFacts.P_TRY_CATCH_BLOCK, list.build());
@@ -468,7 +480,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
-		putInstruction(opcode, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, type));
+		putInstruction(opcode, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, prefix, type));
 		super.visitTypeInsn(opcode, type);
 	}
 
@@ -477,10 +489,11 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		VarUsage vu = new VarUsage();
 		vu.lastLabel = labels.size() - 1;
 		vu.varNum = var;
-		vu.varId = model.blank();
-		model.add(vu.varId, RdfVocabulary.RDF_VALUE, model.literal(var));
+		vu.varId = model.createResource();
+
+		model.add(vu.varId, RDF.value, model.createTypedLiteral(var));
 		if (super.locals != null && super.locals.size() > var) {
-			model.add(vu.varId, JavaFacts.P_TYPE, JavaUtil.frameTypeToId(model, super.locals.get(var)));
+			model.add(vu.varId, JavaFacts.P_TYPE, JavaUtil.frameTypeToId(model, prefix, super.locals.get(var)));
 		}
 		localVarUse.add(vu);
 		log.logf("visitVarInsn(opcode=%s, var=%d)%n", opcode, var);

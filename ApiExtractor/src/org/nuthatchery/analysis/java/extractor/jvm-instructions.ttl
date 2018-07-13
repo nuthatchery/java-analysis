@@ -1,0 +1,2536 @@
+@prefix jvm: <https://model.nuthatchery.org/jvm/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+jvm:aaload a jvm:Instruction ;
+    jvm:description "load onto the stack a reference from an array"^^xsd:string ;
+    jvm:expr "o = aload_a(a, i)" ;
+    jvm:mnemonic "aaload"^^xsd:string ;
+    jvm:opcode "32"^^xsd:hexBinary ;
+    jvm:opcodeNum "50"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:o ) ;
+    jvm:stackBefore ( jvm:a jvm:i ) ;
+    jvm:subInstrOf jvm:aload .
+
+jvm:aastore a jvm:Instruction ;
+    jvm:description "store into a reference in an array"^^xsd:string ;
+    jvm:expr "astore_a(a, i, o)" ;
+    jvm:mnemonic "aastore"^^xsd:string ;
+    jvm:opcode "53"^^xsd:hexBinary ;
+    jvm:opcodeNum "83"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:a jvm:i jvm:o ) ;
+    jvm:subInstrOf jvm:astore .
+
+jvm:aconst_null a jvm:Instruction ;
+    jvm:description "push a null reference onto the stack"^^xsd:string ;
+    jvm:expr "o2 = const_a(null)" ;
+    jvm:mnemonic "aconst_null"^^xsd:string ;
+    jvm:opcode "01"^^xsd:hexBinary ;
+    jvm:opcodeNum "1"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:aconst ;
+            jvm:o1 "null" ] ;
+    jvm:stackAfter ( jvm:o2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:aload_0 a jvm:Instruction ;
+    jvm:description "load a reference onto the stack from local variable 0"^^xsd:string ;
+    jvm:expr "o = load_a(0)" ;
+    jvm:mnemonic "aload_0"^^xsd:string ;
+    jvm:opcode "2a"^^xsd:hexBinary ;
+    jvm:opcodeNum "42"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:aload ;
+            jvm:v 0 ] ;
+    jvm:stackAfter ( jvm:o ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:aload_1 a jvm:Instruction ;
+    jvm:description "load a reference onto the stack from local variable 1"^^xsd:string ;
+    jvm:expr "o = load_a(1)" ;
+    jvm:mnemonic "aload_1"^^xsd:string ;
+    jvm:opcode "2b"^^xsd:hexBinary ;
+    jvm:opcodeNum "43"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:aload ;
+            jvm:v 1 ] ;
+    jvm:stackAfter ( jvm:o ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:aload_2 a jvm:Instruction ;
+    jvm:description "load a reference onto the stack from local variable 2"^^xsd:string ;
+    jvm:expr "o = load_a(2)" ;
+    jvm:mnemonic "aload_2"^^xsd:string ;
+    jvm:opcode "2c"^^xsd:hexBinary ;
+    jvm:opcodeNum "44"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:aload ;
+            jvm:v 2 ] ;
+    jvm:stackAfter ( jvm:o ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:aload_3 a jvm:Instruction ;
+    jvm:description "load a reference onto the stack from local variable 3"^^xsd:string ;
+    jvm:expr "o = load_a(3)" ;
+    jvm:mnemonic "aload_3"^^xsd:string ;
+    jvm:opcode "2d"^^xsd:hexBinary ;
+    jvm:opcodeNum "45"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:aload ;
+            jvm:v 3 ] ;
+    jvm:stackAfter ( jvm:o ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:anewarray a jvm:Instruction ;
+    jvm:description "create a new array of references of length count and component type identified by the class reference index (indexbyte1 << 8 + indexbyte2) in the constant pool"^^xsd:string ;
+    jvm:expr "arrayref = anewarray(count)" ;
+    jvm:mnemonic "anewarray"^^xsd:string ;
+    jvm:opcode "bd"^^xsd:hexBinary ;
+    jvm:opcodeNum "189"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "arrayref" ) ;
+    jvm:stackBefore ( "count" ) .
+
+jvm:areturn a jvm:Instruction ;
+    jvm:description "return a reference from a method"^^xsd:string ;
+    jvm:expr "return_a(o)" ;
+    jvm:mnemonic "areturn"^^xsd:string ;
+    jvm:opcode "b0"^^xsd:hexBinary ;
+    jvm:opcodeNum "176"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:o ) ;
+    jvm:subInstrOf jvm:return .
+
+jvm:arraylength a jvm:Instruction ;
+    jvm:description "get the length of an array"^^xsd:string ;
+    jvm:expr "length = arraylength(arrayref)" ;
+    jvm:mnemonic "arraylength"^^xsd:string ;
+    jvm:opcode "be"^^xsd:hexBinary ;
+    jvm:opcodeNum "190"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter ( "length" ) ;
+    jvm:stackBefore ( "arrayref" ) .
+
+jvm:astore_0 a jvm:Instruction ;
+    jvm:description "store a reference into local variable 0"^^xsd:string ;
+    jvm:expr "store_a(0, o)" ;
+    jvm:mnemonic "astore_0"^^xsd:string ;
+    jvm:opcode "4b"^^xsd:hexBinary ;
+    jvm:opcodeNum "75"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:astore ;
+            jvm:v 0 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:o ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:astore_1 a jvm:Instruction ;
+    jvm:description "store a reference into local variable 1"^^xsd:string ;
+    jvm:expr "store_a(1, o)" ;
+    jvm:mnemonic "astore_1"^^xsd:string ;
+    jvm:opcode "4c"^^xsd:hexBinary ;
+    jvm:opcodeNum "76"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:astore ;
+            jvm:v 1 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:o ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:astore_2 a jvm:Instruction ;
+    jvm:description "store a reference into local variable 2"^^xsd:string ;
+    jvm:expr "store_a(2, o)" ;
+    jvm:mnemonic "astore_2"^^xsd:string ;
+    jvm:opcode "4d"^^xsd:hexBinary ;
+    jvm:opcodeNum "77"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:astore ;
+            jvm:v 2 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:o ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:astore_3 a jvm:Instruction ;
+    jvm:description "store a reference into local variable 3"^^xsd:string ;
+    jvm:expr "store_a(3, o)" ;
+    jvm:mnemonic "astore_3"^^xsd:string ;
+    jvm:opcode "4e"^^xsd:hexBinary ;
+    jvm:opcodeNum "78"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:astore ;
+            jvm:v 3 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:o ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:athrow a jvm:Instruction ;
+    jvm:description "throws an error or exception (notice that the rest of the stack is cleared, leaving only a reference to the Throwable)"^^xsd:string ;
+    jvm:expr "(),objectref = athrow(objectref)" ;
+    jvm:mnemonic "athrow"^^xsd:string ;
+    jvm:opcode "bf"^^xsd:hexBinary ;
+    jvm:opcodeNum "191"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter [ rdf:first "()" ;
+            rdf:rest ( "objectref" ) ] ;
+    jvm:stackBefore ( "objectref" ) .
+
+jvm:baload a jvm:Instruction ;
+    jvm:description "load a byte or Boolean value from an array"^^xsd:string ;
+    jvm:expr "b = aload_b(a, i)" ;
+    jvm:mnemonic "baload"^^xsd:string ;
+    jvm:opcode "33"^^xsd:hexBinary ;
+    jvm:opcodeNum "51"^^xsd:int ;
+    jvm:operandType jvm:byte ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:b ) ;
+    jvm:stackBefore ( jvm:a jvm:i ) ;
+    jvm:subInstrOf jvm:aload .
+
+jvm:bastore a jvm:Instruction ;
+    jvm:description "store a byte or Boolean value into an array"^^xsd:string ;
+    jvm:expr "astore_b(a, i, b)" ;
+    jvm:mnemonic "bastore"^^xsd:string ;
+    jvm:opcode "54"^^xsd:hexBinary ;
+    jvm:opcodeNum "84"^^xsd:int ;
+    jvm:operandType jvm:byte ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:a jvm:i jvm:b ) ;
+    jvm:subInstrOf jvm:astore .
+
+jvm:bipush a jvm:Instruction ;
+    jvm:description "push a byte onto the stack as an integer value"^^xsd:string ;
+    jvm:expr "i = ipush_b(c, b)" ;
+    jvm:mnemonic "bipush"^^xsd:string ;
+    jvm:opcode "10"^^xsd:hexBinary ;
+    jvm:opcodeNum "16"^^xsd:int ;
+    jvm:operandType jvm:byte ;
+    jvm:params ( jvm:c ) ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore ( jvm:b ) ;
+    jvm:subInstrOf jvm:ipush .
+
+jvm:breakpoint a jvm:Instruction ;
+    jvm:description "reserved for breakpoints in Java debuggers; should not appear in any class file"^^xsd:string ;
+    jvm:expr "breakpoint()" ;
+    jvm:mnemonic "breakpoint"^^xsd:string ;
+    jvm:opcode "ca"^^xsd:hexBinary ;
+    jvm:opcodeNum "202"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter [ rdf:first "" ;
+            rdf:rest () ] ;
+    jvm:stackBefore "" .
+
+jvm:caload a jvm:Instruction ;
+    jvm:description "load a char from an array"^^xsd:string ;
+    jvm:expr "c = aload_c(a, i)" ;
+    jvm:mnemonic "caload"^^xsd:string ;
+    jvm:opcode "34"^^xsd:hexBinary ;
+    jvm:opcodeNum "52"^^xsd:int ;
+    jvm:operandType jvm:char ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:c ) ;
+    jvm:stackBefore ( jvm:a jvm:i ) ;
+    jvm:subInstrOf jvm:aload .
+
+jvm:castore a jvm:Instruction ;
+    jvm:description "store a char into an array"^^xsd:string ;
+    jvm:expr "astore_c(a, i, c)" ;
+    jvm:mnemonic "castore"^^xsd:string ;
+    jvm:opcode "55"^^xsd:hexBinary ;
+    jvm:opcodeNum "85"^^xsd:int ;
+    jvm:operandType jvm:char ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:a jvm:i jvm:c ) ;
+    jvm:subInstrOf jvm:astore .
+
+jvm:checkcast a jvm:Instruction ;
+    jvm:description "checks whether an objectref is of a certain type, the class reference of which is in the constant pool at index (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "objectref = checkcast(objectref)" ;
+    jvm:mnemonic "checkcast"^^xsd:string ;
+    jvm:opcode "c0"^^xsd:hexBinary ;
+    jvm:opcodeNum "192"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "objectref" ) ;
+    jvm:stackBefore ( "objectref" ) .
+
+jvm:d2f a jvm:Instruction ;
+    jvm:description "convert a double to a float"^^xsd:string ;
+    jvm:expr "f = 2_d(d)" ;
+    jvm:mnemonic "d2f"^^xsd:string ;
+    jvm:opcode "90"^^xsd:hexBinary ;
+    jvm:opcodeNum "144"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f ) ;
+    jvm:stackBefore ( jvm:d ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:d2i a jvm:Instruction ;
+    jvm:description "convert a double to an int"^^xsd:string ;
+    jvm:expr "i = 2_d(d)" ;
+    jvm:mnemonic "d2i"^^xsd:string ;
+    jvm:opcode "8e"^^xsd:hexBinary ;
+    jvm:opcodeNum "142"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore ( jvm:d ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:d2l a jvm:Instruction ;
+    jvm:description "convert a double to a long"^^xsd:string ;
+    jvm:expr "l = 2_d(d)" ;
+    jvm:mnemonic "d2l"^^xsd:string ;
+    jvm:opcode "8f"^^xsd:hexBinary ;
+    jvm:opcodeNum "143"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l ) ;
+    jvm:stackBefore ( jvm:d ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:dadd a jvm:Instruction ;
+    jvm:description "add two doubles"^^xsd:string ;
+    jvm:expr "d3 = add_d(d1, d2)" ;
+    jvm:mnemonic "dadd"^^xsd:string ;
+    jvm:opcode "63"^^xsd:hexBinary ;
+    jvm:opcodeNum "99"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d3 ) ;
+    jvm:stackBefore ( jvm:d1 jvm:d2 ) ;
+    jvm:subInstrOf jvm:add .
+
+jvm:daload a jvm:Instruction ;
+    jvm:description "load a double from an array"^^xsd:string ;
+    jvm:expr "d = aload_d(a, i)" ;
+    jvm:mnemonic "daload"^^xsd:string ;
+    jvm:opcode "31"^^xsd:hexBinary ;
+    jvm:opcodeNum "49"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d ) ;
+    jvm:stackBefore ( jvm:a jvm:i ) ;
+    jvm:subInstrOf jvm:aload .
+
+jvm:dastore a jvm:Instruction ;
+    jvm:description "store a double into an array"^^xsd:string ;
+    jvm:expr "astore_d(a, i, d)" ;
+    jvm:mnemonic "dastore"^^xsd:string ;
+    jvm:opcode "52"^^xsd:hexBinary ;
+    jvm:opcodeNum "82"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:a jvm:i jvm:d ) ;
+    jvm:subInstrOf jvm:astore .
+
+jvm:dcmpg a jvm:Instruction ;
+    jvm:description "compare two doubles"^^xsd:string ;
+    jvm:expr "d3 = cmp_d(d1, d2)" ;
+    jvm:mnemonic "dcmpg"^^xsd:string ;
+    jvm:opcode "98"^^xsd:hexBinary ;
+    jvm:opcodeNum "152"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d3 ) ;
+    jvm:stackBefore ( jvm:d1 jvm:d2 ) ;
+    jvm:subInstrOf jvm:cmp .
+
+jvm:dcmpl a jvm:Instruction ;
+    jvm:description "compare two doubles"^^xsd:string ;
+    jvm:expr "d3 = cmp_d(d1, d2)" ;
+    jvm:mnemonic "dcmpl"^^xsd:string ;
+    jvm:opcode "97"^^xsd:hexBinary ;
+    jvm:opcodeNum "151"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d3 ) ;
+    jvm:stackBefore ( jvm:d1 jvm:d2 ) ;
+    jvm:subInstrOf jvm:cmp .
+
+jvm:dconst_0 a jvm:Instruction ;
+    jvm:description "push the constant 0.0 (a double) onto the stack"^^xsd:string ;
+    jvm:expr "d2 = const_d(0)" ;
+    jvm:mnemonic "dconst_0"^^xsd:string ;
+    jvm:opcode "0e"^^xsd:hexBinary ;
+    jvm:opcodeNum "14"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:d1 0 ;
+            jvm:instruction jvm:dconst ] ;
+    jvm:stackAfter ( jvm:d2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:dconst_1 a jvm:Instruction ;
+    jvm:description "push the constant 1.0 (a double) onto the stack"^^xsd:string ;
+    jvm:expr "d2 = const_d(1)" ;
+    jvm:mnemonic "dconst_1"^^xsd:string ;
+    jvm:opcode "0f"^^xsd:hexBinary ;
+    jvm:opcodeNum "15"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:d1 1 ;
+            jvm:instruction jvm:dconst ] ;
+    jvm:stackAfter ( jvm:d2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:ddiv a jvm:Instruction ;
+    jvm:description "divide two doubles"^^xsd:string ;
+    jvm:expr "d3 = div_d(d1, d2)" ;
+    jvm:mnemonic "ddiv"^^xsd:string ;
+    jvm:opcode "6f"^^xsd:hexBinary ;
+    jvm:opcodeNum "111"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d3 ) ;
+    jvm:stackBefore ( jvm:d1 jvm:d2 ) ;
+    jvm:subInstrOf jvm:div .
+
+jvm:dload_0 a jvm:Instruction ;
+    jvm:description "load a double from local variable 0"^^xsd:string ;
+    jvm:expr "d = load_d(0)" ;
+    jvm:mnemonic "dload_0"^^xsd:string ;
+    jvm:opcode "26"^^xsd:hexBinary ;
+    jvm:opcodeNum "38"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:dload ;
+            jvm:v 0 ] ;
+    jvm:stackAfter ( jvm:d ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:dload_1 a jvm:Instruction ;
+    jvm:description "load a double from local variable 1"^^xsd:string ;
+    jvm:expr "d = load_d(1)" ;
+    jvm:mnemonic "dload_1"^^xsd:string ;
+    jvm:opcode "27"^^xsd:hexBinary ;
+    jvm:opcodeNum "39"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:dload ;
+            jvm:v 1 ] ;
+    jvm:stackAfter ( jvm:d ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:dload_2 a jvm:Instruction ;
+    jvm:description "load a double from local variable 2"^^xsd:string ;
+    jvm:expr "d = load_d(2)" ;
+    jvm:mnemonic "dload_2"^^xsd:string ;
+    jvm:opcode "28"^^xsd:hexBinary ;
+    jvm:opcodeNum "40"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:dload ;
+            jvm:v 2 ] ;
+    jvm:stackAfter ( jvm:d ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:dload_3 a jvm:Instruction ;
+    jvm:description "load a double from local variable 3"^^xsd:string ;
+    jvm:expr "d = load_d(3)" ;
+    jvm:mnemonic "dload_3"^^xsd:string ;
+    jvm:opcode "29"^^xsd:hexBinary ;
+    jvm:opcodeNum "41"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:dload ;
+            jvm:v 3 ] ;
+    jvm:stackAfter ( jvm:d ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:dmul a jvm:Instruction ;
+    jvm:description "multiply two doubles"^^xsd:string ;
+    jvm:expr "d3 = mul_d(d1, d2)" ;
+    jvm:mnemonic "dmul"^^xsd:string ;
+    jvm:opcode "6b"^^xsd:hexBinary ;
+    jvm:opcodeNum "107"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d3 ) ;
+    jvm:stackBefore ( jvm:d1 jvm:d2 ) ;
+    jvm:subInstrOf jvm:mul .
+
+jvm:dneg a jvm:Instruction ;
+    jvm:description "negate a double"^^xsd:string ;
+    jvm:expr "d2 = neg_d(d1)" ;
+    jvm:mnemonic "dneg"^^xsd:string ;
+    jvm:opcode "77"^^xsd:hexBinary ;
+    jvm:opcodeNum "119"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d2 ) ;
+    jvm:stackBefore ( jvm:d1 ) ;
+    jvm:subInstrOf jvm:neg .
+
+jvm:drem a jvm:Instruction ;
+    jvm:description "get the remainder from a division between two doubles"^^xsd:string ;
+    jvm:expr "d3 = rem_d(d1, d2)" ;
+    jvm:mnemonic "drem"^^xsd:string ;
+    jvm:opcode "73"^^xsd:hexBinary ;
+    jvm:opcodeNum "115"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d3 ) ;
+    jvm:stackBefore ( jvm:d1 jvm:d2 ) ;
+    jvm:subInstrOf jvm:rem .
+
+jvm:dreturn a jvm:Instruction ;
+    jvm:description "return a double from a method"^^xsd:string ;
+    jvm:expr "return_d(d)" ;
+    jvm:mnemonic "dreturn"^^xsd:string ;
+    jvm:opcode "af"^^xsd:hexBinary ;
+    jvm:opcodeNum "175"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:d ) ;
+    jvm:subInstrOf jvm:return .
+
+jvm:dstore_0 a jvm:Instruction ;
+    jvm:description "store a double into local variable 0"^^xsd:string ;
+    jvm:expr "store_d(0, d)" ;
+    jvm:mnemonic "dstore_0"^^xsd:string ;
+    jvm:opcode "47"^^xsd:hexBinary ;
+    jvm:opcodeNum "71"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:dstore ;
+            jvm:v 0 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:d ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:dstore_1 a jvm:Instruction ;
+    jvm:description "store a double into local variable 1"^^xsd:string ;
+    jvm:expr "store_d(1, d)" ;
+    jvm:mnemonic "dstore_1"^^xsd:string ;
+    jvm:opcode "48"^^xsd:hexBinary ;
+    jvm:opcodeNum "72"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:dstore ;
+            jvm:v 1 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:d ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:dstore_2 a jvm:Instruction ;
+    jvm:description "store a double into local variable 2"^^xsd:string ;
+    jvm:expr "store_d(2, d)" ;
+    jvm:mnemonic "dstore_2"^^xsd:string ;
+    jvm:opcode "49"^^xsd:hexBinary ;
+    jvm:opcodeNum "73"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:dstore ;
+            jvm:v 2 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:d ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:dstore_3 a jvm:Instruction ;
+    jvm:description "store a double into local variable 3"^^xsd:string ;
+    jvm:expr "store_d(3, d)" ;
+    jvm:mnemonic "dstore_3"^^xsd:string ;
+    jvm:opcode "4a"^^xsd:hexBinary ;
+    jvm:opcodeNum "74"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:dstore ;
+            jvm:v 3 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:d ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:dsub a jvm:Instruction ;
+    jvm:description "subtract a double from another"^^xsd:string ;
+    jvm:expr "d3 = sub_d(d1, d2)" ;
+    jvm:mnemonic "dsub"^^xsd:string ;
+    jvm:opcode "67"^^xsd:hexBinary ;
+    jvm:opcodeNum "103"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d3 ) ;
+    jvm:stackBefore ( jvm:d1 jvm:d2 ) ;
+    jvm:subInstrOf jvm:sub .
+
+jvm:dup a jvm:Instruction ;
+    jvm:description "duplicate the value on top of the stack"^^xsd:string ;
+    jvm:expr "value,value = dup(value)" ;
+    jvm:mnemonic "dup"^^xsd:string ;
+    jvm:opcode "59"^^xsd:hexBinary ;
+    jvm:opcodeNum "89"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter ( "value" "value" ) ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:dup2 a jvm:Instruction ;
+    jvm:description "duplicate top two stack words (two values, if value1 is not double nor long; a single value, if value1 is double or long)"^^xsd:string ;
+    jvm:expr "['value2', 'value1'],['value2', 'value1'] = dup2(['value2', 'value1'])" ;
+    jvm:mnemonic "dup2"^^xsd:string ;
+    jvm:opcode "5c"^^xsd:hexBinary ;
+    jvm:opcodeNum "92"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter ( ( "value2" "value1" ) ( "value2" "value1" ) ) ;
+    jvm:stackBefore ( ( "value2" "value1" ) ) .
+
+jvm:dup2_x1 a jvm:Instruction ;
+    jvm:description "duplicate two words and insert beneath third word (see explanation above)"^^xsd:string ;
+    jvm:expr "['value2', 'value1'],value3,['value2', 'value1'] = dup2_x1(value3, ['value2', 'value1'])" ;
+    jvm:mnemonic "dup2_x1"^^xsd:string ;
+    jvm:opcode "5d"^^xsd:hexBinary ;
+    jvm:opcodeNum "93"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter ( ( "value2" "value1" ) "value3" ( "value2" "value1" ) ) ;
+    jvm:stackBefore ( "value3" ( "value2" "value1" ) ) .
+
+jvm:dup2_x2 a jvm:Instruction ;
+    jvm:description "duplicate two words and insert beneath fourth word"^^xsd:string ;
+    jvm:expr "['value2', 'value1'],['value4', 'value3'],['value2', 'value1'] = dup2_x2(['value4', 'value3'], ['value2', 'value1'])" ;
+    jvm:mnemonic "dup2_x2"^^xsd:string ;
+    jvm:opcode "5e"^^xsd:hexBinary ;
+    jvm:opcodeNum "94"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter ( ( "value2" "value1" ) ( "value4" "value3" ) ( "value2" "value1" ) ) ;
+    jvm:stackBefore ( ( "value4" "value3" ) ( "value2" "value1" ) ) .
+
+jvm:dup_x1 a jvm:Instruction ;
+    jvm:description "insert a copy of the top value into the stack two values from the top. value1 and value2 must not be of the type double or long."^^xsd:string ;
+    jvm:expr "value1,value2,value1 = dup_x1(value2, value1)" ;
+    jvm:mnemonic "dup_x1"^^xsd:string ;
+    jvm:opcode "5a"^^xsd:hexBinary ;
+    jvm:opcodeNum "90"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter ( "value1" "value2" "value1" ) ;
+    jvm:stackBefore ( "value2" "value1" ) .
+
+jvm:dup_x2 a jvm:Instruction ;
+    jvm:description "insert a copy of the top value into the stack two (if value2 is double or long it takes up the entry of value3, too) or three values (if value2 is neither double nor long) from the top"^^xsd:string ;
+    jvm:expr "value1,value3,value2,value1 = dup_x2(value3, value2, value1)" ;
+    jvm:mnemonic "dup_x2"^^xsd:string ;
+    jvm:opcode "5b"^^xsd:hexBinary ;
+    jvm:opcodeNum "91"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter ( "value1" "value3" "value2" "value1" ) ;
+    jvm:stackBefore ( "value3" "value2" "value1" ) .
+
+jvm:f2d a jvm:Instruction ;
+    jvm:description "convert a float to a double"^^xsd:string ;
+    jvm:expr "d = 2_f(f)" ;
+    jvm:mnemonic "f2d"^^xsd:string ;
+    jvm:opcode "8d"^^xsd:hexBinary ;
+    jvm:opcodeNum "141"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d ) ;
+    jvm:stackBefore ( jvm:f ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:f2i a jvm:Instruction ;
+    jvm:description "convert a float to an int"^^xsd:string ;
+    jvm:expr "i = 2_f(f)" ;
+    jvm:mnemonic "f2i"^^xsd:string ;
+    jvm:opcode "8b"^^xsd:hexBinary ;
+    jvm:opcodeNum "139"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore ( jvm:f ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:f2l a jvm:Instruction ;
+    jvm:description "convert a float to a long"^^xsd:string ;
+    jvm:expr "l = 2_f(f)" ;
+    jvm:mnemonic "f2l"^^xsd:string ;
+    jvm:opcode "8c"^^xsd:hexBinary ;
+    jvm:opcodeNum "140"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l ) ;
+    jvm:stackBefore ( jvm:f ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:fadd a jvm:Instruction ;
+    jvm:description "add two floats"^^xsd:string ;
+    jvm:expr "f3 = add_f(f1, f2)" ;
+    jvm:mnemonic "fadd"^^xsd:string ;
+    jvm:opcode "62"^^xsd:hexBinary ;
+    jvm:opcodeNum "98"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f3 ) ;
+    jvm:stackBefore ( jvm:f1 jvm:f2 ) ;
+    jvm:subInstrOf jvm:add .
+
+jvm:faload a jvm:Instruction ;
+    jvm:description "load a float from an array"^^xsd:string ;
+    jvm:expr "f = aload_f(a, i)" ;
+    jvm:mnemonic "faload"^^xsd:string ;
+    jvm:opcode "30"^^xsd:hexBinary ;
+    jvm:opcodeNum "48"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f ) ;
+    jvm:stackBefore ( jvm:a jvm:i ) ;
+    jvm:subInstrOf jvm:aload .
+
+jvm:fastore a jvm:Instruction ;
+    jvm:description "store a float in an array"^^xsd:string ;
+    jvm:expr "astore_f(a, i, f)" ;
+    jvm:mnemonic "fastore"^^xsd:string ;
+    jvm:opcode "51"^^xsd:hexBinary ;
+    jvm:opcodeNum "81"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:a jvm:i jvm:f ) ;
+    jvm:subInstrOf jvm:astore .
+
+jvm:fcmpg a jvm:Instruction ;
+    jvm:description "compare two floats"^^xsd:string ;
+    jvm:expr "f3 = cmp_f(f1, f2)" ;
+    jvm:mnemonic "fcmpg"^^xsd:string ;
+    jvm:opcode "96"^^xsd:hexBinary ;
+    jvm:opcodeNum "150"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f3 ) ;
+    jvm:stackBefore ( jvm:f1 jvm:f2 ) ;
+    jvm:subInstrOf jvm:cmp .
+
+jvm:fcmpl a jvm:Instruction ;
+    jvm:description "compare two floats"^^xsd:string ;
+    jvm:expr "f3 = cmp_f(f1, f2)" ;
+    jvm:mnemonic "fcmpl"^^xsd:string ;
+    jvm:opcode "95"^^xsd:hexBinary ;
+    jvm:opcodeNum "149"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f3 ) ;
+    jvm:stackBefore ( jvm:f1 jvm:f2 ) ;
+    jvm:subInstrOf jvm:cmp .
+
+jvm:fconst_0 a jvm:Instruction ;
+    jvm:description "push 0.0f on the stack"^^xsd:string ;
+    jvm:expr "f2 = const_f(0)" ;
+    jvm:mnemonic "fconst_0"^^xsd:string ;
+    jvm:opcode "0b"^^xsd:hexBinary ;
+    jvm:opcodeNum "11"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:f1 0 ;
+            jvm:instruction jvm:fconst ] ;
+    jvm:stackAfter ( jvm:f2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:fconst_1 a jvm:Instruction ;
+    jvm:description "push 1.0f on the stack"^^xsd:string ;
+    jvm:expr "f2 = const_f(1)" ;
+    jvm:mnemonic "fconst_1"^^xsd:string ;
+    jvm:opcode "0c"^^xsd:hexBinary ;
+    jvm:opcodeNum "12"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:f1 1 ;
+            jvm:instruction jvm:fconst ] ;
+    jvm:stackAfter ( jvm:f2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:fconst_2 a jvm:Instruction ;
+    jvm:description "push 2.0f on the stack"^^xsd:string ;
+    jvm:expr "f2 = const_f(2)" ;
+    jvm:mnemonic "fconst_2"^^xsd:string ;
+    jvm:opcode "0d"^^xsd:hexBinary ;
+    jvm:opcodeNum "13"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:f1 2 ;
+            jvm:instruction jvm:fconst ] ;
+    jvm:stackAfter ( jvm:f2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:fdiv a jvm:Instruction ;
+    jvm:description "divide two floats"^^xsd:string ;
+    jvm:expr "f3 = div_f(f1, f2)" ;
+    jvm:mnemonic "fdiv"^^xsd:string ;
+    jvm:opcode "6e"^^xsd:hexBinary ;
+    jvm:opcodeNum "110"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f3 ) ;
+    jvm:stackBefore ( jvm:f1 jvm:f2 ) ;
+    jvm:subInstrOf jvm:div .
+
+jvm:fload_0 a jvm:Instruction ;
+    jvm:description "load a float value from local variable 0"^^xsd:string ;
+    jvm:expr "f = load_f(0)" ;
+    jvm:mnemonic "fload_0"^^xsd:string ;
+    jvm:opcode "22"^^xsd:hexBinary ;
+    jvm:opcodeNum "34"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:fload ;
+            jvm:v 0 ] ;
+    jvm:stackAfter ( jvm:f ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:fload_1 a jvm:Instruction ;
+    jvm:description "load a float value from local variable 1"^^xsd:string ;
+    jvm:expr "f = load_f(1)" ;
+    jvm:mnemonic "fload_1"^^xsd:string ;
+    jvm:opcode "23"^^xsd:hexBinary ;
+    jvm:opcodeNum "35"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:fload ;
+            jvm:v 1 ] ;
+    jvm:stackAfter ( jvm:f ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:fload_2 a jvm:Instruction ;
+    jvm:description "load a float value from local variable 2"^^xsd:string ;
+    jvm:expr "f = load_f(2)" ;
+    jvm:mnemonic "fload_2"^^xsd:string ;
+    jvm:opcode "24"^^xsd:hexBinary ;
+    jvm:opcodeNum "36"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:fload ;
+            jvm:v 2 ] ;
+    jvm:stackAfter ( jvm:f ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:fload_3 a jvm:Instruction ;
+    jvm:description "load a float value from local variable 3"^^xsd:string ;
+    jvm:expr "f = load_f(3)" ;
+    jvm:mnemonic "fload_3"^^xsd:string ;
+    jvm:opcode "25"^^xsd:hexBinary ;
+    jvm:opcodeNum "37"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:fload ;
+            jvm:v 3 ] ;
+    jvm:stackAfter ( jvm:f ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:fmul a jvm:Instruction ;
+    jvm:description "multiply two floats"^^xsd:string ;
+    jvm:expr "f3 = mul_f(f1, f2)" ;
+    jvm:mnemonic "fmul"^^xsd:string ;
+    jvm:opcode "6a"^^xsd:hexBinary ;
+    jvm:opcodeNum "106"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f3 ) ;
+    jvm:stackBefore ( jvm:f1 jvm:f2 ) ;
+    jvm:subInstrOf jvm:mul .
+
+jvm:fneg a jvm:Instruction ;
+    jvm:description "negate a float"^^xsd:string ;
+    jvm:expr "f2 = neg_f(f1)" ;
+    jvm:mnemonic "fneg"^^xsd:string ;
+    jvm:opcode "76"^^xsd:hexBinary ;
+    jvm:opcodeNum "118"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f2 ) ;
+    jvm:stackBefore ( jvm:f1 ) ;
+    jvm:subInstrOf jvm:neg .
+
+jvm:frem a jvm:Instruction ;
+    jvm:description "get the remainder from a division between two floats"^^xsd:string ;
+    jvm:expr "f3 = rem_f(f1, f2)" ;
+    jvm:mnemonic "frem"^^xsd:string ;
+    jvm:opcode "72"^^xsd:hexBinary ;
+    jvm:opcodeNum "114"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f3 ) ;
+    jvm:stackBefore ( jvm:f1 jvm:f2 ) ;
+    jvm:subInstrOf jvm:rem .
+
+jvm:freturn a jvm:Instruction ;
+    jvm:description "return a float"^^xsd:string ;
+    jvm:expr "return_f(f)" ;
+    jvm:mnemonic "freturn"^^xsd:string ;
+    jvm:opcode "ae"^^xsd:hexBinary ;
+    jvm:opcodeNum "174"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:f ) ;
+    jvm:subInstrOf jvm:return .
+
+jvm:fstore_0 a jvm:Instruction ;
+    jvm:description "store a float value into local variable 0"^^xsd:string ;
+    jvm:expr "store_f(0, f)" ;
+    jvm:mnemonic "fstore_0"^^xsd:string ;
+    jvm:opcode "43"^^xsd:hexBinary ;
+    jvm:opcodeNum "67"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:fstore ;
+            jvm:v 0 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:f ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:fstore_1 a jvm:Instruction ;
+    jvm:description "store a float value into local variable 1"^^xsd:string ;
+    jvm:expr "store_f(1, f)" ;
+    jvm:mnemonic "fstore_1"^^xsd:string ;
+    jvm:opcode "44"^^xsd:hexBinary ;
+    jvm:opcodeNum "68"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:fstore ;
+            jvm:v 1 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:f ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:fstore_2 a jvm:Instruction ;
+    jvm:description "store a float value into local variable 2"^^xsd:string ;
+    jvm:expr "store_f(2, f)" ;
+    jvm:mnemonic "fstore_2"^^xsd:string ;
+    jvm:opcode "45"^^xsd:hexBinary ;
+    jvm:opcodeNum "69"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:fstore ;
+            jvm:v 2 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:f ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:fstore_3 a jvm:Instruction ;
+    jvm:description "store a float value into local variable 3"^^xsd:string ;
+    jvm:expr "store_f(3, f)" ;
+    jvm:mnemonic "fstore_3"^^xsd:string ;
+    jvm:opcode "46"^^xsd:hexBinary ;
+    jvm:opcodeNum "70"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:fstore ;
+            jvm:v 3 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:f ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:fsub a jvm:Instruction ;
+    jvm:description "subtract two floats"^^xsd:string ;
+    jvm:expr "f3 = sub_f(f1, f2)" ;
+    jvm:mnemonic "fsub"^^xsd:string ;
+    jvm:opcode "66"^^xsd:hexBinary ;
+    jvm:opcodeNum "102"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f3 ) ;
+    jvm:stackBefore ( jvm:f1 jvm:f2 ) ;
+    jvm:subInstrOf jvm:sub .
+
+jvm:getfield a jvm:Instruction ;
+    jvm:description "get a field value of an object objectref, where the field is identified by field reference in the constant pool index (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "value = getfield(objectref)" ;
+    jvm:mnemonic "getfield"^^xsd:string ;
+    jvm:opcode "b4"^^xsd:hexBinary ;
+    jvm:opcodeNum "180"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "value" ) ;
+    jvm:stackBefore ( "objectref" ) .
+
+jvm:getstatic a jvm:Instruction ;
+    jvm:description "get a static field value of a class, where the field is identified by field reference in the constant pool index (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "value = getstatic()" ;
+    jvm:mnemonic "getstatic"^^xsd:string ;
+    jvm:opcode "b2"^^xsd:hexBinary ;
+    jvm:opcodeNum "178"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "value" ) ;
+    jvm:stackBefore () .
+
+jvm:goto a jvm:Instruction ;
+    jvm:description "goes to another instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "[no change] = goto()" ;
+    jvm:mnemonic "goto"^^xsd:string ;
+    jvm:opcode "a7"^^xsd:hexBinary ;
+    jvm:opcodeNum "167"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter ( "[no change]" ) ;
+    jvm:stackBefore "" .
+
+jvm:goto_w a jvm:Instruction ;
+    jvm:description "goes to another instruction at branchoffset (signed int constructed from unsigned bytes branchbyte1 << 24 + branchbyte2 << 16 + branchbyte3 << 8 + branchbyte4)"^^xsd:string ;
+    jvm:expr "[no change] = goto_w()" ;
+    jvm:mnemonic "goto_w"^^xsd:string ;
+    jvm:opcode "c8"^^xsd:hexBinary ;
+    jvm:opcodeNum "200"^^xsd:int ;
+    jvm:params ( "4: branchbyte1" "branchbyte2" "branchbyte3" "branchbyte4" ) ;
+    jvm:stackAfter ( "[no change]" ) ;
+    jvm:stackBefore "" .
+
+jvm:i2b a jvm:Instruction ;
+    jvm:description "convert an int into a byte"^^xsd:string ;
+    jvm:expr "b = 2_i(i)" ;
+    jvm:mnemonic "i2b"^^xsd:string ;
+    jvm:opcode "91"^^xsd:hexBinary ;
+    jvm:opcodeNum "145"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:b ) ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:i2c a jvm:Instruction ;
+    jvm:description "convert an int into a character"^^xsd:string ;
+    jvm:expr "c = 2_i(i)" ;
+    jvm:mnemonic "i2c"^^xsd:string ;
+    jvm:opcode "92"^^xsd:hexBinary ;
+    jvm:opcodeNum "146"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:c ) ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:i2d a jvm:Instruction ;
+    jvm:description "convert an int into a double"^^xsd:string ;
+    jvm:expr "d = 2_i(i)" ;
+    jvm:mnemonic "i2d"^^xsd:string ;
+    jvm:opcode "87"^^xsd:hexBinary ;
+    jvm:opcodeNum "135"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d ) ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:i2f a jvm:Instruction ;
+    jvm:description "convert an int into a float"^^xsd:string ;
+    jvm:expr "f = 2_i(i)" ;
+    jvm:mnemonic "i2f"^^xsd:string ;
+    jvm:opcode "86"^^xsd:hexBinary ;
+    jvm:opcodeNum "134"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f ) ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:i2l a jvm:Instruction ;
+    jvm:description "convert an int into a long"^^xsd:string ;
+    jvm:expr "l = 2_i(i)" ;
+    jvm:mnemonic "i2l"^^xsd:string ;
+    jvm:opcode "85"^^xsd:hexBinary ;
+    jvm:opcodeNum "133"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l ) ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:i2s a jvm:Instruction ;
+    jvm:description "convert an int into a short"^^xsd:string ;
+    jvm:expr "s = 2_i(i)" ;
+    jvm:mnemonic "i2s"^^xsd:string ;
+    jvm:opcode "93"^^xsd:hexBinary ;
+    jvm:opcodeNum "147"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:s ) ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:iadd a jvm:Instruction ;
+    jvm:description "add two ints"^^xsd:string ;
+    jvm:expr "i3 = add_i(i1, i2)" ;
+    jvm:mnemonic "iadd"^^xsd:string ;
+    jvm:opcode "60"^^xsd:hexBinary ;
+    jvm:opcodeNum "96"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:add .
+
+jvm:iaload a jvm:Instruction ;
+    jvm:description "load an int from an array"^^xsd:string ;
+    jvm:expr "i2 = aload_i(a, i1)" ;
+    jvm:mnemonic "iaload"^^xsd:string ;
+    jvm:opcode "2e"^^xsd:hexBinary ;
+    jvm:opcodeNum "46"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i2 ) ;
+    jvm:stackBefore ( jvm:a jvm:i1 ) ;
+    jvm:subInstrOf jvm:aload .
+
+jvm:iand a jvm:Instruction ;
+    jvm:description "perform a bitwise AND on two integers"^^xsd:string ;
+    jvm:expr "i3 = and_i(i1, i2)" ;
+    jvm:mnemonic "iand"^^xsd:string ;
+    jvm:opcode "7e"^^xsd:hexBinary ;
+    jvm:opcodeNum "126"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:and .
+
+jvm:iastore a jvm:Instruction ;
+    jvm:description "store an int into an array"^^xsd:string ;
+    jvm:expr "astore_i(a, i1, i2)" ;
+    jvm:mnemonic "iastore"^^xsd:string ;
+    jvm:opcode "4f"^^xsd:hexBinary ;
+    jvm:opcodeNum "79"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:a jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:astore .
+
+jvm:iconst_0 a jvm:Instruction ;
+    jvm:description "load the int value 0 onto the stack"^^xsd:string ;
+    jvm:expr "i2 = const_i(0)" ;
+    jvm:mnemonic "iconst_0"^^xsd:string ;
+    jvm:opcode "03"^^xsd:hexBinary ;
+    jvm:opcodeNum "3"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:i1 0 ;
+            jvm:instruction jvm:iconst ] ;
+    jvm:stackAfter ( jvm:i2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:iconst_1 a jvm:Instruction ;
+    jvm:description "load the int value 1 onto the stack"^^xsd:string ;
+    jvm:expr "i2 = const_i(1)" ;
+    jvm:mnemonic "iconst_1"^^xsd:string ;
+    jvm:opcode "04"^^xsd:hexBinary ;
+    jvm:opcodeNum "4"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:i1 1 ;
+            jvm:instruction jvm:iconst ] ;
+    jvm:stackAfter ( jvm:i2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:iconst_2 a jvm:Instruction ;
+    jvm:description "load the int value 2 onto the stack"^^xsd:string ;
+    jvm:expr "i2 = const_i(2)" ;
+    jvm:mnemonic "iconst_2"^^xsd:string ;
+    jvm:opcode "05"^^xsd:hexBinary ;
+    jvm:opcodeNum "5"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:i1 2 ;
+            jvm:instruction jvm:iconst ] ;
+    jvm:stackAfter ( jvm:i2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:iconst_3 a jvm:Instruction ;
+    jvm:description "load the int value 3 onto the stack"^^xsd:string ;
+    jvm:expr "i2 = const_i(3)" ;
+    jvm:mnemonic "iconst_3"^^xsd:string ;
+    jvm:opcode "06"^^xsd:hexBinary ;
+    jvm:opcodeNum "6"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:i1 3 ;
+            jvm:instruction jvm:iconst ] ;
+    jvm:stackAfter ( jvm:i2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:iconst_4 a jvm:Instruction ;
+    jvm:description "load the int value 4 onto the stack"^^xsd:string ;
+    jvm:expr "i2 = const_i(4)" ;
+    jvm:mnemonic "iconst_4"^^xsd:string ;
+    jvm:opcode "07"^^xsd:hexBinary ;
+    jvm:opcodeNum "7"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:i1 4 ;
+            jvm:instruction jvm:iconst ] ;
+    jvm:stackAfter ( jvm:i2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:iconst_5 a jvm:Instruction ;
+    jvm:description "load the int value 5 onto the stack"^^xsd:string ;
+    jvm:expr "i2 = const_i(5)" ;
+    jvm:mnemonic "iconst_5"^^xsd:string ;
+    jvm:opcode "08"^^xsd:hexBinary ;
+    jvm:opcodeNum "8"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:i1 5 ;
+            jvm:instruction jvm:iconst ] ;
+    jvm:stackAfter ( jvm:i2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:iconst_m1 a jvm:Instruction ;
+    jvm:description "load the int value −1 onto the stack"^^xsd:string ;
+    jvm:expr "i2 = const_i(-1)" ;
+    jvm:mnemonic "iconst_m1"^^xsd:string ;
+    jvm:opcode "02"^^xsd:hexBinary ;
+    jvm:opcodeNum "2"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:i1 -1 ;
+            jvm:instruction jvm:iconst ] ;
+    jvm:stackAfter ( jvm:i2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:idiv a jvm:Instruction ;
+    jvm:description "divide two integers"^^xsd:string ;
+    jvm:expr "i3 = div_i(i1, i2)" ;
+    jvm:mnemonic "idiv"^^xsd:string ;
+    jvm:opcode "6c"^^xsd:hexBinary ;
+    jvm:opcodeNum "108"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:div .
+
+jvm:if_acmpeq a jvm:Instruction ;
+    jvm:description "if references are equal, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "if_acmpeq(value1, value2)" ;
+    jvm:mnemonic "if_acmpeq"^^xsd:string ;
+    jvm:opcode "a5"^^xsd:hexBinary ;
+    jvm:opcodeNum "165"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value1" "value2" ) .
+
+jvm:if_acmpne a jvm:Instruction ;
+    jvm:description "if references are not equal, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "if_acmpne(value1, value2)" ;
+    jvm:mnemonic "if_acmpne"^^xsd:string ;
+    jvm:opcode "a6"^^xsd:hexBinary ;
+    jvm:opcodeNum "166"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value1" "value2" ) .
+
+jvm:if_icmpeq a jvm:Instruction ;
+    jvm:description "if ints are equal, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "if_icmpeq(value1, value2)" ;
+    jvm:mnemonic "if_icmpeq"^^xsd:string ;
+    jvm:opcode "9f"^^xsd:hexBinary ;
+    jvm:opcodeNum "159"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value1" "value2" ) .
+
+jvm:if_icmpge a jvm:Instruction ;
+    jvm:description "if value1 is greater than or equal to value2, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "if_icmpge(value1, value2)" ;
+    jvm:mnemonic "if_icmpge"^^xsd:string ;
+    jvm:opcode "a2"^^xsd:hexBinary ;
+    jvm:opcodeNum "162"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value1" "value2" ) .
+
+jvm:if_icmpgt a jvm:Instruction ;
+    jvm:description "if value1 is greater than value2, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "if_icmpgt(value1, value2)" ;
+    jvm:mnemonic "if_icmpgt"^^xsd:string ;
+    jvm:opcode "a3"^^xsd:hexBinary ;
+    jvm:opcodeNum "163"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value1" "value2" ) .
+
+jvm:if_icmple a jvm:Instruction ;
+    jvm:description "if value1 is less than or equal to value2, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "if_icmple(value1, value2)" ;
+    jvm:mnemonic "if_icmple"^^xsd:string ;
+    jvm:opcode "a4"^^xsd:hexBinary ;
+    jvm:opcodeNum "164"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value1" "value2" ) .
+
+jvm:if_icmplt a jvm:Instruction ;
+    jvm:description "if value1 is less than value2, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "if_icmplt(value1, value2)" ;
+    jvm:mnemonic "if_icmplt"^^xsd:string ;
+    jvm:opcode "a1"^^xsd:hexBinary ;
+    jvm:opcodeNum "161"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value1" "value2" ) .
+
+jvm:if_icmpne a jvm:Instruction ;
+    jvm:description "if ints are not equal, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "if_icmpne(value1, value2)" ;
+    jvm:mnemonic "if_icmpne"^^xsd:string ;
+    jvm:opcode "a0"^^xsd:hexBinary ;
+    jvm:opcodeNum "160"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value1" "value2" ) .
+
+jvm:ifeq a jvm:Instruction ;
+    jvm:description "if value is 0, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "ifeq(value)" ;
+    jvm:mnemonic "ifeq"^^xsd:string ;
+    jvm:opcode "99"^^xsd:hexBinary ;
+    jvm:opcodeNum "153"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:ifge a jvm:Instruction ;
+    jvm:description "if value is greater than or equal to 0, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "ifge(value)" ;
+    jvm:mnemonic "ifge"^^xsd:string ;
+    jvm:opcode "9c"^^xsd:hexBinary ;
+    jvm:opcodeNum "156"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:ifgt a jvm:Instruction ;
+    jvm:description "if value is greater than 0, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "ifgt(value)" ;
+    jvm:mnemonic "ifgt"^^xsd:string ;
+    jvm:opcode "9d"^^xsd:hexBinary ;
+    jvm:opcodeNum "157"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:ifle a jvm:Instruction ;
+    jvm:description "if value is less than or equal to 0, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "ifle(value)" ;
+    jvm:mnemonic "ifle"^^xsd:string ;
+    jvm:opcode "9e"^^xsd:hexBinary ;
+    jvm:opcodeNum "158"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:iflt a jvm:Instruction ;
+    jvm:description "if value is less than 0, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "iflt(value)" ;
+    jvm:mnemonic "iflt"^^xsd:string ;
+    jvm:opcode "9b"^^xsd:hexBinary ;
+    jvm:opcodeNum "155"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:ifne a jvm:Instruction ;
+    jvm:description "if value is not 0, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "ifne(value)" ;
+    jvm:mnemonic "ifne"^^xsd:string ;
+    jvm:opcode "9a"^^xsd:hexBinary ;
+    jvm:opcodeNum "154"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:ifnonnull a jvm:Instruction ;
+    jvm:description "if value is not null, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "ifnonnull(value)" ;
+    jvm:mnemonic "ifnonnull"^^xsd:string ;
+    jvm:opcode "c7"^^xsd:hexBinary ;
+    jvm:opcodeNum "199"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:ifnull a jvm:Instruction ;
+    jvm:description "if value is null, branch to instruction at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2)"^^xsd:string ;
+    jvm:expr "ifnull(value)" ;
+    jvm:mnemonic "ifnull"^^xsd:string ;
+    jvm:opcode "c6"^^xsd:hexBinary ;
+    jvm:opcodeNum "198"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:iinc a jvm:Instruction ;
+    jvm:description "increment local variable #index by signed byte const"^^xsd:string ;
+    jvm:expr "inc_i(v, c)" ;
+    jvm:mnemonic "iinc"^^xsd:string ;
+    jvm:opcode "84"^^xsd:hexBinary ;
+    jvm:opcodeNum "132"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params ( jvm:v jvm:c ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:inc .
+
+jvm:iload_0 a jvm:Instruction ;
+    jvm:description "load an int value from local variable 0"^^xsd:string ;
+    jvm:expr "i = load_i(0)" ;
+    jvm:mnemonic "iload_0"^^xsd:string ;
+    jvm:opcode "1a"^^xsd:hexBinary ;
+    jvm:opcodeNum "26"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:iload ;
+            jvm:v 0 ] ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:iload_1 a jvm:Instruction ;
+    jvm:description "load an int value from local variable 1"^^xsd:string ;
+    jvm:expr "i = load_i(1)" ;
+    jvm:mnemonic "iload_1"^^xsd:string ;
+    jvm:opcode "1b"^^xsd:hexBinary ;
+    jvm:opcodeNum "27"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:iload ;
+            jvm:v 1 ] ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:iload_2 a jvm:Instruction ;
+    jvm:description "load an int value from local variable 2"^^xsd:string ;
+    jvm:expr "i = load_i(2)" ;
+    jvm:mnemonic "iload_2"^^xsd:string ;
+    jvm:opcode "1c"^^xsd:hexBinary ;
+    jvm:opcodeNum "28"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:iload ;
+            jvm:v 2 ] ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:iload_3 a jvm:Instruction ;
+    jvm:description "load an int value from local variable 3"^^xsd:string ;
+    jvm:expr "i = load_i(3)" ;
+    jvm:mnemonic "iload_3"^^xsd:string ;
+    jvm:opcode "1d"^^xsd:hexBinary ;
+    jvm:opcodeNum "29"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:iload ;
+            jvm:v 3 ] ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:impdep1 a jvm:Instruction ;
+    jvm:description "reserved for implementation-dependent operations within debuggers; should not appear in any class file"^^xsd:string ;
+    jvm:expr "impdep1()" ;
+    jvm:mnemonic "impdep1"^^xsd:string ;
+    jvm:opcode "fe"^^xsd:hexBinary ;
+    jvm:opcodeNum "254"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter [ rdf:first "" ;
+            rdf:rest () ] ;
+    jvm:stackBefore "" .
+
+jvm:impdep2 a jvm:Instruction ;
+    jvm:description "reserved for implementation-dependent operations within debuggers; should not appear in any class file"^^xsd:string ;
+    jvm:expr "impdep2()" ;
+    jvm:mnemonic "impdep2"^^xsd:string ;
+    jvm:opcode "ff"^^xsd:hexBinary ;
+    jvm:opcodeNum "255"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter [ rdf:first "" ;
+            rdf:rest () ] ;
+    jvm:stackBefore "" .
+
+jvm:imul a jvm:Instruction ;
+    jvm:description "multiply two integers"^^xsd:string ;
+    jvm:expr "i3 = mul_i(i1, i2)" ;
+    jvm:mnemonic "imul"^^xsd:string ;
+    jvm:opcode "68"^^xsd:hexBinary ;
+    jvm:opcodeNum "104"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:mul .
+
+jvm:ineg a jvm:Instruction ;
+    jvm:description "negate int"^^xsd:string ;
+    jvm:expr "i2 = neg_i(i1)" ;
+    jvm:mnemonic "ineg"^^xsd:string ;
+    jvm:opcode "74"^^xsd:hexBinary ;
+    jvm:opcodeNum "116"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i2 ) ;
+    jvm:stackBefore ( jvm:i1 ) ;
+    jvm:subInstrOf jvm:neg .
+
+jvm:instanceof a jvm:Instruction ;
+    jvm:description "determines if an object objectref is of a given type, identified by class reference index in constant pool (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "result = instanceof(objectref)" ;
+    jvm:mnemonic "instanceof"^^xsd:string ;
+    jvm:opcode "c1"^^xsd:hexBinary ;
+    jvm:opcodeNum "193"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "result" ) ;
+    jvm:stackBefore ( "objectref" ) .
+
+jvm:invokedynamic a jvm:Instruction ;
+    jvm:description "invokes a dynamic method and puts the result on the stack (might be void); the method is identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "result = invokedynamic(['arg1', ['arg2...']])" ;
+    jvm:mnemonic "invokedynamic"^^xsd:string ;
+    jvm:opcode "ba"^^xsd:hexBinary ;
+    jvm:opcodeNum "186"^^xsd:int ;
+    jvm:params ( "4: indexbyte1" "indexbyte2" "0" "0" ) ;
+    jvm:stackAfter ( "result" ) ;
+    jvm:stackBefore ( ( "arg1" ( "arg2..." ) ) ) .
+
+jvm:invokeinterface a jvm:Instruction ;
+    jvm:description "invokes an interface method on object objectref and puts the result on the stack (might be void); the interface method is identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "result = invokeinterface(objectref, ['arg1', 'arg2', '...'])" ;
+    jvm:mnemonic "invokeinterface"^^xsd:string ;
+    jvm:opcode "b9"^^xsd:hexBinary ;
+    jvm:opcodeNum "185"^^xsd:int ;
+    jvm:params ( "4: indexbyte1" "indexbyte2" "count" "0" ) ;
+    jvm:stackAfter ( "result" ) ;
+    jvm:stackBefore ( "objectref" ( "arg1" "arg2" "..." ) ) .
+
+jvm:invokespecial a jvm:Instruction ;
+    jvm:description "invoke instance method on object objectref and puts the result on the stack (might be void); the method is identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "result = invokespecial(objectref, ['arg1', 'arg2', '...'])" ;
+    jvm:mnemonic "invokespecial"^^xsd:string ;
+    jvm:opcode "b7"^^xsd:hexBinary ;
+    jvm:opcodeNum "183"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "result" ) ;
+    jvm:stackBefore ( "objectref" ( "arg1" "arg2" "..." ) ) .
+
+jvm:invokestatic a jvm:Instruction ;
+    jvm:description "invoke a static method and puts the result on the stack (might be void); the method is identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "result = invokestatic(['arg1', 'arg2', '...'])" ;
+    jvm:mnemonic "invokestatic"^^xsd:string ;
+    jvm:opcode "b8"^^xsd:hexBinary ;
+    jvm:opcodeNum "184"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "result" ) ;
+    jvm:stackBefore ( ( "arg1" "arg2" "..." ) ) .
+
+jvm:invokevirtual a jvm:Instruction ;
+    jvm:description "invoke virtual method on object objectref and puts the result on the stack (might be void); the method is identified by method reference index in constant pool (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "result = invokevirtual(objectref, ['arg1', 'arg2', '...'])" ;
+    jvm:mnemonic "invokevirtual"^^xsd:string ;
+    jvm:opcode "b6"^^xsd:hexBinary ;
+    jvm:opcodeNum "182"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "result" ) ;
+    jvm:stackBefore ( "objectref" ( "arg1" "arg2" "..." ) ) .
+
+jvm:ior a jvm:Instruction ;
+    jvm:description "bitwise int OR"^^xsd:string ;
+    jvm:expr "i3 = or_i(i1, i2)" ;
+    jvm:mnemonic "ior"^^xsd:string ;
+    jvm:opcode "80"^^xsd:hexBinary ;
+    jvm:opcodeNum "128"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:or .
+
+jvm:irem a jvm:Instruction ;
+    jvm:description "logical int remainder"^^xsd:string ;
+    jvm:expr "i3 = rem_i(i1, i2)" ;
+    jvm:mnemonic "irem"^^xsd:string ;
+    jvm:opcode "70"^^xsd:hexBinary ;
+    jvm:opcodeNum "112"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:rem .
+
+jvm:ireturn a jvm:Instruction ;
+    jvm:description "return an integer from a method"^^xsd:string ;
+    jvm:expr "return_i(i)" ;
+    jvm:mnemonic "ireturn"^^xsd:string ;
+    jvm:opcode "ac"^^xsd:hexBinary ;
+    jvm:opcodeNum "172"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf jvm:return .
+
+jvm:ishl a jvm:Instruction ;
+    jvm:description "int shift left"^^xsd:string ;
+    jvm:expr "i3 = shl_i(i1, i2)" ;
+    jvm:mnemonic "ishl"^^xsd:string ;
+    jvm:opcode "78"^^xsd:hexBinary ;
+    jvm:opcodeNum "120"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:shl .
+
+jvm:ishr a jvm:Instruction ;
+    jvm:description "int arithmetic shift right"^^xsd:string ;
+    jvm:expr "i3 = shr_i(i1, i2)" ;
+    jvm:mnemonic "ishr"^^xsd:string ;
+    jvm:opcode "7a"^^xsd:hexBinary ;
+    jvm:opcodeNum "122"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:shr .
+
+jvm:istore_0 a jvm:Instruction ;
+    jvm:description "store int value into variable 0"^^xsd:string ;
+    jvm:expr "store_i(0, i)" ;
+    jvm:mnemonic "istore_0"^^xsd:string ;
+    jvm:opcode "3b"^^xsd:hexBinary ;
+    jvm:opcodeNum "59"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:istore ;
+            jvm:v 0 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:istore_1 a jvm:Instruction ;
+    jvm:description "store int value into variable 1"^^xsd:string ;
+    jvm:expr "store_i(1, i)" ;
+    jvm:mnemonic "istore_1"^^xsd:string ;
+    jvm:opcode "3c"^^xsd:hexBinary ;
+    jvm:opcodeNum "60"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:istore ;
+            jvm:v 1 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:istore_2 a jvm:Instruction ;
+    jvm:description "store int value into variable 2"^^xsd:string ;
+    jvm:expr "store_i(2, i)" ;
+    jvm:mnemonic "istore_2"^^xsd:string ;
+    jvm:opcode "3d"^^xsd:hexBinary ;
+    jvm:opcodeNum "61"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:istore ;
+            jvm:v 2 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:istore_3 a jvm:Instruction ;
+    jvm:description "store int value into variable 3"^^xsd:string ;
+    jvm:expr "store_i(3, i)" ;
+    jvm:mnemonic "istore_3"^^xsd:string ;
+    jvm:opcode "3e"^^xsd:hexBinary ;
+    jvm:opcodeNum "62"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:istore ;
+            jvm:v 3 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:isub a jvm:Instruction ;
+    jvm:description "int subtract"^^xsd:string ;
+    jvm:expr "i3 = sub_i(i1, i2)" ;
+    jvm:mnemonic "isub"^^xsd:string ;
+    jvm:opcode "64"^^xsd:hexBinary ;
+    jvm:opcodeNum "100"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:sub .
+
+jvm:iushr a jvm:Instruction ;
+    jvm:description "int logical shift right"^^xsd:string ;
+    jvm:expr "i3 = ushr_i(i1, i2)" ;
+    jvm:mnemonic "iushr"^^xsd:string ;
+    jvm:opcode "7c"^^xsd:hexBinary ;
+    jvm:opcodeNum "124"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:ushr .
+
+jvm:ixor a jvm:Instruction ;
+    jvm:description "int xor"^^xsd:string ;
+    jvm:expr "i3 = xor_i(i1, i2)" ;
+    jvm:mnemonic "ixor"^^xsd:string ;
+    jvm:opcode "82"^^xsd:hexBinary ;
+    jvm:opcodeNum "130"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i3 ) ;
+    jvm:stackBefore ( jvm:i1 jvm:i2 ) ;
+    jvm:subInstrOf jvm:xor .
+
+jvm:jsr a jvm:Instruction ;
+    jvm:description "jump to subroutine at branchoffset (signed short constructed from unsigned bytes branchbyte1 << 8 + branchbyte2) and place the return address on the stack"^^xsd:string ;
+    jvm:expr "address = jsr()" ;
+    jvm:mnemonic "jsr"^^xsd:string ;
+    jvm:opcode "a8"^^xsd:hexBinary ;
+    jvm:opcodeNum "168"^^xsd:int ;
+    jvm:params ( "2: branchbyte1" "branchbyte2" ) ;
+    jvm:stackAfter ( "address" ) ;
+    jvm:stackBefore () .
+
+jvm:jsr_w a jvm:Instruction ;
+    jvm:description "jump to subroutine at branchoffset (signed int constructed from unsigned bytes branchbyte1 << 24 + branchbyte2 << 16 + branchbyte3 << 8 + branchbyte4) and place the return address on the stack"^^xsd:string ;
+    jvm:expr "address = jsr_w()" ;
+    jvm:mnemonic "jsr_w"^^xsd:string ;
+    jvm:opcode "c9"^^xsd:hexBinary ;
+    jvm:opcodeNum "201"^^xsd:int ;
+    jvm:params ( "4: branchbyte1" "branchbyte2" "branchbyte3" "branchbyte4" ) ;
+    jvm:stackAfter ( "address" ) ;
+    jvm:stackBefore () .
+
+jvm:l2d a jvm:Instruction ;
+    jvm:description "convert a long to a double"^^xsd:string ;
+    jvm:expr "d = 2_l(l)" ;
+    jvm:mnemonic "l2d"^^xsd:string ;
+    jvm:opcode "8a"^^xsd:hexBinary ;
+    jvm:opcodeNum "138"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:d ) ;
+    jvm:stackBefore ( jvm:l ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:l2f a jvm:Instruction ;
+    jvm:description "convert a long to a float"^^xsd:string ;
+    jvm:expr "f = 2_l(l)" ;
+    jvm:mnemonic "l2f"^^xsd:string ;
+    jvm:opcode "89"^^xsd:hexBinary ;
+    jvm:opcodeNum "137"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:f ) ;
+    jvm:stackBefore ( jvm:l ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:l2i a jvm:Instruction ;
+    jvm:description "convert a long to a int"^^xsd:string ;
+    jvm:expr "i = 2_l(l)" ;
+    jvm:mnemonic "l2i"^^xsd:string ;
+    jvm:opcode "88"^^xsd:hexBinary ;
+    jvm:opcodeNum "136"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore ( jvm:l ) ;
+    jvm:subInstrOf <https://model.nuthatchery.org/jvm/2> .
+
+jvm:ladd a jvm:Instruction ;
+    jvm:description "add two longs"^^xsd:string ;
+    jvm:expr "l3 = add_l(l1, l2)" ;
+    jvm:mnemonic "ladd"^^xsd:string ;
+    jvm:opcode "61"^^xsd:hexBinary ;
+    jvm:opcodeNum "97"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:add .
+
+jvm:laload a jvm:Instruction ;
+    jvm:description "load a long from an array"^^xsd:string ;
+    jvm:expr "l = aload_l(a, i)" ;
+    jvm:mnemonic "laload"^^xsd:string ;
+    jvm:opcode "2f"^^xsd:hexBinary ;
+    jvm:opcodeNum "47"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l ) ;
+    jvm:stackBefore ( jvm:a jvm:i ) ;
+    jvm:subInstrOf jvm:aload .
+
+jvm:land a jvm:Instruction ;
+    jvm:description "bitwise AND of two longs"^^xsd:string ;
+    jvm:expr "l3 = and_l(l1, l2)" ;
+    jvm:mnemonic "land"^^xsd:string ;
+    jvm:opcode "7f"^^xsd:hexBinary ;
+    jvm:opcodeNum "127"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:and .
+
+jvm:lastore a jvm:Instruction ;
+    jvm:description "store a long to an array"^^xsd:string ;
+    jvm:expr "astore_l(a, i, l)" ;
+    jvm:mnemonic "lastore"^^xsd:string ;
+    jvm:opcode "50"^^xsd:hexBinary ;
+    jvm:opcodeNum "80"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:a jvm:i jvm:l ) ;
+    jvm:subInstrOf jvm:astore .
+
+jvm:lcmp a jvm:Instruction ;
+    jvm:description "push 0 if the two longs are the same, 1 if value1 is greater than value2, -1 otherwise"^^xsd:string ;
+    jvm:expr "l3 = cmp_l(l1, l2)" ;
+    jvm:mnemonic "lcmp"^^xsd:string ;
+    jvm:opcode "94"^^xsd:hexBinary ;
+    jvm:opcodeNum "148"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:cmp .
+
+jvm:lconst_0 a jvm:Instruction ;
+    jvm:description "push 0L (the number zero with type long) onto the stack"^^xsd:string ;
+    jvm:expr "l2 = const_l(0)" ;
+    jvm:mnemonic "lconst_0"^^xsd:string ;
+    jvm:opcode "09"^^xsd:hexBinary ;
+    jvm:opcodeNum "9"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lconst ;
+            jvm:l1 0 ] ;
+    jvm:stackAfter ( jvm:l2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:lconst_1 a jvm:Instruction ;
+    jvm:description "push 1L (the number one with type long) onto the stack"^^xsd:string ;
+    jvm:expr "l2 = const_l(1)" ;
+    jvm:mnemonic "lconst_1"^^xsd:string ;
+    jvm:opcode "0a"^^xsd:hexBinary ;
+    jvm:opcodeNum "10"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lconst ;
+            jvm:l1 1 ] ;
+    jvm:stackAfter ( jvm:l2 ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:const .
+
+jvm:ldc a jvm:Instruction ;
+    jvm:description "push a constant #index from a constant pool (String, int, float, Class, java.lang.invoke.MethodType, or java.lang.invoke.MethodHandle) onto the stack"^^xsd:string ;
+    jvm:expr "value = ldc()" ;
+    jvm:mnemonic "ldc"^^xsd:string ;
+    jvm:opcode "12"^^xsd:hexBinary ;
+    jvm:opcodeNum "18"^^xsd:int ;
+    jvm:params ( "1: index" ) ;
+    jvm:stackAfter ( "value" ) ;
+    jvm:stackBefore () .
+
+jvm:ldc2_w a jvm:Instruction ;
+    jvm:description "push a constant #index from a constant pool (double or long) onto the stack (wide index is constructed as indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "value = ldc2_w()" ;
+    jvm:mnemonic "ldc2_w"^^xsd:string ;
+    jvm:opcode "14"^^xsd:hexBinary ;
+    jvm:opcodeNum "20"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "value" ) ;
+    jvm:stackBefore () .
+
+jvm:ldc_w a jvm:Instruction ;
+    jvm:description "push a constant #index from a constant pool (String, int, float, Class, java.lang.invoke.MethodType, or java.lang.invoke.MethodHandle) onto the stack (wide index is constructed as indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "value = ldc_w()" ;
+    jvm:mnemonic "ldc_w"^^xsd:string ;
+    jvm:opcode "13"^^xsd:hexBinary ;
+    jvm:opcodeNum "19"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "value" ) ;
+    jvm:stackBefore () .
+
+jvm:ldiv a jvm:Instruction ;
+    jvm:description "divide two longs"^^xsd:string ;
+    jvm:expr "l3 = div_l(l1, l2)" ;
+    jvm:mnemonic "ldiv"^^xsd:string ;
+    jvm:opcode "6d"^^xsd:hexBinary ;
+    jvm:opcodeNum "109"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:div .
+
+jvm:lload_0 a jvm:Instruction ;
+    jvm:description "load a long value from a local variable 0"^^xsd:string ;
+    jvm:expr "l = load_l(0)" ;
+    jvm:mnemonic "lload_0"^^xsd:string ;
+    jvm:opcode "1e"^^xsd:hexBinary ;
+    jvm:opcodeNum "30"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lload ;
+            jvm:v 0 ] ;
+    jvm:stackAfter ( jvm:l ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:lload_1 a jvm:Instruction ;
+    jvm:description "load a long value from a local variable 1"^^xsd:string ;
+    jvm:expr "l = load_l(1)" ;
+    jvm:mnemonic "lload_1"^^xsd:string ;
+    jvm:opcode "1f"^^xsd:hexBinary ;
+    jvm:opcodeNum "31"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lload ;
+            jvm:v 1 ] ;
+    jvm:stackAfter ( jvm:l ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:lload_2 a jvm:Instruction ;
+    jvm:description "load a long value from a local variable 2"^^xsd:string ;
+    jvm:expr "l = load_l(2)" ;
+    jvm:mnemonic "lload_2"^^xsd:string ;
+    jvm:opcode "20"^^xsd:hexBinary ;
+    jvm:opcodeNum "32"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lload ;
+            jvm:v 2 ] ;
+    jvm:stackAfter ( jvm:l ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:lload_3 a jvm:Instruction ;
+    jvm:description "load a long value from a local variable 3"^^xsd:string ;
+    jvm:expr "l = load_l(3)" ;
+    jvm:mnemonic "lload_3"^^xsd:string ;
+    jvm:opcode "21"^^xsd:hexBinary ;
+    jvm:opcodeNum "33"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lload ;
+            jvm:v 3 ] ;
+    jvm:stackAfter ( jvm:l ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:lmul a jvm:Instruction ;
+    jvm:description "multiply two longs"^^xsd:string ;
+    jvm:expr "l3 = mul_l(l1, l2)" ;
+    jvm:mnemonic "lmul"^^xsd:string ;
+    jvm:opcode "69"^^xsd:hexBinary ;
+    jvm:opcodeNum "105"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:mul .
+
+jvm:lneg a jvm:Instruction ;
+    jvm:description "negate a long"^^xsd:string ;
+    jvm:expr "l2 = neg_l(l1)" ;
+    jvm:mnemonic "lneg"^^xsd:string ;
+    jvm:opcode "75"^^xsd:hexBinary ;
+    jvm:opcodeNum "117"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l2 ) ;
+    jvm:stackBefore ( jvm:l1 ) ;
+    jvm:subInstrOf jvm:neg .
+
+jvm:lookupswitch a jvm:Instruction ;
+    jvm:description "a target address is looked up from a table using a key and execution continues from the instruction at that address"^^xsd:string ;
+    jvm:expr "lookupswitch(key)" ;
+    jvm:mnemonic "lookupswitch"^^xsd:string ;
+    jvm:opcode "ab"^^xsd:hexBinary ;
+    jvm:opcodeNum "171"^^xsd:int ;
+    jvm:params ( "8+: <0–3 bytes padding>" "defaultbyte1" "defaultbyte2" "defaultbyte3" "defaultbyte4" "npairs1" "npairs2" "npairs3" "npairs4" "match-offset pairs..." ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "key" ) .
+
+jvm:lor a jvm:Instruction ;
+    jvm:description "bitwise OR of two longs"^^xsd:string ;
+    jvm:expr "l3 = or_l(l1, l2)" ;
+    jvm:mnemonic "lor"^^xsd:string ;
+    jvm:opcode "81"^^xsd:hexBinary ;
+    jvm:opcodeNum "129"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:or .
+
+jvm:lrem a jvm:Instruction ;
+    jvm:description "remainder of division of two longs"^^xsd:string ;
+    jvm:expr "l3 = rem_l(l1, l2)" ;
+    jvm:mnemonic "lrem"^^xsd:string ;
+    jvm:opcode "71"^^xsd:hexBinary ;
+    jvm:opcodeNum "113"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:rem .
+
+jvm:lreturn a jvm:Instruction ;
+    jvm:description "return a long value"^^xsd:string ;
+    jvm:expr "return_l(l)" ;
+    jvm:mnemonic "lreturn"^^xsd:string ;
+    jvm:opcode "ad"^^xsd:hexBinary ;
+    jvm:opcodeNum "173"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:l ) ;
+    jvm:subInstrOf jvm:return .
+
+jvm:lshl a jvm:Instruction ;
+    jvm:description "bitwise shift left of a long value1 by int value2 positions"^^xsd:string ;
+    jvm:expr "l3 = shl_l(l1, l2)" ;
+    jvm:mnemonic "lshl"^^xsd:string ;
+    jvm:opcode "79"^^xsd:hexBinary ;
+    jvm:opcodeNum "121"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:shl .
+
+jvm:lshr a jvm:Instruction ;
+    jvm:description "bitwise shift right of a long value1 by int value2 positions"^^xsd:string ;
+    jvm:expr "l3 = shr_l(l1, l2)" ;
+    jvm:mnemonic "lshr"^^xsd:string ;
+    jvm:opcode "7b"^^xsd:hexBinary ;
+    jvm:opcodeNum "123"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:shr .
+
+jvm:lstore_0 a jvm:Instruction ;
+    jvm:description "store a long value in a local variable 0"^^xsd:string ;
+    jvm:expr "store_l(0, l)" ;
+    jvm:mnemonic "lstore_0"^^xsd:string ;
+    jvm:opcode "3f"^^xsd:hexBinary ;
+    jvm:opcodeNum "63"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lstore ;
+            jvm:v 0 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:l ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:lstore_1 a jvm:Instruction ;
+    jvm:description "store a long value in a local variable 1"^^xsd:string ;
+    jvm:expr "store_l(1, l)" ;
+    jvm:mnemonic "lstore_1"^^xsd:string ;
+    jvm:opcode "40"^^xsd:hexBinary ;
+    jvm:opcodeNum "64"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lstore ;
+            jvm:v 1 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:l ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:lstore_2 a jvm:Instruction ;
+    jvm:description "store a long value in a local variable 2"^^xsd:string ;
+    jvm:expr "store_l(2, l)" ;
+    jvm:mnemonic "lstore_2"^^xsd:string ;
+    jvm:opcode "41"^^xsd:hexBinary ;
+    jvm:opcodeNum "65"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lstore ;
+            jvm:v 2 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:l ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:lstore_3 a jvm:Instruction ;
+    jvm:description "store a long value in a local variable 3"^^xsd:string ;
+    jvm:expr "store_l(3, l)" ;
+    jvm:mnemonic "lstore_3"^^xsd:string ;
+    jvm:opcode "42"^^xsd:hexBinary ;
+    jvm:opcodeNum "66"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:sameAs [ jvm:instruction jvm:lstore ;
+            jvm:v 3 ] ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:l ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:lsub a jvm:Instruction ;
+    jvm:description "subtract two longs"^^xsd:string ;
+    jvm:expr "l3 = sub_l(l1, l2)" ;
+    jvm:mnemonic "lsub"^^xsd:string ;
+    jvm:opcode "65"^^xsd:hexBinary ;
+    jvm:opcodeNum "101"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:sub .
+
+jvm:lushr a jvm:Instruction ;
+    jvm:description "bitwise shift right of a long value1 by int value2 positions, unsigned"^^xsd:string ;
+    jvm:expr "l3 = ushr_l(l1, l2)" ;
+    jvm:mnemonic "lushr"^^xsd:string ;
+    jvm:opcode "7d"^^xsd:hexBinary ;
+    jvm:opcodeNum "125"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:ushr .
+
+jvm:lxor a jvm:Instruction ;
+    jvm:description "bitwise XOR of two longs"^^xsd:string ;
+    jvm:expr "l3 = xor_l(l1, l2)" ;
+    jvm:mnemonic "lxor"^^xsd:string ;
+    jvm:opcode "83"^^xsd:hexBinary ;
+    jvm:opcodeNum "131"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:l3 ) ;
+    jvm:stackBefore ( jvm:l1 jvm:l2 ) ;
+    jvm:subInstrOf jvm:xor .
+
+jvm:monitorenter a jvm:Instruction ;
+    jvm:description "enter monitor for object (\"grab the lock\" – start of synchronized() section)"^^xsd:string ;
+    jvm:expr "monitorenter(objectref)" ;
+    jvm:mnemonic "monitorenter"^^xsd:string ;
+    jvm:opcode "c2"^^xsd:hexBinary ;
+    jvm:opcodeNum "194"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "objectref" ) .
+
+jvm:monitorexit a jvm:Instruction ;
+    jvm:description "exit monitor for object (\"release the lock\" – end of synchronized() section)"^^xsd:string ;
+    jvm:expr "monitorexit(objectref)" ;
+    jvm:mnemonic "monitorexit"^^xsd:string ;
+    jvm:opcode "c3"^^xsd:hexBinary ;
+    jvm:opcodeNum "195"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "objectref" ) .
+
+jvm:multianewarray a jvm:Instruction ;
+    jvm:description "create a new array of dimensions dimensions of type identified by class reference in constant pool index (indexbyte1 << 8 + indexbyte2); the sizes of each dimension is identified by count1, [count2, etc.]"^^xsd:string ;
+    jvm:expr "arrayref = multianewarray(count1, ['count2', '...'])" ;
+    jvm:mnemonic "multianewarray"^^xsd:string ;
+    jvm:opcode "c5"^^xsd:hexBinary ;
+    jvm:opcodeNum "197"^^xsd:int ;
+    jvm:params ( "3: indexbyte1" "indexbyte2" "dimensions" ) ;
+    jvm:stackAfter ( "arrayref" ) ;
+    jvm:stackBefore ( "count1" ( "count2" "..." ) ) .
+
+jvm:new a jvm:Instruction ;
+    jvm:description "create new object of type identified by class reference in constant pool index (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "objectref = new()" ;
+    jvm:mnemonic "new"^^xsd:string ;
+    jvm:opcode "bb"^^xsd:hexBinary ;
+    jvm:opcodeNum "187"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter ( "objectref" ) ;
+    jvm:stackBefore () .
+
+jvm:newarray a jvm:Instruction ;
+    jvm:description "create new array with count elements of primitive type identified by atype"^^xsd:string ;
+    jvm:expr "arrayref = newarray(count)" ;
+    jvm:mnemonic "newarray"^^xsd:string ;
+    jvm:opcode "bc"^^xsd:hexBinary ;
+    jvm:opcodeNum "188"^^xsd:int ;
+    jvm:params ( "1: atype" ) ;
+    jvm:stackAfter ( "arrayref" ) ;
+    jvm:stackBefore ( "count" ) .
+
+jvm:nop a jvm:Instruction ;
+    jvm:description "perform no operation"^^xsd:string ;
+    jvm:expr "nop()" ;
+    jvm:mnemonic "nop"^^xsd:string ;
+    jvm:opcode "00"^^xsd:hexBinary ;
+    jvm:opcodeNum "0"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter [ rdf:first "" ;
+            rdf:rest () ] ;
+    jvm:stackBefore "" .
+
+jvm:o1 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:objectRef .
+
+jvm:pop a jvm:Instruction ;
+    jvm:description "discard the top value on the stack"^^xsd:string ;
+    jvm:expr "pop(value)" ;
+    jvm:mnemonic "pop"^^xsd:string ;
+    jvm:opcode "57"^^xsd:hexBinary ;
+    jvm:opcodeNum "87"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:pop2 a jvm:Instruction ;
+    jvm:description "discard the top two values on the stack (or one value, if it is a double or long)"^^xsd:string ;
+    jvm:expr "pop2(['value2', 'value1'])" ;
+    jvm:mnemonic "pop2"^^xsd:string ;
+    jvm:opcode "58"^^xsd:hexBinary ;
+    jvm:opcodeNum "88"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( ( "value2" "value1" ) ) .
+
+jvm:putfield a jvm:Instruction ;
+    jvm:description "set field to value in an object objectref, where the field is identified by a field reference index in constant pool (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "putfield(objectref, value)" ;
+    jvm:mnemonic "putfield"^^xsd:string ;
+    jvm:opcode "b5"^^xsd:hexBinary ;
+    jvm:opcodeNum "181"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "objectref" "value" ) .
+
+jvm:putstatic a jvm:Instruction ;
+    jvm:description "set static field to value in a class, where the field is identified by a field reference index in constant pool (indexbyte1 << 8 + indexbyte2)"^^xsd:string ;
+    jvm:expr "putstatic(value)" ;
+    jvm:mnemonic "putstatic"^^xsd:string ;
+    jvm:opcode "b3"^^xsd:hexBinary ;
+    jvm:opcodeNum "179"^^xsd:int ;
+    jvm:params ( "2: indexbyte1" "indexbyte2" ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "value" ) .
+
+jvm:ret a jvm:Instruction ;
+    jvm:description "continue execution from address taken from a local variable #index (the asymmetry with jsr is intentional)"^^xsd:string ;
+    jvm:expr "ret()" ;
+    jvm:mnemonic "ret"^^xsd:string ;
+    jvm:opcode "a9"^^xsd:hexBinary ;
+    jvm:opcodeNum "169"^^xsd:int ;
+    jvm:params ( "1: index" ) ;
+    jvm:stackAfter [ rdf:first "" ;
+            rdf:rest () ] ;
+    jvm:stackBefore "" .
+
+jvm:saload a jvm:Instruction ;
+    jvm:description "load short from array"^^xsd:string ;
+    jvm:expr "s = aload_s(a, i)" ;
+    jvm:mnemonic "saload"^^xsd:string ;
+    jvm:opcode "35"^^xsd:hexBinary ;
+    jvm:opcodeNum "53"^^xsd:int ;
+    jvm:operandType jvm:short ;
+    jvm:params () ;
+    jvm:stackAfter ( jvm:s ) ;
+    jvm:stackBefore ( jvm:a jvm:i ) ;
+    jvm:subInstrOf jvm:aload .
+
+jvm:sastore a jvm:Instruction ;
+    jvm:description "store short to array"^^xsd:string ;
+    jvm:expr "astore_s(a, i, s)" ;
+    jvm:mnemonic "sastore"^^xsd:string ;
+    jvm:opcode "56"^^xsd:hexBinary ;
+    jvm:opcodeNum "86"^^xsd:int ;
+    jvm:operandType jvm:short ;
+    jvm:params () ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:a jvm:i jvm:s ) ;
+    jvm:subInstrOf jvm:astore .
+
+jvm:sipush a jvm:Instruction ;
+    jvm:description "push a short onto the stack as an integer value"^^xsd:string ;
+    jvm:expr "i = ipush_s(c, s)" ;
+    jvm:mnemonic "sipush"^^xsd:string ;
+    jvm:opcode "11"^^xsd:hexBinary ;
+    jvm:opcodeNum "17"^^xsd:int ;
+    jvm:operandType jvm:short ;
+    jvm:params ( jvm:c ) ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore ( jvm:s ) ;
+    jvm:subInstrOf jvm:ipush .
+
+jvm:swap a jvm:Instruction ;
+    jvm:description "swaps two top words on the stack (note that value1 and value2 must not be double or long)"^^xsd:string ;
+    jvm:expr "value1,value2 = swap(value2, value1)" ;
+    jvm:mnemonic "swap"^^xsd:string ;
+    jvm:opcode "5f"^^xsd:hexBinary ;
+    jvm:opcodeNum "95"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter ( "value1" "value2" ) ;
+    jvm:stackBefore ( "value2" "value1" ) .
+
+jvm:tableswitch a jvm:Instruction ;
+    jvm:description "continue execution from an address in the table at offset index"^^xsd:string ;
+    jvm:expr "tableswitch(index)" ;
+    jvm:mnemonic "tableswitch"^^xsd:string ;
+    jvm:opcode "aa"^^xsd:hexBinary ;
+    jvm:opcodeNum "170"^^xsd:int ;
+    jvm:params ( "16+: [0–3 bytes padding]" "defaultbyte1" "defaultbyte2" "defaultbyte3" "defaultbyte4" "lowbyte1" "lowbyte2" "lowbyte3" "lowbyte4" "highbyte1" "highbyte2" "highbyte3" "highbyte4" "jump offsets..." ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( "index" ) .
+
+jvm:wide a jvm:Instruction ;
+    jvm:description "execute opcode, where opcode is either iload, fload, aload, lload, dload, istore, fstore, astore, lstore, dstore, or ret, but assume the index is 16 bit; or execute iinc, where the index is 16 bits and the constant to increment by is a signed 16 bit short"^^xsd:string ;
+    jvm:expr "same = wide()" ;
+    jvm:mnemonic "wide"^^xsd:string ;
+    jvm:opcode "c4"^^xsd:hexBinary ;
+    jvm:opcodeNum "196"^^xsd:int ;
+    jvm:params ( "3/5: opcode" "indexbyte1" "indexbyte2or iinc" "indexbyte1" "indexbyte2" "countbyte1" "countbyte2" ) ;
+    jvm:stackAfter ( "same" ) ;
+    jvm:stackBefore "" .
+
+jvm:o2 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:objectRef .
+
+jvm:b a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:byte .
+
+jvm:dload a jvm:Instruction ;
+    jvm:description "load a double value from a local variable #index"^^xsd:string ;
+    jvm:expr "d = load_d(v)" ;
+    jvm:mnemonic "dload"^^xsd:string ;
+    jvm:opcode "18"^^xsd:hexBinary ;
+    jvm:opcodeNum "24"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter ( jvm:d ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:dstore a jvm:Instruction ;
+    jvm:description "store a double value into a local variable #index"^^xsd:string ;
+    jvm:expr "store_d(v, d)" ;
+    jvm:mnemonic "dstore"^^xsd:string ;
+    jvm:opcode "39"^^xsd:hexBinary ;
+    jvm:opcodeNum "57"^^xsd:int ;
+    jvm:operandType jvm:double ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:d ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:fload a jvm:Instruction ;
+    jvm:description "load a float value from a local variable #index"^^xsd:string ;
+    jvm:expr "f = load_f(v)" ;
+    jvm:mnemonic "fload"^^xsd:string ;
+    jvm:opcode "17"^^xsd:hexBinary ;
+    jvm:opcodeNum "23"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter ( jvm:f ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:fstore a jvm:Instruction ;
+    jvm:description "store a float value into a local variable #index"^^xsd:string ;
+    jvm:expr "store_f(v, f)" ;
+    jvm:mnemonic "fstore"^^xsd:string ;
+    jvm:opcode "38"^^xsd:hexBinary ;
+    jvm:opcodeNum "56"^^xsd:int ;
+    jvm:operandType jvm:float ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:f ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:iload a jvm:Instruction ;
+    jvm:description "load an int value from a local variable #index"^^xsd:string ;
+    jvm:expr "i = load_i(v)" ;
+    jvm:mnemonic "iload"^^xsd:string ;
+    jvm:opcode "15"^^xsd:hexBinary ;
+    jvm:opcodeNum "21"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter ( jvm:i ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:istore a jvm:Instruction ;
+    jvm:description "store int value into variable #index"^^xsd:string ;
+    jvm:expr "store_i(v, i)" ;
+    jvm:mnemonic "istore"^^xsd:string ;
+    jvm:opcode "36"^^xsd:hexBinary ;
+    jvm:opcodeNum "54"^^xsd:int ;
+    jvm:operandType jvm:int ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:i ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:lload a jvm:Instruction ;
+    jvm:description "load a long value from a local variable #index"^^xsd:string ;
+    jvm:expr "l = load_l(v)" ;
+    jvm:mnemonic "lload"^^xsd:string ;
+    jvm:opcode "16"^^xsd:hexBinary ;
+    jvm:opcodeNum "22"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter ( jvm:l ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:lstore a jvm:Instruction ;
+    jvm:description "store a long value in a local variable #index"^^xsd:string ;
+    jvm:expr "store_l(v, l)" ;
+    jvm:mnemonic "lstore"^^xsd:string ;
+    jvm:opcode "37"^^xsd:hexBinary ;
+    jvm:opcodeNum "55"^^xsd:int ;
+    jvm:operandType jvm:long ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:l ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:s a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:short .
+
+jvm:return a jvm:Instruction ;
+    jvm:description "return void from method"^^xsd:string ;
+    jvm:expr "() = return()" ;
+    jvm:mnemonic "return"^^xsd:string ;
+    jvm:opcode "b1"^^xsd:hexBinary ;
+    jvm:opcodeNum "177"^^xsd:int ;
+    jvm:params () ;
+    jvm:stackAfter [ rdf:first "()" ;
+            rdf:rest () ] ;
+    jvm:stackBefore () .
+
+jvm:c a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:byte,
+        jvm:char .
+
+jvm:d3 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:double .
+
+jvm:f3 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:float .
+
+jvm:d1 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:double .
+
+jvm:f1 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:float .
+
+jvm:d2 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:double .
+
+jvm:f2 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:float .
+
+jvm:i3 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:int .
+
+jvm:v a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:variable .
+
+jvm:aload a jvm:Instruction ;
+    jvm:description "load a reference onto the stack from a local variable #index"^^xsd:string ;
+    jvm:expr "o = load_a(v)" ;
+    jvm:mnemonic "aload"^^xsd:string ;
+    jvm:opcode "19"^^xsd:hexBinary ;
+    jvm:opcodeNum "25"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter ( jvm:o ) ;
+    jvm:stackBefore () ;
+    jvm:subInstrOf jvm:load .
+
+jvm:astore a jvm:Instruction ;
+    jvm:description "store a reference into a local variable #index"^^xsd:string ;
+    jvm:expr "store_a(v, o)" ;
+    jvm:mnemonic "astore"^^xsd:string ;
+    jvm:opcode "3a"^^xsd:hexBinary ;
+    jvm:opcodeNum "58"^^xsd:int ;
+    jvm:operandType jvm:objectRef ;
+    jvm:params ( jvm:v ) ;
+    jvm:stackAfter () ;
+    jvm:stackBefore ( jvm:o ) ;
+    jvm:subInstrOf jvm:store .
+
+jvm:l3 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:long .
+
+jvm:l1 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:long .
+
+jvm:o a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:objectRef .
+
+jvm:i1 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:int .
+
+jvm:l2 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:long .
+
+jvm:a a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:arrayRef .
+
+jvm:d a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:double .
+
+jvm:f a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:float .
+
+jvm:l a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:long .
+
+jvm:i2 a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:int .
+
+jvm:i a jvm:Variable ;
+    jvm:foo.bar.baz-a--b--c--d jvm:int .
+

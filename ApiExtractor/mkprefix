@@ -1,0 +1,1 @@
+ls ../examples/|sed -Ee 's;(.*)-(.*);PREFIX \1-\2: <https://db.nuthatchery.org/org/example/\1/\2/>;'

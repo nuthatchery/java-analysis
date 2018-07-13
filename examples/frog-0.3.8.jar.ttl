@@ -1,0 +1,155 @@
+@prefix :      <https://db.nuthatchery.org/org.example/frog/0.3.8/> .
+@prefix jvm:   <https://model.nuthatchery.org/jvm/> .
+@prefix frog-0.3.8: <https://db.nuthatchery.org/org.example/frog/0.3.8/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix nh:    <https://model.nuthatchery.org/common/> .
+@prefix j:     <https://model.nuthatchery.org/java/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix pond-0.3.0: <https://db.nuthatchery.org/org.example/pond/0.3.0/> .
+@prefix m:     <https://model.nuthatchery.org/maven/> .
+@prefix db:    <https://db.nuthatchery.org/> .
+
+<maven://org.slf4j/slf4j-simple/1.7.25>
+        a       m:MavenCoordinate .
+
+frog-0.3.8:  a           m:project ;
+        m:artifactId     "frog" ;
+        m:groupId        "org.example" ;
+        m:hasCoordinate  <maven://org.example/frog/0.3.8> ;
+        m:version        "0.3.8" .
+
+<java://org/example/frog/Frog>
+        a                 j:ref ;
+        rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> .
+
+<java://org/example/frog/Frog.jumpLength-double>
+        rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.jumpLength-double> .
+
+<https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.jumpLength-double>
+        a            nh:def ;
+        nh:declares  j:field ;
+        nh:idName    "org/example/frog/Frog.jumpLength:D" ;
+        nh:name      "jumpLength" ;
+        j:hasAccess  j:private ;
+        j:memberOf   <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> ;
+        j:type       j:double .
+
+<https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
+        a             nh:def ;
+        nh:defines    j:constructor , j:field ;
+        nh:idName     "org/example/frog/Frog.<init>:()V" ;
+        nh:name       "<init>" ;
+        j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
+                          j:insn         jvm:aload ;
+                          j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void> ;
+                          j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                           nh:idName  "this:Lorg/example/frog/Frog;" ;
+                                           nh:name    "this" ;
+                                           j:type     <java://org/example/frog/Frog> , j:new-obj
+                                         ]
+                        ]
+                        [ j:insn           jvm:invokespecial ;
+                          j:memberOperand  <java://java/lang/Object.--init-----void> ;
+                          j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
+                        ]
+                        [ nh:lineNumber  "4"^^xsd:int ;
+                          j:insn         jvm:aload ;
+                          j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void> ;
+                          j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                           nh:idName  "this:Lorg/example/frog/Frog;" ;
+                                           nh:name    "this" ;
+                                           j:type     <java://org/example/frog/Frog>
+                                         ]
+                        ]
+                        [ j:insn    jvm:dconst_0 ;
+                          j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
+                        ]
+                        [ j:insn           jvm:putfield ;
+                          j:memberOperand  <java://org/example/frog/Frog.jumpLength-double> ;
+                          j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
+                        ]
+                        [ j:insn    jvm:return ;
+                          j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
+                        ]
+                      ) ;
+        j:constructs  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> ;
+        j:hasAccess   j:public ;
+        j:maxLocals   "1"^^xsd:int ;
+        j:maxStack    "3"^^xsd:int ;
+        j:memberOf    <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> ;
+        j:rType       j:void ;
+        j:srcEnd      [ nh:lineNumber  "4"^^xsd:int ] ;
+        j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
+
+<https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog>
+        a                   nh:def , j:ref ;
+        nh:defines          j:class ;
+        nh:idName           "org/example/frog/Frog" ;
+        nh:name             "org/example/frog/Frog" ;
+        j:classFileVersion  "52"^^xsd:int ;
+        j:extends           <java://java/lang/Object> ;
+        j:hasAccess         j:public ;
+        j:sourceFile        "Frog.java" .
+
+<java://org/example/frog/Frog.--init-----void>
+        rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void> .
+
+<java://org/example/frog/Frog.leap-double--void>
+        rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void> .
+
+<https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+        a            nh:def ;
+        nh:defines   j:method ;
+        nh:idName    "org/example/frog/Frog.leap:(D)V" ;
+        nh:name      "leap" ;
+        j:code       ( [ nh:lineNumber  "7"^^xsd:int ;
+                         j:insn         jvm:aload ;
+                         j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void> ;
+                         j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                          nh:idName  "this:Lorg/example/frog/Frog;" ;
+                                          nh:name    "this" ;
+                                          j:type     <java://org/example/frog/Frog>
+                                        ]
+                       ]
+                       [ j:insn    jvm:dup ;
+                         j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                       ]
+                       [ j:insn           jvm:getfield ;
+                         j:memberOperand  <java://org/example/frog/Frog.jumpLength-double> ;
+                         j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                       ]
+                       [ j:insn        jvm:dload ;
+                         j:partOf      <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void> ;
+                         j:varOperand  [ rdf:value  "1"^^xsd:int ;
+                                         nh:idName  "howLong:D" ;
+                                         nh:name    "howLong" ;
+                                         j:type     j:double
+                                       ]
+                       ]
+                       [ j:insn    jvm:dadd ;
+                         j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                       ]
+                       [ j:insn           jvm:putfield ;
+                         j:memberOperand  <java://org/example/frog/Frog.jumpLength-double> ;
+                         j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                       ]
+                       [ nh:lineNumber  "8"^^xsd:int ;
+                         j:insn         jvm:return ;
+                         j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                       ]
+                     ) ;
+        j:hasAccess  j:public ;
+        j:maxLocals  "3"^^xsd:int ;
+        j:maxStack   "5"^^xsd:int ;
+        j:memberOf   <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> ;
+        j:rType      j:void ;
+        j:srcEnd     [ nh:lineNumber  "8"^^xsd:int ] ;
+        j:srcStart   [ nh:lineNumber  "7"^^xsd:int ] .
+
+<java://java/lang/Object>
+        a       j:ref .
+
+<maven://org.example/frog/0.3.8>
+        a            m:MavenCoordinate ;
+        m:dependsOn  <maven://org.slf4j/slf4j-simple/1.7.25> .
