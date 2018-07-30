@@ -378,6 +378,7 @@ public class ExtractToNeo4j {
 		// console.printf("ok\n");
 		// }
 		// ANNA: load file from outFile to neo4j
+		// currently this works, run neo4j from console before running this.
 		Driver driver = GraphDatabase.driver("bolt://localhost:7687",
 				AuthTokens.basic("neo4j", "password"));
 		GraphDatabaseService graphDb = new GraphDatabaseFactory()
