@@ -1,0 +1,12 @@
+@prefix a1-0.0.1-SNAPSHOT: <https://db.nuthatchery.org/_/a1/0.0.1-SNAPSHOT/> .
+@prefix jvm:   <https://model.nuthatchery.org/jvm/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix nh:    <https://model.nuthatchery.org/common/> .
+@prefix j:     <https://model.nuthatchery.org/java/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix m:     <https://model.nuthatchery.org/maven/> .
+@prefix db:    <https://db.nuthatchery.org/> .
+
+a1-0.0.1-SNAPSHOT:  m:artifactId  "a1" ;
+        m:version     "0.0.1-SNAPSHOT" .

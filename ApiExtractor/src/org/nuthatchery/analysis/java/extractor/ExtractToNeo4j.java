@@ -240,145 +240,133 @@ public class ExtractToNeo4j {
 	}
 
 	public static void main(String[] args) throws IOException {
-		// Dataset dataset = DatasetFactory.create();
-		// String outFile = "/tmp/data.trig";
-		// setupDataset(dataset);
-		//
-		// LogCtl.setJavaLogging();
-		//
-		// demoMode = args.length == 0;
-		// logLevel = args.length == 0 ? 10 : 0;
-		// logLevel = 0;
-		// List<String> arguments = new ArrayList<>(demoMode ? DEFAULT_CLASSES :
-		// Arrays.asList(args));
-		// // IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
-		// String modelName = null;
-		// boolean jung = false;
-		// try {
-		// for (Iterator<String> it = arguments.iterator(); it.hasNext();) {
-		// String arg = it.next();
-		// switch (arg) {
-		// case "-h":
-		// System.err.println(
-		// "arguments: [options] [-d dbDir | -o outFile.trig | -m modelName |
-		// fileOrDir]... [-s]");
-		// System.err.println("Inputs: fileOrDir can be zero or more of");
-		// System.err.println(" *.class Java class files");
-		// System.err.println(" *.jar JAR files (contained class files are extracted)");
-		// System.err.println(" */ Directory (all classes and jars extracted
-		// recursively)");
-		// System.err.println("General options:");
-		// System.err.println(" -h help");
-		// System.err.println(" -v verbose logging");
-		// System.err.println("Special options: (take effect when encountered)");
-		// System.err.println(" -m modelName set model name for subsequent input");
-		// System.err.println(" -ont add ontology to dataset");
-		// System.err.println(" -mod add models as named graphs in dataset");
-		// System.err.println(" -db dbDir set TDB database directory");
-		// System.err.println(" -jung starts a JFrame with a visualisation of the
-		// graph");
-		// System.err.println(" -o outFile.trig set output TRiG file (when not using
-		// TDB)");
-		// System.err.println(" -s start server on http://localhost:3330/");
-		// break;
-		// case "-v":
-		// logLevel = 10;
-		// break;
-		// case "-o":
-		// if (outFile == null)
-		// throw new IllegalArgumentException("-o option incompatible with -d");
-		// outFile = it.next();
-		// break;
-		// case "-mod":
-		// addGraphToDataset = true;
-		// break;
-		// case "-ont":
-		// addOntologyToDataset = true;
-		// break;
-		// case "-db":
-		// String dbDir = it.next();
-		// dataset.close();
-		// dataset = TDBFactory.createDataset(dbDir);
-		// setupDataset(dataset);
-		// outFile = null;
-		// break;
-		// case "-s":
-		// FusekiServer server = FusekiServer.create()//
-		// .add("/dataset", dataset, true)//
-		// .enableStats(true)//
-		// .build();
-		// server.start();
-		// TDB.sync(dataset);
-		// server.join();
-		// break;
-		// case "-m":
-		// modelName = it.next();
-		// break;
-		// case "-jung":
-		// jung = true;
-		// break;
-		// default:
-		// extractModel(dataset, modelName, arg);
-		// }
-		// }
-		//
-		// if (outFile != null) {
-		// try (OutputStream output = new FileOutputStream(outFile)) {
-		// dataset.getDefaultModel().setNsPrefixes(prefixMapping);
-		// RDFDataMgr.write(output, dataset, Lang.TRIG); // throws
-		// java.nio.charset.MalformedInputException
-		// // when
-		// // dataset is not UTF-8?
-		// //
-		// http://mail-archives.apache.org/mod_mbox/jena-users/201502.mbox/%3C54E6FFFE.7010308@apache.org%3E
-		// // bug at
-		// //
-		// https://github.com/apache/jena/blob/master/jena-base/src/main/java/org/apache/jena/atlas/io/IndentedWriter.java,
-		// // in print, line nr 123: should be codepoints, not chars
-		//
-		// /*
-		// * clone Jena Fix bug
-		// *
-		// */
-		//
-		// // jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
-		// }
-		// }
-		// if (jung) {
-		// System.out.println("all named models: ");
-		// dataset.listNames().forEachRemaining(i -> System.out.println(i));
-		// /*
-		// * http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar
-		// * http://model.nuthatchery.org/java/types/
-		// * http://model.nuthatchery.org/maven/project/
-		// * http://model.nuthatchery.org/java/
-		// *
-		// */
-		// System.out.println(dataset.getDefaultModel());
-		// System.out.println(dataset.getUnionModel());
-		// //
-		// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
-		// // TODO let you pick which graph to visualise
-		// // JenaJungJFrame.makeJFrame(dataset.getDefaultModel());
-		// //
-		// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar"));
-		// //
-		// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
-		// //
-		// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/java/"));
-		// }
-		// } finally {
-		// if (dataset != null) {
-		// dataset.close();
-		// }
-		// }
-		//
-		// Console console = System.console();
-		// if (console != null) {
-		// console.printf("ok\n");
-		// }
+		Dataset dataset = DatasetFactory.create();
+		String outFile = "/tmp/data.trig";
+		setupDataset(dataset);
+
+		LogCtl.setJavaLogging();
+
+		demoMode = args.length == 0;
+		logLevel = args.length == 0 ? 10 : 0;
+		logLevel = 0;
+		List<String> arguments = new ArrayList<>(demoMode ? DEFAULT_CLASSES :
+			Arrays.asList(args));
+		// IFactsWriter fw = FactsDb.nTripleFactsWriter("/tmp/data.n3", "C");
+		String modelName = null;
+		boolean jung = false;
+		try {
+			for (Iterator<String> it = arguments.iterator(); it.hasNext();) {
+				String arg = it.next();
+				switch (arg) {
+				case "-h":
+					System.err.println(
+							"arguments: [options] [-d dbDir | -o outFile.trig | -m modelName | fileOrDir]... [-s]");
+					System.err.println("Inputs: fileOrDir can be zero or more of");
+					System.err.println(" *.class Java class files");
+					System.err.println(" *.jar JAR files (contained class files are extracted)");
+					System.err.println(" */ Directory (all classes and jars extracted recursively)");
+					System.err.println("General options:");
+					System.err.println(" -h help");
+					System.err.println(" -v verbose logging");
+					System.err.println("Special options: (take effect when encountered)");
+					System.err.println(" -m modelName set model name for subsequent input");
+					System.err.println(" -ont add ontology to dataset");
+					System.err.println(" -mod add models as named graphs in dataset");
+					System.err.println(" -db dbDir set TDB database directory");
+					System.err.println(" -jung starts a JFrame with a visualisation of the graph");
+					System.err.println(" -o outFile.trig set output TRiG file (when not using TDB)");
+					System.err.println(" -s start server on http://localhost:3330/");
+					break;
+				case "-v":
+					logLevel = 10;
+					break;
+				case "-o":
+					if (outFile == null)
+						throw new IllegalArgumentException("-o option incompatible with -d");
+					outFile = it.next();
+					break;
+				case "-mod":
+					addGraphToDataset = true;
+					break;
+				case "-ont":
+					addOntologyToDataset = true;
+					break;
+				case "-db":
+					String dbDir = it.next();
+					dataset.close();
+					dataset = TDBFactory.createDataset(dbDir);
+					setupDataset(dataset);
+					outFile = null;
+					break;
+				case "-s":
+					FusekiServer server = FusekiServer.create()//
+					.add("/dataset", dataset, true)//
+					.enableStats(true)//
+					.build();
+					server.start();
+					TDB.sync(dataset);
+					server.join();
+					break;
+				case "-m":
+					modelName = it.next();
+					break;
+				case "-jung":
+					jung = true;
+					break;
+				default:
+					extractModel(dataset, modelName, arg);
+				}
+			}
+
+			if (outFile != null) {
+				try (OutputStream output = new FileOutputStream(outFile)) {
+					dataset.getDefaultModel().setNsPrefixes(prefixMapping);
+					RDFDataMgr.write(output, dataset, Lang.TRIG); // throws java.nio.charset.MalformedInputException
+					// when
+					// dataset is not UTF-8?
+					//http://mail-archives.apache.org/mod_mbox/jena-users/201502.mbox/%3C54E6FFFE.7010308@apache.org%3E
+					// bug at
+					//https://github.com/apache/jena/blob/master/jena-base/src/main/java/org/apache/jena/atlas/io/IndentedWriter.java,
+					// in print, line nr 123: should be codepoints, not chars
+
+					/*
+					 * clone Jena Fix bug
+					 *
+					 */
+
+					// jenaModel.write(output, "TURTLE"); //"N-TRIPLE");
+				}
+			}
+			if (jung) {
+				System.out.println("all named models: ");
+				dataset.listNames().forEachRemaining(i -> System.out.println(i));
+				/*
+				 * http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar
+				 * http://model.nuthatchery.org/java/types/
+				 * http://model.nuthatchery.org/maven/project/
+				 * http://model.nuthatchery.org/java/
+				 *
+				 */
+				System.out.println(dataset.getDefaultModel());
+				System.out.println(dataset.getUnionModel());
+				// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
+				// TODO let you pick which graph to visualise
+				// JenaJungJFrame.makeJFrame(dataset.getDefaultModel());
+				// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar"));
+				// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
+				// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/java/"));
+			}
+		} finally {
+			if (dataset != null) {
+				dataset.close();
+			}
+		}
+
+		Console console = System.console();
+		if (console != null) {
+			console.printf("ok\n");
+		}
 		// ANNA: load file from outFile to neo4j
-		// currently this works, run neo4j from console before running this.
 		Driver driver = GraphDatabase.driver("bolt://localhost:7687",
 				AuthTokens.basic("neo4j", "password"));
 		GraphDatabaseService graphDb = new GraphDatabaseFactory()
