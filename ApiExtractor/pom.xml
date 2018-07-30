@@ -115,8 +115,8 @@
 			<artifactId>maven-model</artifactId>
 			<version>3.5.3</version>
 		</dependency>
-		<!--dependency> <groupId>org.neo4j.driver</groupId> <artifactId>neo4j-java-driver</artifactId> 
+		<dependency> <groupId>org.neo4j.driver</groupId> <artifactId>neo4j-java-driver</artifactId> 
 			<version>1.6.1</version> </dependency> <dependency> <groupId>org.neo4j</groupId> 
-			<artifactId>neo4j</artifactId> <version>3.4.0</version> </dependency -->
+			<artifactId>neo4j</artifactId> <version>3.4.0</version> </dependency >
 	</dependencies>
 </project>

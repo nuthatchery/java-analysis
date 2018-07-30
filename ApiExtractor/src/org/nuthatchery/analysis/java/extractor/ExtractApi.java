@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
@@ -35,16 +36,24 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ReadWrite;
+import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.reasoner.Reasoner;
+import org.apache.jena.reasoner.ReasonerRegistry;
+import org.apache.jena.reasoner.rulesys.RDFSRuleReasonerFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.tdb.TDB;
 import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.util.PrintUtil;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.ReasonerVocabulary;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -152,6 +161,42 @@ public class ExtractApi {
 			if (addGraphToDataset) {
 				dataset.addNamedModel(model.getNsPrefixURI(""), model);
 			}
+			boolean reasoning = false;
+			if (reasoning) {
+
+				Resource config = ModelFactory.createDefaultModel().createResource()
+						.addProperty(ReasonerVocabulary.PROPsetRDFSLevel, "full");
+				Reasoner reasoner = RDFSRuleReasonerFactory.theInstance().create(config);
+				InfModel inf = ModelFactory.createInfModel(reasoner, dataset.getUnionModel());
+				// from https://jena.apache.org/documentation/inference/index.html#owl
+				// Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
+				// reasoner = reasoner.bindSchema(dataset.getDefaultModel());
+				// System.out.println(dataset.getDefaultModel().listNameSpaces().toList()); //
+				// output: [https://model.nuthatchery.org/maven/]
+				InfModel infmodel = ModelFactory.createInfModel(reasoner, model);
+
+				try {
+					inf.write(new FileOutputStream("model.xml"), "TURTLE");
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				Resource resource = inf.getResource("m:project");
+				System.out.println("'m:project':");
+				Model m = inf;
+				Resource s = resource;
+				Property p = null;
+				Resource o = null;
+				System.out.println("first statement");
+				for (StmtIterator i = m.listStatements(s,p,o); i.hasNext(); ) {
+					System.out.println("another statement");
+					Statement stmt = i.nextStatement();
+					System.out.println(" - " + PrintUtil.print(stmt));
+				}
+
+			}
+
 		});
 
 	}
@@ -283,6 +328,8 @@ public class ExtractApi {
 				 * http://model.nuthatchery.org/java/
 				 *
 				 */
+				System.out.println(dataset.getDefaultModel());
+				System.out.println(dataset.getUnionModel());
 				// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
 				// TODO let you pick which graph to visualise
 				// JenaJungJFrame.makeJFrame(dataset.getDefaultModel());
