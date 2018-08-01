@@ -14,8 +14,6 @@ PREFIX B-1.0.1:  <https://db.nuthatchery.org/_/B/1.0.1/>
 
 SELECT  ?project ?version ?update
 WHERE {
-#  GRAPH ?g {
-
 	?jar m:artifactId ?project.
 	?jar m:version ?version.
 	?jar2 m:artifactId ?project.
@@ -23,6 +21,5 @@ WHERE {
 
 	FILTER(?version < ?update).
 
-#  }
 }
 
