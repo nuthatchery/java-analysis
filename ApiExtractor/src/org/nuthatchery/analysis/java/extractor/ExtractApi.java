@@ -100,7 +100,6 @@ public class ExtractApi {
 			Resource modelId = model.createResource(mName);
 			prefixMapping.put(artifactId + "-" + version, modelId.getURI());
 			model.setNsPrefixes(prefixMapping);
-			String prefix = "java://";
 			model.setNsPrefix("", modelId.getURI());
 			if (groupId != null) {
 				modelId.addLiteral(MavenFacts.groupId, groupId);
@@ -134,7 +133,7 @@ public class ExtractApi {
 
 			try (ArtifactHandle h = art.open()) {
 				h.stream().forEach((bytes) -> {
-					ClassFactExtractor ea = new ClassFactExtractor(model, prefix, JavaUtil.logger(logLevel));
+					ClassFactExtractor ea = new ClassFactExtractor(model, modelId.getURI(), JavaUtil.logger(logLevel));
 					ClassReader cr = new ClassReader(bytes.getBytes());
 					cr.accept(ea, ClassReader.EXPAND_FRAMES);
 				});

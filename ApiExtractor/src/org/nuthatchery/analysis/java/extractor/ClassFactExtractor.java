@@ -169,7 +169,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		int major = version & 0xffff;
 		int minor = (version >>> 16) & 0xffff;
 
-		className = name;// .replace('/', '.');
+		className = name.replace('/', '.');
 		Resource id = JavaFacts.Types.object(model, model.getNsPrefixURI(""), className);
 		Resource javaName = JavaFacts.Types.object(model, JavaFacts.JN, className);
 		javaName.addProperty(RDFS.isDefinedBy, id);
@@ -192,11 +192,11 @@ public class ClassFactExtractor extends ClassVisitor {
 			id.addProperty(CommonVocabulary.P_DEFINES, JavaFacts.C_CLASS);
 		}
 		if (superName != null) {
-			id.addProperty(JavaFacts.P_EXTENDS, JavaFacts.Types.object(model, prefix, superName));
+			id.addProperty(JavaFacts.P_EXTENDS, JavaFacts.Types.object(model, JavaFacts.JN, superName));
 		}
 		if (interfaces != null) {
 			for (String s : interfaces) {
-				id.addProperty(JavaFacts.P_SUBTYPE_OF, JavaFacts.Types.object(model, prefix, s));
+				id.addProperty(JavaFacts.P_SUBTYPE_OF, JavaFacts.Types.object(model, JavaFacts.JN, s));
 			}
 		}
 		addClassAccessFlags(access, id);
@@ -209,7 +209,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		// visible=%b)%n", desc, visible);
 		Resource anno = model.createResource();
 		model.add(getClassId(), JavaFacts.P_ANNOTATION, anno);
-		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, prefix, desc));
+		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, JavaFacts.JN, desc));
 		// TODO: also traverse the annotation
 		return super.visitAnnotation(desc, visible);
 	}
@@ -242,7 +242,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		model.add(memberId, CommonVocabulary.P_NAME, model.createLiteral(name));
 		model.add(memberId, CommonVocabulary.P_IDNAME, model.createLiteral(descName));
 		model.add(memberId, RDF.type, CommonVocabulary.C_DEF);
-		model.add(memberId, JavaFacts.P_TYPE, JavaUtil.typeToId(model, prefix, Type.getType(desc)));
+		model.add(memberId, JavaFacts.P_TYPE, JavaUtil.typeToId(model, JavaFacts.JN, Type.getType(desc)));
 		model.add(memberId, JavaFacts.P_MEMBER_OF, getClassId());
 		if (value != null) {
 			model.add(memberId, CommonVocabulary.P_DEFINES, JavaFacts.C_FIELD);
@@ -266,8 +266,8 @@ public class ClassFactExtractor extends ClassVisitor {
 		// id.addProperty(CommonVocabulary.P_IDNAME, model.createTypedLiteral(className));
 
 		if (outerName != null) {
-			Resource inner = JavaFacts.Types.object(model, prefix, name);
-			Resource outer = JavaFacts.Types.object(model, prefix, outerName);
+			Resource inner = JavaFacts.Types.object(model, JavaFacts.JN, name);
+			Resource outer = JavaFacts.Types.object(model, JavaFacts.JN, outerName);
 			model.add(inner, JavaFacts.P_MEMBER_OF, outer);
 			if (innerName != null) {
 				model.add(inner, CommonVocabulary.P_NAME, model.createLiteral(innerName));
@@ -292,7 +292,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		model.add(memberId, CommonVocabulary.P_IDNAME, model.createLiteral(descName));
 		model.add(memberId, RDF.type, CommonVocabulary.C_DEF);
 		model.add(memberId, JavaFacts.P_RETURN_TYPE,
-				JavaUtil.typeToId(model, prefix, Type.getType(desc).getReturnType()));
+				JavaUtil.typeToId(model, JavaFacts.JN, Type.getType(desc).getReturnType()));
 		model.add(memberId, JavaFacts.P_MEMBER_OF, getClassId());
 		if (name.equals("<init>")) {
 			model.add(memberId, CommonVocabulary.P_DEFINES, JavaFacts.C_FIELD);
@@ -308,7 +308,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		}
 		if (exceptions != null) {
 			for (String s : exceptions) {
-				model.add(memberId, JavaFacts.DECLARES_THROW, JavaFacts.Types.object(model, prefix, s));
+				model.add(memberId, JavaFacts.DECLARES_THROW, JavaFacts.Types.object(model, JavaFacts.JN, s));
 			}
 		}
 		addMethodAccessFlags(access, memberId);
@@ -326,7 +326,7 @@ public class ClassFactExtractor extends ClassVisitor {
 	@Override
 	public void visitOuterClass(String owner, String name, String desc) {
 		log.logf("visitOuterClass(owner=%s, name=%s, desc=%s)%n", owner, name, desc);
-		Resource ownerId = JavaFacts.Types.object(model, prefix, owner);
+		Resource ownerId = JavaFacts.Types.object(model, JavaFacts.JN, owner);
 		if (name != null && desc != null) {
 			Resource methodId = JavaFacts.method(model, ownerId, name, desc);
 			model.add(getClassId(), JavaFacts.P_MEMBER_OF, methodId);

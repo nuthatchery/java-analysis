@@ -147,7 +147,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		// MethodFactExtractor.visitAnnotation(desc=%s,visible=%b)%n", desc, visible);
 		Resource anno = model.createResource();
 		model.add(currentMethodId, JavaFacts.P_ANNOTATION, anno);
-		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, prefix, desc));
+		model.add(anno, JavaFacts.P_TYPE, JavaFacts.Types.object(model, JavaFacts.JN, desc));
 		// TODO: also traverse the annotation
 		// return new AnnotationVisitor(Opcodes.ASM6) {
 		//
@@ -257,7 +257,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 	public void visitLdcInsn(Object cst) {
 		RDFNode operand;
 		if (cst instanceof Type) {
-			operand = JavaUtil.typeToId(model, prefix, (Type) cst);
+			operand = JavaUtil.typeToId(model, JavaFacts.JN, (Type) cst);
 		} else {
 			operand = model.createTypedLiteral(cst);
 		}
@@ -289,7 +289,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 			if (vu.varNum == index && startIndex <= vu.lastLabel && endIndex > vu.lastLabel) {
 				model.add(vu.varId, CommonVocabulary.P_NAME, model.createTypedLiteral(name));
 				model.add(vu.varId, JavaFacts.P_TYPE, //
-						JavaUtil.typeToId(model, prefix, Type.getType(desc)));
+						JavaUtil.typeToId(model, JavaFacts.JN, Type.getType(desc)));
 				model.add(vu.varId, CommonVocabulary.P_IDNAME, //
 						model.createTypedLiteral(name + ":" + desc + (signature == null ? "" : signature)));
 			}
@@ -333,8 +333,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-		Resource classId = JavaFacts.Types.object(model, prefix, owner);
-		Resource methodId = JavaFacts.method(model, classId, name, desc);
+		Resource classJn = JavaFacts.Types.object(model, JavaFacts.JN, owner);
+		Resource methodId = JavaFacts.method(model, classJn, name, desc);
 		// NOTE: Example of finding the types of actual arguments and formal
 		// parameters
 		Type objType = Type.getObjectType(owner);
@@ -392,7 +392,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		log.logf("visitMultiANewArrayInsn(desc=%s, dims=%d)%n", desc, dims);
 		putInstruction(Opcodes.MULTIANEWARRAY, JavaFacts.P_OPERAND_TYPE, //
 				JavaFacts.Types.array(model, dims, //
-						JavaFacts.Types.object(model, prefix, desc)));
+						JavaFacts.Types.object(model, JavaFacts.JN, desc)));
 		super.visitMultiANewArrayInsn(desc, dims);
 	}
 
@@ -461,7 +461,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 		node = model.createResource();
 		model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(handler.toString())));
-		model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, prefix, type));
+		model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, JavaFacts.JN, type));
 		list.add(node);
 
 		model.add(currentMethodId, JavaFacts.P_TRY_CATCH_BLOCK, list.build());
@@ -480,7 +480,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
-		putInstruction(opcode, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, prefix, type));
+		putInstruction(opcode, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, JavaFacts.JN, type));
 		super.visitTypeInsn(opcode, type);
 	}
 
@@ -493,7 +493,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 		model.add(vu.varId, RDF.value, model.createTypedLiteral(var));
 		if (super.locals != null && super.locals.size() > var) {
-			model.add(vu.varId, JavaFacts.P_TYPE, JavaUtil.frameTypeToId(model, prefix, super.locals.get(var)));
+			model.add(vu.varId, JavaFacts.P_TYPE, JavaUtil.frameTypeToId(model, JavaFacts.JN, super.locals.get(var)));
 		}
 		localVarUse.add(vu);
 		log.logf("visitVarInsn(opcode=%s, var=%d)%n", opcode, var);

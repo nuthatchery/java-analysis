@@ -32,7 +32,7 @@ import org.objectweb.asm.util.Printer;
  */
 public abstract class JavaFacts {
 	public static final String J = "https://model.nuthatchery.org/java/";
-	public static final String JN = "java://";
+	public static final String JN = "java:";
 	public static final String JF = J; // + "flags/";
 	// public static final String JM = J + "methods/";
 	public static final String JVM = "https://model.nuthatchery.org/jvm/";
@@ -157,6 +157,20 @@ public abstract class JavaFacts {
 		}
 	}
 
+	/**
+	 * Makes a java name or artifact name for a method.
+	 *
+	 * <pre>
+	 * memberId = JavaFacts.method(model, getClassId(), name, desc);
+	 * memberJn = JavaFacts.method(model, getClassJn(), name, desc);
+	 * </pre>
+	 *
+	 * @param m
+	 * @param owner
+	 * @param memberName
+	 * @param memberDesc
+	 * @return
+	 */
 	public static Resource method(Model m, Resource owner, String memberName, String memberDesc) {
 		memberName = memberName.replaceAll("[<>]", "--");
 		// return m.node(owner, memberName + "/" + memberDesc);
@@ -286,7 +300,7 @@ public abstract class JavaFacts {
 			javaTypesModel.add(CHAR, RDFS.subClassOf, PRIMITIVE_TYPE);
 			javaTypesModel.add(TOP, RDFS.subClassOf, PRIMITIVE_TYPE); // TOP of stack when top element
 			// takes up two spots on the
-			// stack; real time is on
+			// stack; real type is on
 			// element top-1
 			javaTypesModel.add(VOID, RDFS.subClassOf, PRIMITIVE_TYPE);
 			javaTypesModel.add(REFERENCE_TYPE, RDFS.subClassOf, JAVA_TYPE);
@@ -302,7 +316,7 @@ public abstract class JavaFacts {
 		}
 
 		public static Resource object(Model m, String prefix, String typeName) {
-			Resource t = m.createResource(prefix + typeName)//
+			Resource t = m.createResource(prefix + typeName.replace('/', '.'))//
 					.addProperty(RDF.type, REFERENCE_TYPE);
 			return t;
 		}
