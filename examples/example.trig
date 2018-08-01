@@ -107,6 +107,9 @@ duck-0.4.3:  a           m:project ;
         m:version        "0.4.3" .
 
 frog-0.3.8: {
+    <java:java.lang.Object>
+            a       j:ref .
+    
     <maven://org.slf4j/slf4j-simple/1.7.25>
             a       m:MavenCoordinate .
     
@@ -116,108 +119,57 @@ frog-0.3.8: {
             m:hasCoordinate  <maven://org.example/frog/0.3.8> ;
             m:version        "0.3.8" .
     
-    <java://org/example/frog/Frog>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> .
+    <java:org.example.frog.Frog.jumpLength-double>
+            rdfs:isDefinedBy  frog-0.3.8:org.example.frog.Frog.jumpLength-double .
     
-    <java://org/example/frog/Frog.jumpLength-double>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.jumpLength-double> .
-    
-    <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.jumpLength-double>
+    frog-0.3.8:org.example.frog.Frog.jumpLength-double
             a            nh:def ;
             nh:declares  j:field ;
-            nh:idName    "org/example/frog/Frog.jumpLength:D" ;
+            nh:idName    "org.example.frog.Frog.jumpLength:D" ;
             nh:name      "jumpLength" ;
             j:hasAccess  j:private ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> ;
+            j:memberOf   frog-0.3.8:org.example.frog.Frog ;
             j:type       j:double .
     
-    <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
-            a             nh:def ;
-            nh:defines    j:constructor , j:field ;
-            nh:idName     "org/example/frog/Frog.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/example/frog/Frog>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
-                            ]
-                            [ nh:lineNumber  "4"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
-                                               nh:name    "this" ;
-                                               j:type     <java://org/example/frog/Frog>
-                                             ]
-                            ]
-                            [ j:insn    jvm:dconst_0 ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
-                            ]
-                            [ j:insn           jvm:putfield ;
-                              j:memberOperand  <java://org/example/frog/Frog.jumpLength-double> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "3"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "4"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
+    <java:org.example.frog.Frog.leap-double--void>
+            rdfs:isDefinedBy  frog-0.3.8:org.example.frog.Frog.leap-double--void .
     
-    <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog>
+    frog-0.3.8:org.example.frog.Frog
             a                   j:ref , nh:def ;
             nh:defines          j:class ;
-            nh:idName           "org/example/frog/Frog" ;
-            nh:name             "org/example/frog/Frog" ;
+            nh:idName           "org.example.frog.Frog" ;
+            nh:name             "org.example.frog.Frog" ;
             j:classFileVersion  "52"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
+            j:extends           <java:java.lang.Object> ;
             j:hasAccess         j:public ;
             j:sourceFile        "Frog.java" .
     
-    <java://org/example/frog/Frog.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.--init-----void> .
+    <java:org.example.frog.Frog.--init-----void>
+            rdfs:isDefinedBy  frog-0.3.8:org.example.frog.Frog.--init-----void .
     
-    <java://org/example/frog/Frog.leap-double--void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void> .
-    
-    <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+    frog-0.3.8:org.example.frog.Frog.leap-double--void
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/frog/Frog.leap:(D)V" ;
+            nh:idName    "org.example.frog.Frog.leap:(D)V" ;
             nh:name      "leap" ;
             j:code       ( [ nh:lineNumber  "7"^^xsd:int ;
                              j:insn         jvm:aload ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void> ;
+                             j:partOf       frog-0.3.8:org.example.frog.Frog.leap-double--void ;
                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
                                               nh:name    "this" ;
-                                              j:type     <java://org/example/frog/Frog>
+                                              j:type     <java:org.example.frog.Frog>
                                             ]
                            ]
                            [ j:insn    jvm:dup ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                             j:partOf  frog-0.3.8:org.example.frog.Frog.leap-double--void
                            ]
                            [ j:insn           jvm:getfield ;
-                             j:memberOperand  <java://org/example/frog/Frog.jumpLength-double> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                             j:memberOperand  <java:org.example.frog.Frog.jumpLength-double> ;
+                             j:partOf         frog-0.3.8:org.example.frog.Frog.leap-double--void
                            ]
                            [ j:insn        jvm:dload ;
-                             j:partOf      <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void> ;
+                             j:partOf      frog-0.3.8:org.example.frog.Frog.leap-double--void ;
                              j:varOperand  [ rdf:value  "1"^^xsd:int ;
                                              nh:idName  "howLong:D" ;
                                              nh:name    "howLong" ;
@@ -225,27 +177,75 @@ frog-0.3.8: {
                                            ]
                            ]
                            [ j:insn    jvm:dadd ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                             j:partOf  frog-0.3.8:org.example.frog.Frog.leap-double--void
                            ]
                            [ j:insn           jvm:putfield ;
-                             j:memberOperand  <java://org/example/frog/Frog.jumpLength-double> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                             j:memberOperand  <java:org.example.frog.Frog.jumpLength-double> ;
+                             j:partOf         frog-0.3.8:org.example.frog.Frog.leap-double--void
                            ]
                            [ nh:lineNumber  "8"^^xsd:int ;
                              j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog.leap-double--void>
+                             j:partOf       frog-0.3.8:org.example.frog.Frog.leap-double--void
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:maxLocals  "3"^^xsd:int ;
             j:maxStack   "5"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/frog/0.3.8/org/example/frog/Frog> ;
+            j:memberOf   frog-0.3.8:org.example.frog.Frog ;
             j:rType      j:void ;
             j:srcEnd     [ nh:lineNumber  "8"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "7"^^xsd:int ] .
     
-    <java://java/lang/Object>
-            a       j:ref .
+    frog-0.3.8:org.example.frog.Frog.--init-----void
+            a             nh:def ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org.example.frog.Frog.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       frog-0.3.8:org.example.frog.Frog.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
+                                               nh:name    "this" ;
+                                               j:type     j:new-obj , <java:org.example.frog.Frog>
+                                             ]
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:java.lang.Object.--init-----void> ;
+                              j:partOf         frog-0.3.8:org.example.frog.Frog.--init-----void
+                            ]
+                            [ nh:lineNumber  "4"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       frog-0.3.8:org.example.frog.Frog.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
+                                               nh:name    "this" ;
+                                               j:type     <java:org.example.frog.Frog>
+                                             ]
+                            ]
+                            [ j:insn    jvm:dconst_0 ;
+                              j:partOf  frog-0.3.8:org.example.frog.Frog.--init-----void
+                            ]
+                            [ j:insn           jvm:putfield ;
+                              j:memberOperand  <java:org.example.frog.Frog.jumpLength-double> ;
+                              j:partOf         frog-0.3.8:org.example.frog.Frog.--init-----void
+                            ]
+                            [ j:insn    jvm:return ;
+                              j:partOf  frog-0.3.8:org.example.frog.Frog.--init-----void
+                            ]
+                          ) ;
+            j:constructs  frog-0.3.8:org.example.frog.Frog ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "3"^^xsd:int ;
+            j:memberOf    frog-0.3.8:org.example.frog.Frog ;
+            j:rType       j:void ;
+            j:srcEnd      [ nh:lineNumber  "4"^^xsd:int ] ;
+            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
+    
+    <java:org.example.frog.Frog>
+            a                 j:ref ;
+            rdfs:isDefinedBy  frog-0.3.8:org.example.frog.Frog .
     
     <maven://org.example/frog/0.3.8>
             a            m:MavenCoordinate ;
@@ -253,79 +253,30 @@ frog-0.3.8: {
 }
 
 frog-0.3.7: {
+    <java:java.lang.Object>
+            a       j:ref .
+    
     <maven://org.slf4j/slf4j-simple/1.7.25>
             a       m:MavenCoordinate .
+    
+    <java:org.example.frog.Frog.jumpLength-double>
+            rdfs:isDefinedBy  frog-0.3.7:org.example.frog.Frog.jumpLength-double .
+    
+    <java:org.example.frog.Frog.jump-double--void>
+            rdfs:isDefinedBy  frog-0.3.7:org.example.frog.Frog.jump-double--void .
     
     <maven://org.example/frog/0.3.7>
             a            m:MavenCoordinate ;
             m:dependsOn  <maven://org.slf4j/slf4j-simple/1.7.25> .
     
-    <java://org/example/frog/Frog>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog> .
-    
-    <java://org/example/frog/Frog.jumpLength-double>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jumpLength-double> .
-    
-    <java://org/example/frog/Frog.jump-double--void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jump-double--void> .
-    
-    <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.--init-----void>
-            a             nh:def ;
-            nh:defines    j:field , j:constructor ;
-            nh:idName     "org/example/frog/Frog.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/example/frog/Frog>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.--init-----void>
-                            ]
-                            [ nh:lineNumber  "4"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
-                                               nh:name    "this" ;
-                                               j:type     <java://org/example/frog/Frog>
-                                             ]
-                            ]
-                            [ j:insn    jvm:dconst_0 ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.--init-----void>
-                            ]
-                            [ j:insn           jvm:putfield ;
-                              j:memberOperand  <java://org/example/frog/Frog.jumpLength-double> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "3"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "4"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
-    
-    <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog>
-            a                   j:ref , nh:def ;
-            nh:defines          j:class ;
-            nh:idName           "org/example/frog/Frog" ;
-            nh:name             "org/example/frog/Frog" ;
-            j:classFileVersion  "52"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
-            j:hasAccess         j:public ;
-            j:sourceFile        "Frog.java" .
+    frog-0.3.7:org.example.frog.Frog.jumpLength-double
+            a            nh:def ;
+            nh:declares  j:field ;
+            nh:idName    "org.example.frog.Frog.jumpLength:D" ;
+            nh:name      "jumpLength" ;
+            j:hasAccess  j:private ;
+            j:memberOf   frog-0.3.7:org.example.frog.Frog ;
+            j:type       j:double .
     
     frog-0.3.7:  a           m:project ;
             m:artifactId     "frog" ;
@@ -333,41 +284,42 @@ frog-0.3.7: {
             m:hasCoordinate  <maven://org.example/frog/0.3.7> ;
             m:version        "0.3.7" .
     
-    <java://org/example/frog/Frog.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.--init-----void> .
+    frog-0.3.7:org.example.frog.Frog
+            a                   j:ref , nh:def ;
+            nh:defines          j:class ;
+            nh:idName           "org.example.frog.Frog" ;
+            nh:name             "org.example.frog.Frog" ;
+            j:classFileVersion  "52"^^xsd:int ;
+            j:extends           <java:java.lang.Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "Frog.java" .
     
-    <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jumpLength-double>
-            a            nh:def ;
-            nh:declares  j:field ;
-            nh:idName    "org/example/frog/Frog.jumpLength:D" ;
-            nh:name      "jumpLength" ;
-            j:hasAccess  j:private ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog> ;
-            j:type       j:double .
+    <java:org.example.frog.Frog.--init-----void>
+            rdfs:isDefinedBy  frog-0.3.7:org.example.frog.Frog.--init-----void .
     
-    <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jump-double--void>
+    frog-0.3.7:org.example.frog.Frog.jump-double--void
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/frog/Frog.jump:(D)V" ;
+            nh:idName    "org.example.frog.Frog.jump:(D)V" ;
             nh:name      "jump" ;
             j:code       ( [ nh:lineNumber  "7"^^xsd:int ;
                              j:insn         jvm:aload ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jump-double--void> ;
+                             j:partOf       frog-0.3.7:org.example.frog.Frog.jump-double--void ;
                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
                                               nh:name    "this" ;
-                                              j:type     <java://org/example/frog/Frog>
+                                              j:type     <java:org.example.frog.Frog>
                                             ]
                            ]
                            [ j:insn    jvm:dup ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jump-double--void>
+                             j:partOf  frog-0.3.7:org.example.frog.Frog.jump-double--void
                            ]
                            [ j:insn           jvm:getfield ;
-                             j:memberOperand  <java://org/example/frog/Frog.jumpLength-double> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jump-double--void>
+                             j:memberOperand  <java:org.example.frog.Frog.jumpLength-double> ;
+                             j:partOf         frog-0.3.7:org.example.frog.Frog.jump-double--void
                            ]
                            [ j:insn        jvm:dload ;
-                             j:partOf      <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jump-double--void> ;
+                             j:partOf      frog-0.3.7:org.example.frog.Frog.jump-double--void ;
                              j:varOperand  [ rdf:value  "1"^^xsd:int ;
                                              nh:idName  "howLong:D" ;
                                              nh:name    "howLong" ;
@@ -375,36 +327,147 @@ frog-0.3.7: {
                                            ]
                            ]
                            [ j:insn    jvm:dadd ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jump-double--void>
+                             j:partOf  frog-0.3.7:org.example.frog.Frog.jump-double--void
                            ]
                            [ j:insn           jvm:putfield ;
-                             j:memberOperand  <java://org/example/frog/Frog.jumpLength-double> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jump-double--void>
+                             j:memberOperand  <java:org.example.frog.Frog.jumpLength-double> ;
+                             j:partOf         frog-0.3.7:org.example.frog.Frog.jump-double--void
                            ]
                            [ nh:lineNumber  "8"^^xsd:int ;
                              j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog.jump-double--void>
+                             j:partOf       frog-0.3.7:org.example.frog.Frog.jump-double--void
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:maxLocals  "3"^^xsd:int ;
             j:maxStack   "5"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/frog/0.3.7/org/example/frog/Frog> ;
+            j:memberOf   frog-0.3.7:org.example.frog.Frog ;
             j:rType      j:void ;
             j:srcEnd     [ nh:lineNumber  "8"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "7"^^xsd:int ] .
     
-    <java://java/lang/Object>
-            a       j:ref .
+    <java:org.example.frog.Frog>
+            a                 j:ref ;
+            rdfs:isDefinedBy  frog-0.3.7:org.example.frog.Frog .
+    
+    frog-0.3.7:org.example.frog.Frog.--init-----void
+            a             nh:def ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org.example.frog.Frog.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       frog-0.3.7:org.example.frog.Frog.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
+                                               nh:name    "this" ;
+                                               j:type     j:new-obj , <java:org.example.frog.Frog>
+                                             ]
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:java.lang.Object.--init-----void> ;
+                              j:partOf         frog-0.3.7:org.example.frog.Frog.--init-----void
+                            ]
+                            [ nh:lineNumber  "4"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       frog-0.3.7:org.example.frog.Frog.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/frog/Frog;" ;
+                                               nh:name    "this" ;
+                                               j:type     <java:org.example.frog.Frog>
+                                             ]
+                            ]
+                            [ j:insn    jvm:dconst_0 ;
+                              j:partOf  frog-0.3.7:org.example.frog.Frog.--init-----void
+                            ]
+                            [ j:insn           jvm:putfield ;
+                              j:memberOperand  <java:org.example.frog.Frog.jumpLength-double> ;
+                              j:partOf         frog-0.3.7:org.example.frog.Frog.--init-----void
+                            ]
+                            [ j:insn    jvm:return ;
+                              j:partOf  frog-0.3.7:org.example.frog.Frog.--init-----void
+                            ]
+                          ) ;
+            j:constructs  frog-0.3.7:org.example.frog.Frog ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "3"^^xsd:int ;
+            j:memberOf    frog-0.3.7:org.example.frog.Frog ;
+            j:rType       j:void ;
+            j:srcEnd      [ nh:lineNumber  "4"^^xsd:int ] ;
+            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
 }
 
 pond-0.3.2: {
-    <java://org/example/pond/Pond>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond> .
-    
-    <java://java/lang/System>
+    <java:java.lang.Object>
             a       j:ref .
+    
+    pond-0.3.2:org.example.pond.Pond.duck-Oorg.example.duck.Duck
+            a            nh:def ;
+            nh:declares  j:field ;
+            nh:idName    "org.example.pond.Pond.duck:Lorg/example/duck/Duck;" ;
+            nh:name      "duck" ;
+            j:hasAccess  j:private ;
+            j:memberOf   pond-0.3.2:org.example.pond.Pond ;
+            j:type       <java:org.example.duck.Duck> .
+    
+    <java:java.io.PrintStream>
+            a       j:ref .
+    
+    pond-0.3.2:org.example.pond.Pond.--init-----void
+            a             nh:def ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org.example.pond.Pond.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        ( [ nh:lineNumber  "4"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       pond-0.3.2:org.example.pond.Pond.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
+                                               nh:name    "this" ;
+                                               j:type     j:new-obj , <java:org.example.pond.Pond>
+                                             ]
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:java.lang.Object.--init-----void> ;
+                              j:partOf         pond-0.3.2:org.example.pond.Pond.--init-----void
+                            ]
+                            [ nh:lineNumber  "5"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       pond-0.3.2:org.example.pond.Pond.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
+                                               nh:name    "this" ;
+                                               j:type     <java:org.example.pond.Pond>
+                                             ]
+                            ]
+                            [ j:insn         jvm:new ;
+                              j:partOf       pond-0.3.2:org.example.pond.Pond.--init-----void ;
+                              j:typeOperand  <java:org.example.duck.Duck>
+                            ]
+                            [ j:insn    jvm:dup ;
+                              j:partOf  pond-0.3.2:org.example.pond.Pond.--init-----void
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:org.example.duck.Duck.--init-----void> ;
+                              j:partOf         pond-0.3.2:org.example.pond.Pond.--init-----void
+                            ]
+                            [ j:insn           jvm:putfield ;
+                              j:memberOperand  <java:org.example.pond.Pond.duck-Oorg.example.duck.Duck> ;
+                              j:partOf         pond-0.3.2:org.example.pond.Pond.--init-----void
+                            ]
+                            [ j:insn    jvm:return ;
+                              j:partOf  pond-0.3.2:org.example.pond.Pond.--init-----void
+                            ]
+                          ) ;
+            j:constructs  pond-0.3.2:org.example.pond.Pond ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "3"^^xsd:int ;
+            j:memberOf    pond-0.3.2:org.example.pond.Pond ;
+            j:rType       j:void ;
+            j:srcEnd      [ nh:lineNumber  "5"^^xsd:int ] ;
+            j:srcStart    [ nh:lineNumber  "4"^^xsd:int ] .
     
     pond-0.3.2:  a           m:project ;
             m:artifactId     "pond" ;
@@ -412,213 +475,140 @@ pond-0.3.2: {
             m:hasCoordinate  <maven://org.example/pond/0.3.2> ;
             m:version        "0.3.2" .
     
-    <java://org/example/duck/Duck>
+    <java:java.lang.System>
             a       j:ref .
     
-    <java://org/example/pond/Pond.run---void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.run---void> .
+    <java:org.example.pond.Pond.run---void>
+            rdfs:isDefinedBy  pond-0.3.2:org.example.pond.Pond.run---void .
     
-    <java://org/example/pond/Pond.main-A1String--void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.main-A1String--void> .
-    
-    <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond>
-            a                   j:ref , nh:def ;
-            nh:defines          j:class ;
-            nh:idName           "org/example/pond/Pond" ;
-            nh:name             "org/example/pond/Pond" ;
-            j:classFileVersion  "52"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
-            j:hasAccess         j:public ;
-            j:sourceFile        "Pond.java" .
-    
-    <maven://org.example/pond/0.3.2>
-            a            m:MavenCoordinate ;
-            m:dependsOn  <maven://org.example/duck/0.4.3> .
-    
-    <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void>
-            a             nh:def ;
-            nh:defines    j:constructor , j:field ;
-            nh:idName     "org/example/pond/Pond.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "4"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/example/pond/Pond>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ nh:lineNumber  "5"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
-                                               nh:name    "this" ;
-                                               j:type     <java://org/example/pond/Pond>
-                                             ]
-                            ]
-                            [ j:insn         jvm:new ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void> ;
-                              j:typeOperand  <java://org/example/duck/Duck>
-                            ]
-                            [ j:insn    jvm:dup ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://org/example/duck/Duck.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ j:insn           jvm:putfield ;
-                              j:memberOperand  <java://org/example/pond/Pond.duck-Oorg.example.duck.Duck> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "3"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "5"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "4"^^xsd:int ] .
-    
-    <java://org/example/pond/Pond.duck-Oorg.example.duck.Duck>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.duck-Oorg.example.duck.Duck> .
-    
-    <java://java/lang/Object>
-            a       j:ref .
-    
-    <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.run---void>
+    pond-0.3.2:org.example.pond.Pond.run---void
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/pond/Pond.run:()V" ;
+            nh:idName    "org.example.pond.Pond.run:()V" ;
             nh:name      "run" ;
             j:code       ( [ nh:lineNumber    "8"^^xsd:int ;
                              j:insn           jvm:getstatic ;
-                             j:memberOperand  <java://java/lang/System.out-Ojava.io.PrintStream> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.run---void>
+                             j:memberOperand  <java:java.lang.System.out-Ojava.io.PrintStream> ;
+                             j:partOf         pond-0.3.2:org.example.pond.Pond.run---void
                            ]
                            [ j:insn        jvm:aload ;
-                             j:partOf      <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.run---void> ;
+                             j:partOf      pond-0.3.2:org.example.pond.Pond.run---void ;
                              j:varOperand  [ rdf:value  "0"^^xsd:int ;
                                              nh:idName  "this:Lorg/example/pond/Pond;" ;
                                              nh:name    "this" ;
-                                             j:type     <java://org/example/pond/Pond>
+                                             j:type     <java:org.example.pond.Pond>
                                            ]
                            ]
                            [ j:insn           jvm:getfield ;
-                             j:memberOperand  <java://org/example/pond/Pond.duck-Oorg.example.duck.Duck> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.run---void>
+                             j:memberOperand  <java:org.example.pond.Pond.duck-Oorg.example.duck.Duck> ;
+                             j:partOf         pond-0.3.2:org.example.pond.Pond.run---void
                            ]
                            [ j:insn           jvm:invokevirtual ;
-                             j:memberOperand  <java://org/example/duck/Duck.quack---String> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.run---void>
+                             j:memberOperand  <java:org.example.duck.Duck.quack---String> ;
+                             j:partOf         pond-0.3.2:org.example.pond.Pond.run---void
                            ]
                            [ j:insn           jvm:invokevirtual ;
-                             j:memberOperand  <java://java/io/PrintStream.println-String--void> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.run---void>
+                             j:memberOperand  <java:java.io.PrintStream.println-String--void> ;
+                             j:partOf         pond-0.3.2:org.example.pond.Pond.run---void
                            ]
                            [ nh:lineNumber  "9"^^xsd:int ;
                              j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.run---void>
+                             j:partOf       pond-0.3.2:org.example.pond.Pond.run---void
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:maxLocals  "1"^^xsd:int ;
             j:maxStack   "2"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond> ;
+            j:memberOf   pond-0.3.2:org.example.pond.Pond ;
             j:rType      j:void ;
             j:srcEnd     [ nh:lineNumber  "9"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "8"^^xsd:int ] .
     
-    <java://java/io/PrintStream>
-            a       j:ref .
+    <java:org.example.pond.Pond.duck-Oorg.example.duck.Duck>
+            rdfs:isDefinedBy  pond-0.3.2:org.example.pond.Pond.duck-Oorg.example.duck.Duck .
     
-    <java://org/example/pond/Pond.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.--init-----void> .
+    <maven://org.example/pond/0.3.2>
+            a            m:MavenCoordinate ;
+            m:dependsOn  <maven://org.example/duck/0.4.3> .
     
-    <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.main-A1String--void>
+    pond-0.3.2:org.example.pond.Pond
+            a                   j:ref , nh:def ;
+            nh:defines          j:class ;
+            nh:idName           "org.example.pond.Pond" ;
+            nh:name             "org.example.pond.Pond" ;
+            j:classFileVersion  "52"^^xsd:int ;
+            j:extends           <java:java.lang.Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "Pond.java" .
+    
+    <java:org.example.pond.Pond.--init-----void>
+            rdfs:isDefinedBy  pond-0.3.2:org.example.pond.Pond.--init-----void .
+    
+    pond-0.3.2:org.example.pond.Pond.main-A1String--void
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/pond/Pond.main:([Ljava/lang/String;)V" ;
+            nh:idName    "org.example.pond.Pond.main:([Ljava/lang/String;)V" ;
             nh:name      "main" ;
             j:code       ( [ nh:lineNumber  "12"^^xsd:int ;
                              j:insn         jvm:new ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.main-A1String--void> ;
-                             j:typeOperand  <java://org/example/pond/Pond>
+                             j:partOf       pond-0.3.2:org.example.pond.Pond.main-A1String--void ;
+                             j:typeOperand  <java:org.example.pond.Pond>
                            ]
                            [ j:insn    jvm:dup ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.main-A1String--void>
+                             j:partOf  pond-0.3.2:org.example.pond.Pond.main-A1String--void
                            ]
                            [ j:insn           jvm:invokespecial ;
-                             j:memberOperand  <java://org/example/pond/Pond.--init-----void> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.main-A1String--void>
+                             j:memberOperand  <java:org.example.pond.Pond.--init-----void> ;
+                             j:partOf         pond-0.3.2:org.example.pond.Pond.main-A1String--void
                            ]
                            [ j:insn        jvm:astore ;
-                             j:partOf      <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.main-A1String--void> ;
+                             j:partOf      pond-0.3.2:org.example.pond.Pond.main-A1String--void ;
                              j:varOperand  [ rdf:value  "1"^^xsd:int ]
                            ]
                            [ nh:lineNumber  "14"^^xsd:int ;
                              j:insn         jvm:aload ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.main-A1String--void> ;
+                             j:partOf       pond-0.3.2:org.example.pond.Pond.main-A1String--void ;
                              j:varOperand   [ rdf:value  "1"^^xsd:int ;
                                               nh:idName  "pond:Lorg/example/pond/Pond;" ;
                                               nh:name    "pond" ;
-                                              j:type     <java://org/example/pond/Pond>
+                                              j:type     <java:org.example.pond.Pond>
                                             ]
                            ]
                            [ j:insn           jvm:invokevirtual ;
-                             j:memberOperand  <java://org/example/pond/Pond.run---void> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.main-A1String--void>
+                             j:memberOperand  <java:org.example.pond.Pond.run---void> ;
+                             j:partOf         pond-0.3.2:org.example.pond.Pond.main-A1String--void
                            ]
                            [ nh:lineNumber  "15"^^xsd:int ;
                              j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.main-A1String--void>
+                             j:partOf       pond-0.3.2:org.example.pond.Pond.main-A1String--void
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:hasFlag    j:static ;
             j:maxLocals  "2"^^xsd:int ;
             j:maxStack   "2"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond> ;
+            j:memberOf   pond-0.3.2:org.example.pond.Pond ;
             j:rType      j:void ;
             j:srcEnd     [ nh:lineNumber  "15"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "12"^^xsd:int ] .
     
+    <java:org.example.pond.Pond>
+            a                 j:ref ;
+            rdfs:isDefinedBy  pond-0.3.2:org.example.pond.Pond .
+    
+    <java:org.example.pond.Pond.main-A1String--void>
+            rdfs:isDefinedBy  pond-0.3.2:org.example.pond.Pond.main-A1String--void .
+    
     <maven://org.example/duck/0.4.3>
             a       m:MavenCoordinate .
     
-    <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond.duck-Oorg.example.duck.Duck>
-            a            nh:def ;
-            nh:declares  j:field ;
-            nh:idName    "org/example/pond/Pond.duck:Lorg/example/duck/Duck;" ;
-            nh:name      "duck" ;
-            j:hasAccess  j:private ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/pond/0.3.2/org/example/pond/Pond> ;
-            j:type       <java://org/example/duck/Duck> .
+    <java:org.example.duck.Duck>
+            a       j:ref .
 }
 
 duck-0.4.2: {
-    <java://org/example/duck/Duck.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck.--init-----void> .
-    
-    <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck>
-            a                   j:ref , nh:def ;
-            nh:defines          j:class ;
-            nh:idName           "org/example/duck/Duck" ;
-            nh:name             "org/example/duck/Duck" ;
-            j:classFileVersion  "52"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
-            j:hasAccess         j:public ;
-            j:sourceFile        "Duck.java" .
+    <java:java.lang.String>
+            a       j:ref .
     
     duck-0.4.2:  a           m:project ;
             m:artifactId     "duck" ;
@@ -630,273 +620,305 @@ duck-0.4.2: {
             a            m:MavenCoordinate ;
             m:dependsOn  <maven://org.slf4j/slf4j-simple/1.7.25> .
     
-    <java://java/lang/Object>
+    <java:org.example.duck.Duck>
+            a                 j:ref ;
+            rdfs:isDefinedBy  duck-0.4.2:org.example.duck.Duck .
+    
+    <java:java.lang.Object>
             a       j:ref .
     
-    <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck.quack---String>
+    duck-0.4.2:org.example.duck.Duck.--init-----void
+            a             nh:def ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org.example.duck.Duck.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       duck-0.4.2:org.example.duck.Duck.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/duck/Duck;" ;
+                                               nh:name    "this" ;
+                                               j:type     j:new-obj , <java:org.example.duck.Duck>
+                                             ]
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:java.lang.Object.--init-----void> ;
+                              j:partOf         duck-0.4.2:org.example.duck.Duck.--init-----void
+                            ]
+                            [ j:insn    jvm:return ;
+                              j:partOf  duck-0.4.2:org.example.duck.Duck.--init-----void
+                            ]
+                          ) ;
+            j:constructs  duck-0.4.2:org.example.duck.Duck ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    duck-0.4.2:org.example.duck.Duck ;
+            j:rType       j:void ;
+            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
+            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
+    
+    duck-0.4.2:org.example.duck.Duck
+            a                   j:ref , nh:def ;
+            nh:defines          j:class ;
+            nh:idName           "org.example.duck.Duck" ;
+            nh:name             "org.example.duck.Duck" ;
+            j:classFileVersion  "52"^^xsd:int ;
+            j:extends           <java:java.lang.Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "Duck.java" .
+    
+    <java:org.example.duck.Duck.quack---String>
+            rdfs:isDefinedBy  duck-0.4.2:org.example.duck.Duck.quack---String .
+    
+    duck-0.4.2:org.example.duck.Duck.quack---String
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/duck/Duck.quack:()Ljava/lang/String;" ;
+            nh:idName    "org.example.duck.Duck.quack:()Ljava/lang/String;" ;
             nh:name      "quack" ;
             j:code       ( [ nh:lineNumber  "5"^^xsd:int ;
                              j:insn         jvm:ldc ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck.quack---String>
+                             j:partOf       duck-0.4.2:org.example.duck.Duck.quack---String
                            ]
                            [ j:insn    jvm:areturn ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck.quack---String>
+                             j:partOf  duck-0.4.2:org.example.duck.Duck.quack---String
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:maxLocals  "1"^^xsd:int ;
             j:maxStack   "1"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck> ;
-            j:rType      <java://java/lang/String> ;
+            j:memberOf   duck-0.4.2:org.example.duck.Duck ;
+            j:rType      <java:java.lang.String> ;
             j:srcEnd     [ nh:lineNumber  "5"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "5"^^xsd:int ] .
     
-    <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck.--init-----void>
-            a             nh:def ;
-            nh:defines    j:field , j:constructor ;
-            nh:idName     "org/example/duck/Duck.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/duck/Duck;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/example/duck/Duck>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "1"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
-    
-    <java://org/example/duck/Duck>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck> .
+    <java:org.example.duck.Duck.--init-----void>
+            rdfs:isDefinedBy  duck-0.4.2:org.example.duck.Duck.--init-----void .
     
     <maven://org.slf4j/slf4j-simple/1.7.25>
             a       m:MavenCoordinate .
-    
-    <java://java/lang/String>
-            a       j:ref .
-    
-    <java://org/example/duck/Duck.quack---String>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/duck/0.4.2/org/example/duck/Duck.quack---String> .
 }
 
 duck-0.4.3: {
+    <java:java.lang.String>
+            a       j:ref .
+    
     <maven://org.example/duck/0.4.3>
             a            m:MavenCoordinate ;
             m:dependsOn  <maven://org.slf4j/slf4j-simple/1.7.25> .
     
-    <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.fly-double--void>
-            a            nh:def ;
-            nh:defines   j:method ;
-            nh:idName    "org/example/duck/Duck.fly:(D)V" ;
-            nh:name      "fly" ;
-            j:code       ( [ nh:lineNumber  "9"^^xsd:int ;
-                             j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.fly-double--void>
-                           ]
-                         ) ;
-            j:hasAccess  j:public ;
-            j:maxLocals  "3"^^xsd:int ;
-            j:maxStack   "0"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck> ;
-            j:rType      j:void ;
-            j:srcEnd     [ nh:lineNumber  "9"^^xsd:int ] ;
-            j:srcStart   [ nh:lineNumber  "9"^^xsd:int ] .
+    <java:org.example.duck.Duck>
+            a                 j:ref ;
+            rdfs:isDefinedBy  duck-0.4.3:org.example.duck.Duck .
     
-    <java://org/example/duck/Duck.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.--init-----void> .
+    <java:org.example.duck.Duck.fly-double--void>
+            rdfs:isDefinedBy  duck-0.4.3:org.example.duck.Duck.fly-double--void .
     
-    <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.--init-----void>
-            a             nh:def ;
-            nh:defines    j:constructor , j:field ;
-            nh:idName     "org/example/duck/Duck.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/duck/Duck;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/example/duck/Duck>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "1"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
-    
-    <java://java/lang/Object>
+    <java:java.lang.Object>
             a       j:ref .
     
-    <java://org/example/duck/Duck.fly-double--void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.fly-double--void> .
+    <java:org.example.duck.Duck.quack---String>
+            rdfs:isDefinedBy  duck-0.4.3:org.example.duck.Duck.quack---String .
     
-    <java://org/example/duck/Duck>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck> .
+    <java:org.example.duck.Duck.--init-----void>
+            rdfs:isDefinedBy  duck-0.4.3:org.example.duck.Duck.--init-----void .
     
-    <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.quack---String>
+    duck-0.4.3:org.example.duck.Duck.quack---String
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/duck/Duck.quack:()Ljava/lang/String;" ;
+            nh:idName    "org.example.duck.Duck.quack:()Ljava/lang/String;" ;
             nh:name      "quack" ;
             j:code       ( [ nh:lineNumber  "5"^^xsd:int ;
                              j:insn         jvm:ldc ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.quack---String>
+                             j:partOf       duck-0.4.3:org.example.duck.Duck.quack---String
                            ]
                            [ j:insn    jvm:areturn ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.quack---String>
+                             j:partOf  duck-0.4.3:org.example.duck.Duck.quack---String
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:maxLocals  "1"^^xsd:int ;
             j:maxStack   "1"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck> ;
-            j:rType      <java://java/lang/String> ;
+            j:memberOf   duck-0.4.3:org.example.duck.Duck ;
+            j:rType      <java:java.lang.String> ;
             j:srcEnd     [ nh:lineNumber  "5"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "5"^^xsd:int ] .
-    
-    <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck>
-            a                   j:ref , nh:def ;
-            nh:defines          j:class ;
-            nh:idName           "org/example/duck/Duck" ;
-            nh:name             "org/example/duck/Duck" ;
-            j:classFileVersion  "52"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
-            j:hasAccess         j:public ;
-            j:sourceFile        "Duck.java" .
     
     <maven://org.slf4j/slf4j-simple/1.7.25>
             a       m:MavenCoordinate .
     
-    <java://java/lang/String>
-            a       j:ref .
+    duck-0.4.3:org.example.duck.Duck
+            a                   j:ref , nh:def ;
+            nh:defines          j:class ;
+            nh:idName           "org.example.duck.Duck" ;
+            nh:name             "org.example.duck.Duck" ;
+            j:classFileVersion  "52"^^xsd:int ;
+            j:extends           <java:java.lang.Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "Duck.java" .
     
-    <java://org/example/duck/Duck.quack---String>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/duck/0.4.3/org/example/duck/Duck.quack---String> .
+    duck-0.4.3:org.example.duck.Duck.--init-----void
+            a             nh:def ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org.example.duck.Duck.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       duck-0.4.3:org.example.duck.Duck.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/duck/Duck;" ;
+                                               nh:name    "this" ;
+                                               j:type     j:new-obj , <java:org.example.duck.Duck>
+                                             ]
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:java.lang.Object.--init-----void> ;
+                              j:partOf         duck-0.4.3:org.example.duck.Duck.--init-----void
+                            ]
+                            [ j:insn    jvm:return ;
+                              j:partOf  duck-0.4.3:org.example.duck.Duck.--init-----void
+                            ]
+                          ) ;
+            j:constructs  duck-0.4.3:org.example.duck.Duck ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    duck-0.4.3:org.example.duck.Duck ;
+            j:rType       j:void ;
+            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
+            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
     
     duck-0.4.3:  a           m:project ;
             m:artifactId     "duck" ;
             m:groupId        "org.example" ;
             m:hasCoordinate  <maven://org.example/duck/0.4.3> ;
             m:version        "0.4.3" .
+    
+    duck-0.4.3:org.example.duck.Duck.fly-double--void
+            a            nh:def ;
+            nh:defines   j:method ;
+            nh:idName    "org.example.duck.Duck.fly:(D)V" ;
+            nh:name      "fly" ;
+            j:code       ( [ nh:lineNumber  "9"^^xsd:int ;
+                             j:insn         jvm:return ;
+                             j:partOf       duck-0.4.3:org.example.duck.Duck.fly-double--void
+                           ]
+                         ) ;
+            j:hasAccess  j:public ;
+            j:maxLocals  "3"^^xsd:int ;
+            j:maxStack   "0"^^xsd:int ;
+            j:memberOf   duck-0.4.3:org.example.duck.Duck ;
+            j:rType      j:void ;
+            j:srcEnd     [ nh:lineNumber  "9"^^xsd:int ] ;
+            j:srcStart   [ nh:lineNumber  "9"^^xsd:int ] .
 }
 
 rubberduck-0.1.3: {
-    <java://org/example/duck/Duck.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.--init-----void> .
-    
-    <java://java/lang/Object>
+    <java:java.lang.String>
             a       j:ref .
     
-    <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck>
+    rubberduck-0.1.3:org.example.duck.Duck.teleport-double--void
+            a            nh:def ;
+            nh:defines   j:method ;
+            nh:idName    "org.example.duck.Duck.teleport:(D)V" ;
+            nh:name      "teleport" ;
+            j:code       ( [ nh:lineNumber  "9"^^xsd:int ;
+                             j:insn         jvm:return ;
+                             j:partOf       rubberduck-0.1.3:org.example.duck.Duck.teleport-double--void
+                           ]
+                         ) ;
+            j:hasAccess  j:public ;
+            j:maxLocals  "3"^^xsd:int ;
+            j:maxStack   "0"^^xsd:int ;
+            j:memberOf   rubberduck-0.1.3:org.example.duck.Duck ;
+            j:rType      j:void ;
+            j:srcEnd     [ nh:lineNumber  "9"^^xsd:int ] ;
+            j:srcStart   [ nh:lineNumber  "9"^^xsd:int ] .
+    
+    <java:org.example.duck.Duck>
+            a                 j:ref ;
+            rdfs:isDefinedBy  rubberduck-0.1.3:org.example.duck.Duck .
+    
+    <java:java.lang.Object>
+            a       j:ref .
+    
+    <java:org.example.duck.Duck.quack---String>
+            rdfs:isDefinedBy  rubberduck-0.1.3:org.example.duck.Duck.quack---String .
+    
+    rubberduck-0.1.3:org.example.duck.Duck.--init-----void
+            a             nh:def ;
+            nh:defines    j:constructor , j:field ;
+            nh:idName     "org.example.duck.Duck.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       rubberduck-0.1.3:org.example.duck.Duck.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/duck/Duck;" ;
+                                               nh:name    "this" ;
+                                               j:type     j:new-obj , <java:org.example.duck.Duck>
+                                             ]
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:java.lang.Object.--init-----void> ;
+                              j:partOf         rubberduck-0.1.3:org.example.duck.Duck.--init-----void
+                            ]
+                            [ j:insn    jvm:return ;
+                              j:partOf  rubberduck-0.1.3:org.example.duck.Duck.--init-----void
+                            ]
+                          ) ;
+            j:constructs  rubberduck-0.1.3:org.example.duck.Duck ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    rubberduck-0.1.3:org.example.duck.Duck ;
+            j:rType       j:void ;
+            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
+            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
+    
+    <java:org.example.duck.Duck.--init-----void>
+            rdfs:isDefinedBy  rubberduck-0.1.3:org.example.duck.Duck.--init-----void .
+    
+    <java:org.example.duck.Duck.teleport-double--void>
+            rdfs:isDefinedBy  rubberduck-0.1.3:org.example.duck.Duck.teleport-double--void .
+    
+    rubberduck-0.1.3:org.example.duck.Duck
             a                   j:ref , nh:def ;
             nh:defines          j:class ;
-            nh:idName           "org/example/duck/Duck" ;
-            nh:name             "org/example/duck/Duck" ;
+            nh:idName           "org.example.duck.Duck" ;
+            nh:name             "org.example.duck.Duck" ;
             j:classFileVersion  "52"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
+            j:extends           <java:java.lang.Object> ;
             j:hasAccess         j:public ;
             j:sourceFile        "Duck.java" .
     
-    <java://org/example/duck/Duck>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck> .
+    <maven://org.slf4j/slf4j-simple/1.7.25>
+            a       m:MavenCoordinate .
     
-    <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.quack---String>
+    rubberduck-0.1.3:org.example.duck.Duck.quack---String
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/duck/Duck.quack:()Ljava/lang/String;" ;
+            nh:idName    "org.example.duck.Duck.quack:()Ljava/lang/String;" ;
             nh:name      "quack" ;
             j:code       ( [ nh:lineNumber  "5"^^xsd:int ;
                              j:insn         jvm:ldc ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.quack---String>
+                             j:partOf       rubberduck-0.1.3:org.example.duck.Duck.quack---String
                            ]
                            [ j:insn    jvm:areturn ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.quack---String>
+                             j:partOf  rubberduck-0.1.3:org.example.duck.Duck.quack---String
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:maxLocals  "1"^^xsd:int ;
             j:maxStack   "1"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck> ;
-            j:rType      <java://java/lang/String> ;
+            j:memberOf   rubberduck-0.1.3:org.example.duck.Duck ;
+            j:rType      <java:java.lang.String> ;
             j:srcEnd     [ nh:lineNumber  "5"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "5"^^xsd:int ] .
     
-    <maven://org.slf4j/slf4j-simple/1.7.25>
-            a       m:MavenCoordinate .
-    
-    <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.--init-----void>
-            a             nh:def ;
-            nh:defines    j:field , j:constructor ;
-            nh:idName     "org/example/duck/Duck.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/duck/Duck;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/example/duck/Duck>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "1"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
-    
-    <java://java/lang/String>
-            a       j:ref .
-    
-    <java://org/example/duck/Duck.teleport-double--void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.teleport-double--void> .
-    
-    <java://org/example/duck/Duck.quack---String>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.quack---String> .
+    <maven://org.example/rubberduck/0.1.3>
+            a            m:MavenCoordinate ;
+            m:dependsOn  <maven://org.slf4j/slf4j-simple/1.7.25> .
     
     rubberduck-0.1.3:
             a                m:project ;
@@ -904,61 +926,11 @@ rubberduck-0.1.3: {
             m:groupId        "org.example" ;
             m:hasCoordinate  <maven://org.example/rubberduck/0.1.3> ;
             m:version        "0.1.3" .
-    
-    <maven://org.example/rubberduck/0.1.3>
-            a            m:MavenCoordinate ;
-            m:dependsOn  <maven://org.slf4j/slf4j-simple/1.7.25> .
-    
-    <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.teleport-double--void>
-            a            nh:def ;
-            nh:defines   j:method ;
-            nh:idName    "org/example/duck/Duck.teleport:(D)V" ;
-            nh:name      "teleport" ;
-            j:code       ( [ nh:lineNumber  "9"^^xsd:int ;
-                             j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck.teleport-double--void>
-                           ]
-                         ) ;
-            j:hasAccess  j:public ;
-            j:maxLocals  "3"^^xsd:int ;
-            j:maxStack   "0"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/rubberduck/0.1.3/org/example/duck/Duck> ;
-            j:rType      j:void ;
-            j:srcEnd     [ nh:lineNumber  "9"^^xsd:int ] ;
-            j:srcStart   [ nh:lineNumber  "9"^^xsd:int ] .
 }
 
 rubberduck-0.1.2: {
-    <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck.--init-----void>
-            a             nh:def ;
-            nh:defines    j:constructor , j:field ;
-            nh:idName     "org/example/duck/Duck.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/duck/Duck;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/example/duck/Duck>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "1"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
+    <java:java.lang.String>
+            a       j:ref .
     
     rubberduck-0.1.2:
             a                m:project ;
@@ -967,139 +939,178 @@ rubberduck-0.1.2: {
             m:hasCoordinate  <maven://org.example/rubberduck/0.1.2> ;
             m:version        "0.1.2" .
     
-    <java://org/example/duck/Duck.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck.--init-----void> .
+    rubberduck-0.1.2:org.example.duck.Duck.--init-----void
+            a             nh:def ;
+            nh:defines    j:constructor , j:field ;
+            nh:idName     "org.example.duck.Duck.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       rubberduck-0.1.2:org.example.duck.Duck.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/duck/Duck;" ;
+                                               nh:name    "this" ;
+                                               j:type     j:new-obj , <java:org.example.duck.Duck>
+                                             ]
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:java.lang.Object.--init-----void> ;
+                              j:partOf         rubberduck-0.1.2:org.example.duck.Duck.--init-----void
+                            ]
+                            [ j:insn    jvm:return ;
+                              j:partOf  rubberduck-0.1.2:org.example.duck.Duck.--init-----void
+                            ]
+                          ) ;
+            j:constructs  rubberduck-0.1.2:org.example.duck.Duck ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    rubberduck-0.1.2:org.example.duck.Duck ;
+            j:rType       j:void ;
+            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
+            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
     
     <maven://org.example/rubberduck/0.1.2>
             a            m:MavenCoordinate ;
             m:dependsOn  <maven://org.slf4j/slf4j-simple/1.7.25> .
     
-    <java://java/lang/Object>
+    rubberduck-0.1.2:org.example.duck.Duck
+            a                   j:ref , nh:def ;
+            nh:defines          j:class ;
+            nh:idName           "org.example.duck.Duck" ;
+            nh:name             "org.example.duck.Duck" ;
+            j:classFileVersion  "52"^^xsd:int ;
+            j:extends           <java:java.lang.Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "Duck.java" .
+    
+    <java:org.example.duck.Duck>
+            a                 j:ref ;
+            rdfs:isDefinedBy  rubberduck-0.1.2:org.example.duck.Duck .
+    
+    <java:java.lang.Object>
             a       j:ref .
     
-    <java://org/example/duck/Duck>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck> .
+    <java:org.example.duck.Duck.quack---String>
+            rdfs:isDefinedBy  rubberduck-0.1.2:org.example.duck.Duck.quack---String .
     
-    <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck.quack---String>
+    <java:org.example.duck.Duck.--init-----void>
+            rdfs:isDefinedBy  rubberduck-0.1.2:org.example.duck.Duck.--init-----void .
+    
+    rubberduck-0.1.2:org.example.duck.Duck.quack---String
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/duck/Duck.quack:()Ljava/lang/String;" ;
+            nh:idName    "org.example.duck.Duck.quack:()Ljava/lang/String;" ;
             nh:name      "quack" ;
             j:code       ( [ nh:lineNumber  "5"^^xsd:int ;
                              j:insn         jvm:ldc ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck.quack---String>
+                             j:partOf       rubberduck-0.1.2:org.example.duck.Duck.quack---String
                            ]
                            [ j:insn    jvm:areturn ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck.quack---String>
+                             j:partOf  rubberduck-0.1.2:org.example.duck.Duck.quack---String
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:maxLocals  "1"^^xsd:int ;
             j:maxStack   "1"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck> ;
-            j:rType      <java://java/lang/String> ;
+            j:memberOf   rubberduck-0.1.2:org.example.duck.Duck ;
+            j:rType      <java:java.lang.String> ;
             j:srcEnd     [ nh:lineNumber  "5"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "5"^^xsd:int ] .
     
     <maven://org.slf4j/slf4j-simple/1.7.25>
             a       m:MavenCoordinate .
-    
-    <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck>
-            a                   j:ref , nh:def ;
-            nh:defines          j:class ;
-            nh:idName           "org/example/duck/Duck" ;
-            nh:name             "org/example/duck/Duck" ;
-            j:classFileVersion  "52"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
-            j:hasAccess         j:public ;
-            j:sourceFile        "Duck.java" .
-    
-    <java://java/lang/String>
-            a       j:ref .
-    
-    <java://org/example/duck/Duck.quack---String>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/rubberduck/0.1.2/org/example/duck/Duck.quack---String> .
 }
 
 pond-0.3.1: {
-    <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.duck-Oorg.example.duck.Duck>
+    <java:java.lang.Object>
+            a       j:ref .
+    
+    <java:java.io.PrintStream>
+            a       j:ref .
+    
+    <java:java.lang.System>
+            a       j:ref .
+    
+    <java:org.example.pond.Pond.run---void>
+            rdfs:isDefinedBy  pond-0.3.1:org.example.pond.Pond.run---void .
+    
+    pond-0.3.1:org.example.pond.Pond.duck-Oorg.example.duck.Duck
             a            nh:def ;
             nh:declares  j:field ;
-            nh:idName    "org/example/pond/Pond.duck:Lorg/example/duck/Duck;" ;
+            nh:idName    "org.example.pond.Pond.duck:Lorg/example/duck/Duck;" ;
             nh:name      "duck" ;
             j:hasAccess  j:private ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond> ;
-            j:type       <java://org/example/duck/Duck> .
+            j:memberOf   pond-0.3.1:org.example.pond.Pond ;
+            j:type       <java:org.example.duck.Duck> .
     
-    <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.run---void>
-            a            nh:def ;
-            nh:defines   j:method ;
-            nh:idName    "org/example/pond/Pond.run:()V" ;
-            nh:name      "run" ;
-            j:code       ( [ nh:lineNumber    "8"^^xsd:int ;
-                             j:insn           jvm:getstatic ;
-                             j:memberOperand  <java://java/lang/System.out-Ojava.io.PrintStream> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.run---void>
-                           ]
-                           [ j:insn        jvm:aload ;
-                             j:partOf      <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.run---void> ;
-                             j:varOperand  [ rdf:value  "0"^^xsd:int ;
-                                             nh:idName  "this:Lorg/example/pond/Pond;" ;
-                                             nh:name    "this" ;
-                                             j:type     <java://org/example/pond/Pond>
-                                           ]
-                           ]
-                           [ j:insn           jvm:getfield ;
-                             j:memberOperand  <java://org/example/pond/Pond.duck-Oorg.example.duck.Duck> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.run---void>
-                           ]
-                           [ j:insn           jvm:invokevirtual ;
-                             j:memberOperand  <java://org/example/duck/Duck.quack---String> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.run---void>
-                           ]
-                           [ j:insn           jvm:invokevirtual ;
-                             j:memberOperand  <java://java/io/PrintStream.println-String--void> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.run---void>
-                           ]
-                           [ nh:lineNumber  "9"^^xsd:int ;
-                             j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.run---void>
-                           ]
-                         ) ;
-            j:hasAccess  j:public ;
-            j:maxLocals  "1"^^xsd:int ;
-            j:maxStack   "2"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond> ;
-            j:rType      j:void ;
-            j:srcEnd     [ nh:lineNumber  "9"^^xsd:int ] ;
-            j:srcStart   [ nh:lineNumber  "8"^^xsd:int ] .
-    
-    <java://org/example/pond/Pond>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond> .
-    
-    <java://java/lang/System>
-            a       j:ref .
-    
-    <java://org/example/duck/Duck>
-            a       j:ref .
-    
-    <java://org/example/pond/Pond.run---void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.run---void> .
-    
-    <java://org/example/pond/Pond.main-A1String--void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.main-A1String--void> .
-    
-    <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond>
+    pond-0.3.1:org.example.pond.Pond
             a                   j:ref , nh:def ;
             nh:defines          j:class ;
-            nh:idName           "org/example/pond/Pond" ;
-            nh:name             "org/example/pond/Pond" ;
+            nh:idName           "org.example.pond.Pond" ;
+            nh:name             "org.example.pond.Pond" ;
             j:classFileVersion  "52"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
+            j:extends           <java:java.lang.Object> ;
             j:hasAccess         j:public ;
             j:sourceFile        "Pond.java" .
+    
+    pond-0.3.1:org.example.pond.Pond.--init-----void
+            a             nh:def ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org.example.pond.Pond.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        ( [ nh:lineNumber  "4"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       pond-0.3.1:org.example.pond.Pond.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
+                                               nh:name    "this" ;
+                                               j:type     j:new-obj , <java:org.example.pond.Pond>
+                                             ]
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:java.lang.Object.--init-----void> ;
+                              j:partOf         pond-0.3.1:org.example.pond.Pond.--init-----void
+                            ]
+                            [ nh:lineNumber  "5"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       pond-0.3.1:org.example.pond.Pond.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
+                                               nh:name    "this" ;
+                                               j:type     <java:org.example.pond.Pond>
+                                             ]
+                            ]
+                            [ j:insn         jvm:new ;
+                              j:partOf       pond-0.3.1:org.example.pond.Pond.--init-----void ;
+                              j:typeOperand  <java:org.example.duck.Duck>
+                            ]
+                            [ j:insn    jvm:dup ;
+                              j:partOf  pond-0.3.1:org.example.pond.Pond.--init-----void
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:org.example.duck.Duck.--init-----void> ;
+                              j:partOf         pond-0.3.1:org.example.pond.Pond.--init-----void
+                            ]
+                            [ j:insn           jvm:putfield ;
+                              j:memberOperand  <java:org.example.pond.Pond.duck-Oorg.example.duck.Duck> ;
+                              j:partOf         pond-0.3.1:org.example.pond.Pond.--init-----void
+                            ]
+                            [ j:insn    jvm:return ;
+                              j:partOf  pond-0.3.1:org.example.pond.Pond.--init-----void
+                            ]
+                          ) ;
+            j:constructs  pond-0.3.1:org.example.pond.Pond ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "3"^^xsd:int ;
+            j:memberOf    pond-0.3.1:org.example.pond.Pond ;
+            j:rType       j:void ;
+            j:srcEnd      [ nh:lineNumber  "5"^^xsd:int ] ;
+            j:srcStart    [ nh:lineNumber  "4"^^xsd:int ] .
+    
+    <java:org.example.pond.Pond.duck-Oorg.example.duck.Duck>
+            rdfs:isDefinedBy  pond-0.3.1:org.example.pond.Pond.duck-Oorg.example.duck.Duck .
     
     <maven://org.example/rubberduck/0.1.2>
             a       m:MavenCoordinate .
@@ -1110,181 +1121,161 @@ pond-0.3.1: {
             m:hasCoordinate  <maven://org.example/pond/0.3.1> ;
             m:version        "0.3.1" .
     
-    <java://org/example/pond/Pond.duck-Oorg.example.duck.Duck>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.duck-Oorg.example.duck.Duck> .
-    
-    <java://java/lang/Object>
-            a       j:ref .
+    pond-0.3.1:org.example.pond.Pond.run---void
+            a            nh:def ;
+            nh:defines   j:method ;
+            nh:idName    "org.example.pond.Pond.run:()V" ;
+            nh:name      "run" ;
+            j:code       ( [ nh:lineNumber    "8"^^xsd:int ;
+                             j:insn           jvm:getstatic ;
+                             j:memberOperand  <java:java.lang.System.out-Ojava.io.PrintStream> ;
+                             j:partOf         pond-0.3.1:org.example.pond.Pond.run---void
+                           ]
+                           [ j:insn        jvm:aload ;
+                             j:partOf      pond-0.3.1:org.example.pond.Pond.run---void ;
+                             j:varOperand  [ rdf:value  "0"^^xsd:int ;
+                                             nh:idName  "this:Lorg/example/pond/Pond;" ;
+                                             nh:name    "this" ;
+                                             j:type     <java:org.example.pond.Pond>
+                                           ]
+                           ]
+                           [ j:insn           jvm:getfield ;
+                             j:memberOperand  <java:org.example.pond.Pond.duck-Oorg.example.duck.Duck> ;
+                             j:partOf         pond-0.3.1:org.example.pond.Pond.run---void
+                           ]
+                           [ j:insn           jvm:invokevirtual ;
+                             j:memberOperand  <java:org.example.duck.Duck.quack---String> ;
+                             j:partOf         pond-0.3.1:org.example.pond.Pond.run---void
+                           ]
+                           [ j:insn           jvm:invokevirtual ;
+                             j:memberOperand  <java:java.io.PrintStream.println-String--void> ;
+                             j:partOf         pond-0.3.1:org.example.pond.Pond.run---void
+                           ]
+                           [ nh:lineNumber  "9"^^xsd:int ;
+                             j:insn         jvm:return ;
+                             j:partOf       pond-0.3.1:org.example.pond.Pond.run---void
+                           ]
+                         ) ;
+            j:hasAccess  j:public ;
+            j:maxLocals  "1"^^xsd:int ;
+            j:maxStack   "2"^^xsd:int ;
+            j:memberOf   pond-0.3.1:org.example.pond.Pond ;
+            j:rType      j:void ;
+            j:srcEnd     [ nh:lineNumber  "9"^^xsd:int ] ;
+            j:srcStart   [ nh:lineNumber  "8"^^xsd:int ] .
     
     <maven://org.example/pond/0.3.1>
             a            m:MavenCoordinate ;
             m:dependsOn  <maven://org.example/rubberduck/0.1.2> .
     
-    <java://java/io/PrintStream>
-            a       j:ref .
+    <java:org.example.pond.Pond.--init-----void>
+            rdfs:isDefinedBy  pond-0.3.1:org.example.pond.Pond.--init-----void .
     
-    <java://org/example/pond/Pond.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void> .
-    
-    <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.main-A1String--void>
+    pond-0.3.1:org.example.pond.Pond.main-A1String--void
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/pond/Pond.main:([Ljava/lang/String;)V" ;
+            nh:idName    "org.example.pond.Pond.main:([Ljava/lang/String;)V" ;
             nh:name      "main" ;
             j:code       ( [ nh:lineNumber  "12"^^xsd:int ;
                              j:insn         jvm:new ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.main-A1String--void> ;
-                             j:typeOperand  <java://org/example/pond/Pond>
+                             j:partOf       pond-0.3.1:org.example.pond.Pond.main-A1String--void ;
+                             j:typeOperand  <java:org.example.pond.Pond>
                            ]
                            [ j:insn    jvm:dup ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.main-A1String--void>
+                             j:partOf  pond-0.3.1:org.example.pond.Pond.main-A1String--void
                            ]
                            [ j:insn           jvm:invokespecial ;
-                             j:memberOperand  <java://org/example/pond/Pond.--init-----void> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.main-A1String--void>
+                             j:memberOperand  <java:org.example.pond.Pond.--init-----void> ;
+                             j:partOf         pond-0.3.1:org.example.pond.Pond.main-A1String--void
                            ]
                            [ j:insn        jvm:astore ;
-                             j:partOf      <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.main-A1String--void> ;
+                             j:partOf      pond-0.3.1:org.example.pond.Pond.main-A1String--void ;
                              j:varOperand  [ rdf:value  "1"^^xsd:int ]
                            ]
                            [ nh:lineNumber  "14"^^xsd:int ;
                              j:insn         jvm:aload ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.main-A1String--void> ;
+                             j:partOf       pond-0.3.1:org.example.pond.Pond.main-A1String--void ;
                              j:varOperand   [ rdf:value  "1"^^xsd:int ;
                                               nh:idName  "pond:Lorg/example/pond/Pond;" ;
                                               nh:name    "pond" ;
-                                              j:type     <java://org/example/pond/Pond>
+                                              j:type     <java:org.example.pond.Pond>
                                             ]
                            ]
                            [ j:insn           jvm:invokevirtual ;
-                             j:memberOperand  <java://org/example/pond/Pond.run---void> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.main-A1String--void>
+                             j:memberOperand  <java:org.example.pond.Pond.run---void> ;
+                             j:partOf         pond-0.3.1:org.example.pond.Pond.main-A1String--void
                            ]
                            [ nh:lineNumber  "15"^^xsd:int ;
                              j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.main-A1String--void>
+                             j:partOf       pond-0.3.1:org.example.pond.Pond.main-A1String--void
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:hasFlag    j:static ;
             j:maxLocals  "2"^^xsd:int ;
             j:maxStack   "2"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond> ;
+            j:memberOf   pond-0.3.1:org.example.pond.Pond ;
             j:rType      j:void ;
             j:srcEnd     [ nh:lineNumber  "15"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "12"^^xsd:int ] .
     
-    <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void>
-            a             nh:def ;
-            nh:defines    j:constructor , j:field ;
-            nh:idName     "org/example/pond/Pond.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "4"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/example/pond/Pond>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ nh:lineNumber  "5"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
-                                               nh:name    "this" ;
-                                               j:type     <java://org/example/pond/Pond>
-                                             ]
-                            ]
-                            [ j:insn         jvm:new ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void> ;
-                              j:typeOperand  <java://org/example/duck/Duck>
-                            ]
-                            [ j:insn    jvm:dup ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://org/example/duck/Duck.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ j:insn           jvm:putfield ;
-                              j:memberOperand  <java://org/example/pond/Pond.duck-Oorg.example.duck.Duck> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "3"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/org.example/pond/0.3.1/org/example/pond/Pond> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "5"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "4"^^xsd:int ] .
+    <java:org.example.pond.Pond>
+            a                 j:ref ;
+            rdfs:isDefinedBy  pond-0.3.1:org.example.pond.Pond .
+    
+    <java:org.example.pond.Pond.main-A1String--void>
+            rdfs:isDefinedBy  pond-0.3.1:org.example.pond.Pond.main-A1String--void .
+    
+    <java:org.example.duck.Duck>
+            a       j:ref .
 }
 
 pond-0.3.0: {
-    <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void>
-            a             nh:def ;
-            nh:defines    j:constructor , j:field ;
-            nh:idName     "org/example/pond/Pond.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "4"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/example/pond/Pond>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ nh:lineNumber  "5"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
-                                               nh:name    "this" ;
-                                               j:type     <java://org/example/pond/Pond>
-                                             ]
-                            ]
-                            [ j:insn         jvm:new ;
-                              j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void> ;
-                              j:typeOperand  <java://org/example/duck/Duck>
-                            ]
-                            [ j:insn    jvm:dup ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://org/example/duck/Duck.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ j:insn           jvm:putfield ;
-                              j:memberOperand  <java://org/example/pond/Pond.duck-Oorg.example.duck.Duck> ;
-                              j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "3"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "5"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "4"^^xsd:int ] .
+    <java:java.lang.Object>
+            a       j:ref .
+    
+    pond-0.3.0:org.example.pond.Pond.run---void
+            a            nh:def ;
+            nh:defines   j:method ;
+            nh:idName    "org.example.pond.Pond.run:()V" ;
+            nh:name      "run" ;
+            j:code       ( [ nh:lineNumber    "8"^^xsd:int ;
+                             j:insn           jvm:getstatic ;
+                             j:memberOperand  <java:java.lang.System.out-Ojava.io.PrintStream> ;
+                             j:partOf         pond-0.3.0:org.example.pond.Pond.run---void
+                           ]
+                           [ j:insn        jvm:aload ;
+                             j:partOf      pond-0.3.0:org.example.pond.Pond.run---void ;
+                             j:varOperand  [ rdf:value  "0"^^xsd:int ;
+                                             nh:idName  "this:Lorg/example/pond/Pond;" ;
+                                             nh:name    "this" ;
+                                             j:type     <java:org.example.pond.Pond>
+                                           ]
+                           ]
+                           [ j:insn           jvm:getfield ;
+                             j:memberOperand  <java:org.example.pond.Pond.duck-Oorg.example.duck.Duck> ;
+                             j:partOf         pond-0.3.0:org.example.pond.Pond.run---void
+                           ]
+                           [ j:insn           jvm:invokevirtual ;
+                             j:memberOperand  <java:org.example.duck.Duck.quack---String> ;
+                             j:partOf         pond-0.3.0:org.example.pond.Pond.run---void
+                           ]
+                           [ j:insn           jvm:invokevirtual ;
+                             j:memberOperand  <java:java.io.PrintStream.println-String--void> ;
+                             j:partOf         pond-0.3.0:org.example.pond.Pond.run---void
+                           ]
+                           [ nh:lineNumber  "9"^^xsd:int ;
+                             j:insn         jvm:return ;
+                             j:partOf       pond-0.3.0:org.example.pond.Pond.run---void
+                           ]
+                         ) ;
+            j:hasAccess  j:public ;
+            j:maxLocals  "1"^^xsd:int ;
+            j:maxStack   "2"^^xsd:int ;
+            j:memberOf   pond-0.3.0:org.example.pond.Pond ;
+            j:rType      j:void ;
+            j:srcEnd     [ nh:lineNumber  "9"^^xsd:int ] ;
+            j:srcStart   [ nh:lineNumber  "8"^^xsd:int ] .
     
     <maven://org.example/duck/0.4.2>
             a       m:MavenCoordinate .
@@ -1295,145 +1286,154 @@ pond-0.3.0: {
             m:hasCoordinate  <maven://org.example/pond/0.3.0> ;
             m:version        "0.3.0" .
     
-    <java://org/example/pond/Pond>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond> .
-    
-    <java://java/lang/System>
+    <java:java.io.PrintStream>
             a       j:ref .
     
-    <java://org/example/duck/Duck>
+    <java:java.lang.System>
             a       j:ref .
     
-    <java://org/example/pond/Pond.run---void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.run---void> .
+    <java:org.example.pond.Pond.run---void>
+            rdfs:isDefinedBy  pond-0.3.0:org.example.pond.Pond.run---void .
     
-    <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.duck-Oorg.example.duck.Duck>
-            a            nh:def ;
-            nh:declares  j:field ;
-            nh:idName    "org/example/pond/Pond.duck:Lorg/example/duck/Duck;" ;
-            nh:name      "duck" ;
-            j:hasAccess  j:private ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond> ;
-            j:type       <java://org/example/duck/Duck> .
-    
-    <java://org/example/pond/Pond.main-A1String--void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.main-A1String--void> .
-    
-    <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.run---void>
-            a            nh:def ;
-            nh:defines   j:method ;
-            nh:idName    "org/example/pond/Pond.run:()V" ;
-            nh:name      "run" ;
-            j:code       ( [ nh:lineNumber    "8"^^xsd:int ;
-                             j:insn           jvm:getstatic ;
-                             j:memberOperand  <java://java/lang/System.out-Ojava.io.PrintStream> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.run---void>
-                           ]
-                           [ j:insn        jvm:aload ;
-                             j:partOf      <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.run---void> ;
-                             j:varOperand  [ rdf:value  "0"^^xsd:int ;
-                                             nh:idName  "this:Lorg/example/pond/Pond;" ;
-                                             nh:name    "this" ;
-                                             j:type     <java://org/example/pond/Pond>
-                                           ]
-                           ]
-                           [ j:insn           jvm:getfield ;
-                             j:memberOperand  <java://org/example/pond/Pond.duck-Oorg.example.duck.Duck> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.run---void>
-                           ]
-                           [ j:insn           jvm:invokevirtual ;
-                             j:memberOperand  <java://org/example/duck/Duck.quack---String> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.run---void>
-                           ]
-                           [ j:insn           jvm:invokevirtual ;
-                             j:memberOperand  <java://java/io/PrintStream.println-String--void> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.run---void>
-                           ]
-                           [ nh:lineNumber  "9"^^xsd:int ;
-                             j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.run---void>
-                           ]
-                         ) ;
-            j:hasAccess  j:public ;
-            j:maxLocals  "1"^^xsd:int ;
-            j:maxStack   "2"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond> ;
-            j:rType      j:void ;
-            j:srcEnd     [ nh:lineNumber  "9"^^xsd:int ] ;
-            j:srcStart   [ nh:lineNumber  "8"^^xsd:int ] .
-    
-    <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond>
+    pond-0.3.0:org.example.pond.Pond
             a                   j:ref , nh:def ;
             nh:defines          j:class ;
-            nh:idName           "org/example/pond/Pond" ;
-            nh:name             "org/example/pond/Pond" ;
+            nh:idName           "org.example.pond.Pond" ;
+            nh:name             "org.example.pond.Pond" ;
             j:classFileVersion  "52"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
+            j:extends           <java:java.lang.Object> ;
             j:hasAccess         j:public ;
             j:sourceFile        "Pond.java" .
     
-    <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.main-A1String--void>
+    pond-0.3.0:org.example.pond.Pond.duck-Oorg.example.duck.Duck
+            a            nh:def ;
+            nh:declares  j:field ;
+            nh:idName    "org.example.pond.Pond.duck:Lorg/example/duck/Duck;" ;
+            nh:name      "duck" ;
+            j:hasAccess  j:private ;
+            j:memberOf   pond-0.3.0:org.example.pond.Pond ;
+            j:type       <java:org.example.duck.Duck> .
+    
+    pond-0.3.0:org.example.pond.Pond.--init-----void
+            a             nh:def ;
+            nh:defines    j:constructor , j:field ;
+            nh:idName     "org.example.pond.Pond.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        ( [ nh:lineNumber  "4"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       pond-0.3.0:org.example.pond.Pond.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
+                                               nh:name    "this" ;
+                                               j:type     j:new-obj , <java:org.example.pond.Pond>
+                                             ]
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:java.lang.Object.--init-----void> ;
+                              j:partOf         pond-0.3.0:org.example.pond.Pond.--init-----void
+                            ]
+                            [ nh:lineNumber  "5"^^xsd:int ;
+                              j:insn         jvm:aload ;
+                              j:partOf       pond-0.3.0:org.example.pond.Pond.--init-----void ;
+                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
+                                               nh:idName  "this:Lorg/example/pond/Pond;" ;
+                                               nh:name    "this" ;
+                                               j:type     <java:org.example.pond.Pond>
+                                             ]
+                            ]
+                            [ j:insn         jvm:new ;
+                              j:partOf       pond-0.3.0:org.example.pond.Pond.--init-----void ;
+                              j:typeOperand  <java:org.example.duck.Duck>
+                            ]
+                            [ j:insn    jvm:dup ;
+                              j:partOf  pond-0.3.0:org.example.pond.Pond.--init-----void
+                            ]
+                            [ j:insn           jvm:invokespecial ;
+                              j:memberOperand  <java:org.example.duck.Duck.--init-----void> ;
+                              j:partOf         pond-0.3.0:org.example.pond.Pond.--init-----void
+                            ]
+                            [ j:insn           jvm:putfield ;
+                              j:memberOperand  <java:org.example.pond.Pond.duck-Oorg.example.duck.Duck> ;
+                              j:partOf         pond-0.3.0:org.example.pond.Pond.--init-----void
+                            ]
+                            [ j:insn    jvm:return ;
+                              j:partOf  pond-0.3.0:org.example.pond.Pond.--init-----void
+                            ]
+                          ) ;
+            j:constructs  pond-0.3.0:org.example.pond.Pond ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "3"^^xsd:int ;
+            j:memberOf    pond-0.3.0:org.example.pond.Pond ;
+            j:rType       j:void ;
+            j:srcEnd      [ nh:lineNumber  "5"^^xsd:int ] ;
+            j:srcStart    [ nh:lineNumber  "4"^^xsd:int ] .
+    
+    <java:org.example.pond.Pond.duck-Oorg.example.duck.Duck>
+            rdfs:isDefinedBy  pond-0.3.0:org.example.pond.Pond.duck-Oorg.example.duck.Duck .
+    
+    pond-0.3.0:org.example.pond.Pond.main-A1String--void
             a            nh:def ;
             nh:defines   j:method ;
-            nh:idName    "org/example/pond/Pond.main:([Ljava/lang/String;)V" ;
+            nh:idName    "org.example.pond.Pond.main:([Ljava/lang/String;)V" ;
             nh:name      "main" ;
             j:code       ( [ nh:lineNumber  "12"^^xsd:int ;
                              j:insn         jvm:new ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.main-A1String--void> ;
-                             j:typeOperand  <java://org/example/pond/Pond>
+                             j:partOf       pond-0.3.0:org.example.pond.Pond.main-A1String--void ;
+                             j:typeOperand  <java:org.example.pond.Pond>
                            ]
                            [ j:insn    jvm:dup ;
-                             j:partOf  <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.main-A1String--void>
+                             j:partOf  pond-0.3.0:org.example.pond.Pond.main-A1String--void
                            ]
                            [ j:insn           jvm:invokespecial ;
-                             j:memberOperand  <java://org/example/pond/Pond.--init-----void> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.main-A1String--void>
+                             j:memberOperand  <java:org.example.pond.Pond.--init-----void> ;
+                             j:partOf         pond-0.3.0:org.example.pond.Pond.main-A1String--void
                            ]
                            [ j:insn        jvm:astore ;
-                             j:partOf      <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.main-A1String--void> ;
+                             j:partOf      pond-0.3.0:org.example.pond.Pond.main-A1String--void ;
                              j:varOperand  [ rdf:value  "1"^^xsd:int ]
                            ]
                            [ nh:lineNumber  "14"^^xsd:int ;
                              j:insn         jvm:aload ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.main-A1String--void> ;
+                             j:partOf       pond-0.3.0:org.example.pond.Pond.main-A1String--void ;
                              j:varOperand   [ rdf:value  "1"^^xsd:int ;
                                               nh:idName  "pond:Lorg/example/pond/Pond;" ;
                                               nh:name    "pond" ;
-                                              j:type     <java://org/example/pond/Pond>
+                                              j:type     <java:org.example.pond.Pond>
                                             ]
                            ]
                            [ j:insn           jvm:invokevirtual ;
-                             j:memberOperand  <java://org/example/pond/Pond.run---void> ;
-                             j:partOf         <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.main-A1String--void>
+                             j:memberOperand  <java:org.example.pond.Pond.run---void> ;
+                             j:partOf         pond-0.3.0:org.example.pond.Pond.main-A1String--void
                            ]
                            [ nh:lineNumber  "15"^^xsd:int ;
                              j:insn         jvm:return ;
-                             j:partOf       <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.main-A1String--void>
+                             j:partOf       pond-0.3.0:org.example.pond.Pond.main-A1String--void
                            ]
                          ) ;
             j:hasAccess  j:public ;
             j:hasFlag    j:static ;
             j:maxLocals  "2"^^xsd:int ;
             j:maxStack   "2"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond> ;
+            j:memberOf   pond-0.3.0:org.example.pond.Pond ;
             j:rType      j:void ;
             j:srcEnd     [ nh:lineNumber  "15"^^xsd:int ] ;
             j:srcStart   [ nh:lineNumber  "12"^^xsd:int ] .
     
-    <java://org/example/pond/Pond.duck-Oorg.example.duck.Duck>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.duck-Oorg.example.duck.Duck> .
+    <java:org.example.pond.Pond.--init-----void>
+            rdfs:isDefinedBy  pond-0.3.0:org.example.pond.Pond.--init-----void .
     
-    <java://java/lang/Object>
-            a       j:ref .
+    <java:org.example.pond.Pond>
+            a                 j:ref ;
+            rdfs:isDefinedBy  pond-0.3.0:org.example.pond.Pond .
     
-    <java://java/io/PrintStream>
-            a       j:ref .
-    
-    <java://org/example/pond/Pond.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/org.example/pond/0.3.0/org/example/pond/Pond.--init-----void> .
+    <java:org.example.pond.Pond.main-A1String--void>
+            rdfs:isDefinedBy  pond-0.3.0:org.example.pond.Pond.main-A1String--void .
     
     <maven://org.example/pond/0.3.0>
             a            m:MavenCoordinate ;
             m:dependsOn  <maven://org.example/duck/0.4.2> .
+    
+    <java:org.example.duck.Duck>
+            a       j:ref .
 }
