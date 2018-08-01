@@ -87,7 +87,8 @@ public class ProjectContext {
 		ctx.path = path;
 		String source = getJarNameInfo(path, ctx);
 		if (pomContext == null) {
-			pomContext = PomUtil.getPom(path, Paths.get(path.toString().replaceAll("\\.jar$", ".pom")));
+			pomContext = PomUtil.getPom(path, Paths.get(path.toString().replaceAll("\\.jar$", ".pom"))); //original: assumes reads files from ~/m2/
+			// pomContext = PomUtil.getPom(path, Paths.get(path.toString().replaceAll("\\.jar$", "/META-INF/maven/" + "Client/" + "B/" + "pom.xml")));
 		}
 		if (pomContext != null) {
 			source = getPomInfo(pomContext, ctx);
