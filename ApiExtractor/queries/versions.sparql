@@ -1,0 +1,28 @@
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX jFlag: <https://model.nuthatchery.org/java/flags/>
+PREFIX jType: <https://model.nuthatchery.org/java/types/>
+PREFIX nh:    <https://model.nuthatchery.org/common/>
+PREFIX j:     <https://model.nuthatchery.org/java/>
+PREFIX jvm:   <https://model.nuthatchery.org/jvm/>
+PREFIX m:     <https://model.nuthatchery.org/maven/>
+PREFIX A-1.0.0:  <https://db.nuthatchery.org/_/A/1.0.0/> 
+PREFIX A-2.0.0:  <https://db.nuthatchery.org/_/A/2.0.0/> 
+PREFIX B-1.1.1:  <https://db.nuthatchery.org/_/B/1.1.1/> 
+PREFIX B-1.0.1:  <https://db.nuthatchery.org/_/B/1.0.1/> 
+
+SELECT  ?project ?version ?update
+WHERE {
+#  GRAPH ?g {
+
+	?jar m:artifactId ?project.
+	?jar m:version ?version.
+	?jar2 m:artifactId ?project.
+	?jar2 m:version ?update.
+
+	FILTER(?version < ?update).
+
+#  }
+}
+
