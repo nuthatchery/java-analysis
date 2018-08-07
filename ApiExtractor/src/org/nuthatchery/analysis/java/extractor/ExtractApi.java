@@ -35,10 +35,17 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ReadWrite;
+import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.reasoner.Reasoner;
+import org.apache.jena.reasoner.rulesys.BuiltinRegistry;
+import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
+import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.tdb.TDB;
@@ -54,6 +61,7 @@ import org.nuthatchery.analysis.java.explorer.FilesystemExplorer;
 import org.nuthatchery.analysis.java.explorer.PomContext;
 import org.nuthatchery.analysis.java.explorer.ProjectContext;
 import org.nuthatchery.ontology.basic.CommonVocabulary;
+import org.nuthatchery.reasoning.StringLessThan;
 import org.objectweb.asm.ClassReader;
 
 public class ExtractApi {
@@ -152,8 +160,33 @@ public class ExtractApi {
 			if (addGraphToDataset) {
 				dataset.addNamedModel(model.getNsPrefixURI(""), model);
 			}
-		});
 
+		});
+		// TODO Anna do reasoning here outside of streams
+		boolean addInference = true;
+		InfModel infModel = null;
+		if (addInference) {
+			// Register custom primitive
+			BuiltinRegistry.theRegistry.register(new StringLessThan());
+			Reasoner reasoner = new GenericRuleReasoner(Rule.rulesFromURL("rules.txt"));
+			infModel = ModelFactory.createInfModel(reasoner, dataset.getUnionModel());
+			dataset.addNamedModel("http://annainferencemodel/", infModel.getDeductionsModel());
+
+			Reasoner mavenReasoner = new GenericRuleReasoner(Rule.rulesFromURL("mavenrules.txt"));
+			InfModel mavenInfModel = ModelFactory.createInfModel(mavenReasoner, dataset.getDefaultModel());
+			dataset.addNamedModel("http://maveninferencemodel/", mavenInfModel.getDeductionsModel());
+			// StmtIterator it = infModel.listStatements();
+			//
+			// while (it.hasNext()) {
+			// Statement stmt = it.nextStatement();
+			//
+			// Resource subject = stmt.getSubject();
+			// Property predicate = stmt.getPredicate();
+			// RDFNode object = stmt.getObject();
+			//
+			// System.out.println(subject.toString() + " " + predicate.toString() + " " + object.toString());
+			// }
+		}
 	}
 
 	public static String fill(String s, int size, String ellipsis, boolean flushRight) {

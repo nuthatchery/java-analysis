@@ -1,0 +1,18 @@
+@prefix m:     <https://model.nuthatchery.org/maven/> .
+@prefix j:     <https://model.nuthatchery.org/java/> .
+@prefix nh:    <https://model.nuthatchery.org/common/> .
+@prefix jvm:   <https://model.nuthatchery.org/jvm/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+[test: (?a m:dependsOn ?b) -> (?a m:inferredRuleYay ?b)]
+
+[isNewerVersion: 
+(?jar1 m:groupId ?gid), 
+(?jar2 m:groupId ?gid), 
+(?jar1 m:artifactId ?aid), 
+(?jar2 m:artifactId ?aid), 
+(?jar1 m:version ?x), 
+(?jar2 m:version ?y),
+lessThan(?x, ?y) 
+-> 
+(?jar1 m:update ?jar2)]
