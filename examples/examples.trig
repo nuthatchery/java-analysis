@@ -1,200 +1,56 @@
 @prefix jvm:   <https://model.nuthatchery.org/jvm/> .
-@prefix B-1.1.1: <https://db.nuthatchery.org/_/B/1.1.1/> .
+@prefix B-1.1.1: <https://db.nuthatchery.org/Client/B/1.1.1/> .
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix B-1.0.1: <https://db.nuthatchery.org/_/B/1.0.1/> .
+@prefix B-1.0.1: <https://db.nuthatchery.org/Client/B/1.0.1/> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix nh:    <https://model.nuthatchery.org/common/> .
 @prefix j:     <https://model.nuthatchery.org/java/> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix m:     <https://model.nuthatchery.org/maven/> .
 @prefix db:    <https://db.nuthatchery.org/> .
-@prefix A-1.0.0: <https://db.nuthatchery.org/_/A/1.0.0/> .
-@prefix A-2.0.0: <https://db.nuthatchery.org/_/A/2.0.0/> .
+@prefix A-1.0.0: <https://db.nuthatchery.org/API/A/1.0.0/> .
+@prefix A-2.0.0: <https://db.nuthatchery.org/API/A/2.0.0/> .
 
-B-1.1.1:  m:artifactId  "B" ;
-        m:version     "1.1.1" .
+<maven://Client/B/1.1.1>
+        a            m:MavenCoordinate ;
+        m:dependsOn  <maven://API/A/2.0.0> .
 
-A-1.0.0:  m:artifactId  "A" ;
-        m:version     "1.0.0" .
+B-1.1.1:  a              m:project ;
+        m:artifactId     "B" ;
+        m:groupId        "Client" ;
+        m:hasCoordinate  <maven://Client/B/1.1.1> ;
+        m:version        "1.1.1" .
 
-A-2.0.0:  m:artifactId  "A" ;
-        m:version     "2.0.0" .
+<maven://Client/B/1.0.1>
+        a            m:MavenCoordinate ;
+        m:dependsOn  <maven://API/A/1.0.0> .
 
-B-1.0.1:  m:artifactId  "B" ;
-        m:version     "1.0.1" .
+<maven://API/A/2.0.0>
+        a       m:MavenCoordinate .
 
-B-1.1.1: {
-    <java://org/b/main/Main.b---boolean>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main.b---boolean> .
-    
-    B-1.1.1:  m:artifactId  "B" ;
-            m:version     "1.1.1" .
-    
-    <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main.b---boolean>
-            a            nh:def ;
-            nh:defines   j:method ;
-            nh:idName    "org/b/main/Main.b:()Z" ;
-            nh:name      "b" ;
-            j:code       ( [ nh:lineNumber    "6"^^xsd:int ;
-                             j:insn           jvm:invokestatic ;
-                             j:memberOperand  <java://org/a/factories/BoolFactory.getFalse---boolean> ;
-                             j:partOf         <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main.b---boolean>
-                           ]
-                           [ j:insn    jvm:ireturn ;
-                             j:partOf  <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main.b---boolean>
-                           ]
-                         ) ;
-            j:hasAccess  j:public ;
-            j:hasFlag    j:static ;
-            j:maxLocals  "0"^^xsd:int ;
-            j:maxStack   "1"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main> ;
-            j:rType      j:boolean ;
-            j:srcEnd     [ nh:lineNumber  "6"^^xsd:int ] ;
-            j:srcStart   [ nh:lineNumber  "6"^^xsd:int ] .
-    
-    <java://java/lang/Object>
-            a       j:ref .
-    
-    <java://org/b/main/Main.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main.--init-----void> .
-    
-    <java://org/b/main/Main>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main> .
-    
-    <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main>
-            a                   j:ref , nh:def ;
-            nh:defines          j:class ;
-            nh:idName           "org/b/main/Main" ;
-            nh:name             "org/b/main/Main" ;
-            j:classFileVersion  "49"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
-            j:hasAccess         j:public ;
-            j:sourceFile        "Main.java" .
-    
-    <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main.--init-----void>
-            a             nh:def ;
-            nh:defines    j:constructor , j:field ;
-            nh:idName     "org/b/main/Main.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "4"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/b/main/Main;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/b/main/Main>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "1"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/_/B/1.1.1/org/b/main/Main> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "4"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "4"^^xsd:int ] .
-    
-    <java://org/a/factories/BoolFactory>
-            a       j:ref .
-}
+B-1.0.1:  a              m:project ;
+        m:artifactId     "B" ;
+        m:groupId        "Client" ;
+        m:hasCoordinate  <maven://Client/B/1.0.1> ;
+        m:version        "1.0.1" .
 
-B-1.0.1: {
-    <java://org/b/main/Main.b---boolean>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main.b---boolean> .
-    
-    <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main>
-            a                   j:ref , nh:def ;
-            nh:defines          j:class ;
-            nh:idName           "org/b/main/Main" ;
-            nh:name             "org/b/main/Main" ;
-            j:classFileVersion  "49"^^xsd:int ;
-            j:extends           <java://java/lang/Object> ;
-            j:hasAccess         j:public ;
-            j:sourceFile        "Main.java" .
-    
-    <java://java/lang/Object>
-            a       j:ref .
-    
-    <java://org/b/main/Main.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main.--init-----void> .
-    
-    B-1.0.1:  m:artifactId  "B" ;
-            m:version     "1.0.1" .
-    
-    <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main.--init-----void>
-            a             nh:def ;
-            nh:defines    j:field , j:constructor ;
-            nh:idName     "org/b/main/Main.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "4"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/b/main/Main;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/b/main/Main>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "1"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "4"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "4"^^xsd:int ] .
-    
-    <java://org/b/main/Main>
-            a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main> .
-    
-    <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main.b---boolean>
-            a            nh:def ;
-            nh:defines   j:method ;
-            nh:idName    "org/b/main/Main.b:()Z" ;
-            nh:name      "b" ;
-            j:code       ( [ nh:lineNumber    "6"^^xsd:int ;
-                             j:insn           jvm:invokestatic ;
-                             j:memberOperand  <java://org/a/factories/BoolFactory.getTrue---boolean> ;
-                             j:partOf         <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main.b---boolean>
-                           ]
-                           [ j:insn    jvm:ireturn ;
-                             j:partOf  <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main.b---boolean>
-                           ]
-                         ) ;
-            j:hasAccess  j:public ;
-            j:hasFlag    j:static ;
-            j:maxLocals  "0"^^xsd:int ;
-            j:maxStack   "1"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/_/B/1.0.1/org/b/main/Main> ;
-            j:rType      j:boolean ;
-            j:srcEnd     [ nh:lineNumber  "6"^^xsd:int ] ;
-            j:srcStart   [ nh:lineNumber  "6"^^xsd:int ] .
-    
-    <java://org/a/factories/BoolFactory>
-            a       j:ref .
-}
+A-1.0.0:  a              m:project ;
+        m:artifactId     "A" ;
+        m:groupId        "API" ;
+        m:hasCoordinate  <maven://API/A/1.0.0> ;
+        m:version        "1.0.0" .
+
+<maven://API/A/1.0.0>
+        a       m:MavenCoordinate .
+
+A-2.0.0:  a              m:project ;
+        m:artifactId     "A" ;
+        m:groupId        "API" ;
+        m:hasCoordinate  <maven://API/A/2.0.0> ;
+        m:version        "2.0.0" .
 
 A-2.0.0: {
-    <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory>
+    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory>
             a                   j:ref , nh:def ;
             nh:defines          j:class ;
             nh:idName           "org/a/factories/BoolFactory" ;
@@ -204,146 +60,262 @@ A-2.0.0: {
             j:hasAccess         j:public ;
             j:sourceFile        "BoolFactory.java" .
     
-    A-2.0.0:  m:artifactId  "A" ;
-            m:version     "2.0.0" .
+    _:b0    rdf:first  _:b1 ;
+            rdf:rest   () .
+    
+    _:b2    rdf:value  "0"^^xsd:int ;
+            nh:idName  "this:Lorg/a/factories/BoolFactory;" ;
+            nh:name    "this" ;
+            j:type     j:new-obj , <java://org/a/factories/BoolFactory> .
+    
+    _:b1    j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    _:b3    j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean> .
+    
+    <maven://API/A/2.0.0>
+            a       m:MavenCoordinate .
     
     <java://org/a/factories/BoolFactory.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.--init-----void> .
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void> .
     
-    <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean>
+    _:b4    rdf:first  _:b5 ;
+            rdf:rest   () .
+    
+    _:b6    nh:lineNumber  "8"^^xsd:int ;
+            j:insn         jvm:iconst_0 ;
+            j:partOf       <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean> .
+    
+    <java://java/lang/Object>
+            a       j:ref .
+    
+    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean>
+            a            nh:def ;
+            nh:defines   j:method ;
+            nh:idName    "org/a/factories/BoolFactory.getTrue:()Z" ;
+            nh:name      "getTrue" ;
+            j:code       _:b7 ;
+            j:hasAccess  j:public ;
+            j:hasFlag    j:static ;
+            j:maxLocals  "0"^^xsd:int ;
+            j:maxStack   "1"^^xsd:int ;
+            j:memberOf   <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> ;
+            j:rType      j:boolean ;
+            j:srcEnd     _:b8 ;
+            j:srcStart   _:b9 .
+    
+    A-2.0.0:  a              m:project ;
+            m:artifactId     "A" ;
+            m:groupId        "API" ;
+            m:hasCoordinate  <maven://API/A/2.0.0> ;
+            m:version        "2.0.0" .
+    
+    _:b10   nh:lineNumber  "3"^^xsd:int .
+    
+    _:b11   rdf:first  _:b12 ;
+            rdf:rest   _:b13 .
+    
+    _:b14   nh:lineNumber  "8"^^xsd:int .
+    
+    _:b15   nh:lineNumber  "3"^^xsd:int .
+    
+    _:b13   rdf:first  _:b16 ;
+            rdf:rest   _:b4 .
+    
+    _:b5    j:insn    jvm:return ;
+            j:partOf  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void> .
+    
+    <java://org/a/factories/BoolFactory.getTrue---boolean>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    _:b17   nh:lineNumber  "8"^^xsd:int .
+    
+    _:b18   rdf:first  _:b6 ;
+            rdf:rest   _:b19 .
+    
+    _:b7    rdf:first  _:b20 ;
+            rdf:rest   _:b0 .
+    
+    _:b8    nh:lineNumber  "5"^^xsd:int .
+    
+    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean>
             a            nh:def ;
             nh:defines   j:method ;
             nh:idName    "org/a/factories/BoolFactory.getFalse:()Z" ;
             nh:name      "getFalse" ;
-            j:code       ( [ nh:lineNumber  "8"^^xsd:int ;
-                             j:insn         jvm:iconst_0 ;
-                             j:partOf       <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean>
-                           ]
-                           [ j:insn    jvm:ireturn ;
-                             j:partOf  <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean>
-                           ]
-                         ) ;
+            j:code       _:b18 ;
             j:hasAccess  j:public ;
             j:hasFlag    j:static ;
             j:maxLocals  "0"^^xsd:int ;
             j:maxStack   "1"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory> ;
+            j:memberOf   <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> ;
             j:rType      j:boolean ;
-            j:srcEnd     [ nh:lineNumber  "8"^^xsd:int ] ;
-            j:srcStart   [ nh:lineNumber  "8"^^xsd:int ] .
+            j:srcEnd     _:b14 ;
+            j:srcStart   _:b17 .
     
-    <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean>
-            a            nh:def ;
-            nh:defines   j:method ;
-            nh:idName    "org/a/factories/BoolFactory.getTrue:()Z" ;
-            nh:name      "getTrue" ;
-            j:code       ( [ nh:lineNumber  "5"^^xsd:int ;
-                             j:insn         jvm:iconst_1 ;
-                             j:partOf       <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean>
-                           ]
-                           [ j:insn    jvm:ireturn ;
-                             j:partOf  <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean>
-                           ]
-                         ) ;
-            j:hasAccess  j:public ;
-            j:hasFlag    j:static ;
-            j:maxLocals  "0"^^xsd:int ;
-            j:maxStack   "1"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory> ;
-            j:rType      j:boolean ;
-            j:srcEnd     [ nh:lineNumber  "5"^^xsd:int ] ;
-            j:srcStart   [ nh:lineNumber  "5"^^xsd:int ] .
-    
-    <java://java/lang/Object>
-            a       j:ref .
-    
-    <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.--init-----void>
+    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void>
             a             nh:def ;
             nh:defines    j:field , j:constructor ;
             nh:idName     "org/a/factories/BoolFactory.<init>:()V" ;
             nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/a/factories/BoolFactory;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/a/factories/BoolFactory>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory> ;
+            j:code        _:b11 ;
+            j:constructs  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> ;
             j:hasAccess   j:public ;
             j:maxLocals   "1"^^xsd:int ;
             j:maxStack    "1"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory> ;
+            j:memberOf    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> ;
             j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
-    
-    <java://org/a/factories/BoolFactory.getTrue---boolean>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+            j:srcEnd      _:b10 ;
+            j:srcStart    _:b15 .
     
     <java://org/a/factories/BoolFactory.getFalse---boolean>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean> .
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean> .
+    
+    _:b9    nh:lineNumber  "5"^^xsd:int .
+    
+    _:b12   nh:lineNumber  "3"^^xsd:int ;
+            j:insn         jvm:aload ;
+            j:partOf       <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void> ;
+            j:varOperand   _:b2 .
+    
+    _:b20   nh:lineNumber  "5"^^xsd:int ;
+            j:insn         jvm:iconst_1 ;
+            j:partOf       <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    _:b16   j:insn           jvm:invokespecial ;
+            j:memberOperand  <java://java/lang/Object.--init-----void> ;
+            j:partOf         <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void> .
     
     <java://org/a/factories/BoolFactory>
             a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/A/2.0.0/org/a/factories/BoolFactory> .
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> .
+    
+    _:b19   rdf:first  _:b3 ;
+            rdf:rest   () .
 }
 
-A-1.0.0: {
-    <java://org/a/factories/BoolFactory.--init-----void>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory.--init-----void> .
+B-1.0.1: {
+    _:b21   nh:lineNumber  "4"^^xsd:int ;
+            j:insn         jvm:aload ;
+            j:partOf       <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void> ;
+            j:varOperand   _:b22 .
+    
+    <java://org/b/main/Main.b---boolean>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.b---boolean> .
+    
+    _:b23   j:insn    jvm:return ;
+            j:partOf  <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void> .
+    
+    <maven://Client/B/1.0.1>
+            a            m:MavenCoordinate ;
+            m:dependsOn  <maven://API/A/1.0.0> .
+    
+    <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void>
+            a             nh:def ;
+            nh:defines    j:constructor , j:field ;
+            nh:idName     "org/b/main/Main.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        _:b24 ;
+            j:constructs  <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main> ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main> ;
+            j:rType       j:void ;
+            j:srcEnd      _:b25 ;
+            j:srcStart    _:b26 .
+    
+    _:b27   nh:lineNumber  "6"^^xsd:int .
     
     <java://java/lang/Object>
             a       j:ref .
     
-    <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory.--init-----void>
-            a             nh:def ;
-            nh:defines    j:constructor , j:field ;
-            nh:idName     "org/a/factories/BoolFactory.<init>:()V" ;
-            nh:name       "<init>" ;
-            j:code        ( [ nh:lineNumber  "3"^^xsd:int ;
-                              j:insn         jvm:aload ;
-                              j:partOf       <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory.--init-----void> ;
-                              j:varOperand   [ rdf:value  "0"^^xsd:int ;
-                                               nh:idName  "this:Lorg/a/factories/BoolFactory;" ;
-                                               nh:name    "this" ;
-                                               j:type     j:new-obj , <java://org/a/factories/BoolFactory>
-                                             ]
-                            ]
-                            [ j:insn           jvm:invokespecial ;
-                              j:memberOperand  <java://java/lang/Object.--init-----void> ;
-                              j:partOf         <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory.--init-----void>
-                            ]
-                            [ j:insn    jvm:return ;
-                              j:partOf  <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory.--init-----void>
-                            ]
-                          ) ;
-            j:constructs  <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory> ;
-            j:hasAccess   j:public ;
-            j:maxLocals   "1"^^xsd:int ;
-            j:maxStack    "1"^^xsd:int ;
-            j:memberOf    <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory> ;
-            j:rType       j:void ;
-            j:srcEnd      [ nh:lineNumber  "3"^^xsd:int ] ;
-            j:srcStart    [ nh:lineNumber  "3"^^xsd:int ] .
+    _:b26   nh:lineNumber  "4"^^xsd:int .
     
-    <java://org/a/factories/BoolFactory.getTrue---boolean>
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    _:b24   rdf:first  _:b21 ;
+            rdf:rest   _:b28 .
     
-    A-1.0.0:  m:artifactId  "A" ;
-            m:version     "1.0.0" .
+    <maven://API/A/1.0.0>
+            a       m:MavenCoordinate .
     
-    <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory>
+    <java://org/b/main/Main.--init-----void>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void> .
+    
+    _:b29   rdf:first  _:b23 ;
+            rdf:rest   () .
+    
+    <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.b---boolean>
+            a            nh:def ;
+            nh:defines   j:method ;
+            nh:idName    "org/b/main/Main.b:()Z" ;
+            nh:name      "b" ;
+            j:code       _:b30 ;
+            j:hasAccess  j:public ;
+            j:hasFlag    j:static ;
+            j:maxLocals  "0"^^xsd:int ;
+            j:maxStack   "1"^^xsd:int ;
+            j:memberOf   <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main> ;
+            j:rType      j:boolean ;
+            j:srcEnd     _:b27 ;
+            j:srcStart   _:b31 .
+    
+    _:b25   nh:lineNumber  "4"^^xsd:int .
+    
+    <java://org/b/main/Main>
+            a                 j:ref ;
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main> .
+    
+    _:b32   j:insn           jvm:invokespecial ;
+            j:memberOperand  <java://java/lang/Object.--init-----void> ;
+            j:partOf         <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void> .
+    
+    _:b31   nh:lineNumber  "6"^^xsd:int .
+    
+    _:b22   rdf:value  "0"^^xsd:int ;
+            nh:idName  "this:Lorg/b/main/Main;" ;
+            nh:name    "this" ;
+            j:type     j:new-obj , <java://org/b/main/Main> .
+    
+    _:b30   rdf:first  _:b33 ;
+            rdf:rest   _:b34 .
+    
+    _:b33   nh:lineNumber    "6"^^xsd:int ;
+            j:insn           jvm:invokestatic ;
+            j:memberOperand  <java://org/a/factories/BoolFactory.getTrue---boolean> ;
+            j:partOf         <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.b---boolean> .
+    
+    _:b35   j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.b---boolean> .
+    
+    _:b34   rdf:first  _:b35 ;
+            rdf:rest   () .
+    
+    <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main>
+            a                   j:ref , nh:def ;
+            nh:defines          j:class ;
+            nh:idName           "org/b/main/Main" ;
+            nh:name             "org/b/main/Main" ;
+            j:classFileVersion  "49"^^xsd:int ;
+            j:extends           <java://java/lang/Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "Main.java" .
+    
+    _:b28   rdf:first  _:b32 ;
+            rdf:rest   _:b29 .
+    
+    B-1.0.1:  a              m:project ;
+            m:artifactId     "B" ;
+            m:groupId        "Client" ;
+            m:hasCoordinate  <maven://Client/B/1.0.1> ;
+            m:version        "1.0.1" .
+    
+    <java://org/a/factories/BoolFactory>
+            a       j:ref .
+}
+
+A-1.0.0: {
+    <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory>
             a                   j:ref , nh:def ;
             nh:defines          j:class ;
             nh:idName           "org/a/factories/BoolFactory" ;
@@ -353,29 +325,690 @@ A-1.0.0: {
             j:hasAccess         j:public ;
             j:sourceFile        "BoolFactory.java" .
     
-    <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean>
+    _:b36   j:insn           jvm:invokespecial ;
+            j:memberOperand  <java://java/lang/Object.--init-----void> ;
+            j:partOf         <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void> .
+    
+    <java://org/a/factories/BoolFactory.--init-----void>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void> .
+    
+    A-1.0.0:  a              m:project ;
+            m:artifactId     "A" ;
+            m:groupId        "API" ;
+            m:hasCoordinate  <maven://API/A/1.0.0> ;
+            m:version        "1.0.0" .
+    
+    <java://java/lang/Object>
+            a       j:ref .
+    
+    _:b37   nh:lineNumber  "3"^^xsd:int .
+    
+    _:b38   rdf:first  _:b39 ;
+            rdf:rest   _:b40 .
+    
+    _:b41   nh:lineNumber  "5"^^xsd:int ;
+            j:insn         jvm:iconst_1 ;
+            j:partOf       <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    <maven://API/A/1.0.0>
+            a       m:MavenCoordinate .
+    
+    _:b42   nh:lineNumber  "5"^^xsd:int .
+    
+    _:b43   nh:lineNumber  "5"^^xsd:int .
+    
+    _:b40   rdf:first  _:b36 ;
+            rdf:rest   _:b44 .
+    
+    <java://org/a/factories/BoolFactory.getTrue---boolean>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    _:b45   rdf:first  _:b41 ;
+            rdf:rest   _:b46 .
+    
+    _:b39   nh:lineNumber  "3"^^xsd:int ;
+            j:insn         jvm:aload ;
+            j:partOf       <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void> ;
+            j:varOperand   _:b47 .
+    
+    _:b44   rdf:first  _:b48 ;
+            rdf:rest   () .
+    
+    _:b47   rdf:value  "0"^^xsd:int ;
+            nh:idName  "this:Lorg/a/factories/BoolFactory;" ;
+            nh:name    "this" ;
+            j:type     j:new-obj , <java://org/a/factories/BoolFactory> .
+    
+    _:b46   rdf:first  _:b49 ;
+            rdf:rest   () .
+    
+    _:b48   j:insn    jvm:return ;
+            j:partOf  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void> .
+    
+    <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void>
+            a             nh:def ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org/a/factories/BoolFactory.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        _:b38 ;
+            j:constructs  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory> ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory> ;
+            j:rType       j:void ;
+            j:srcEnd      _:b50 ;
+            j:srcStart    _:b37 .
+    
+    _:b50   nh:lineNumber  "3"^^xsd:int .
+    
+    <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean>
             a            nh:def ;
             nh:defines   j:method ;
             nh:idName    "org/a/factories/BoolFactory.getTrue:()Z" ;
             nh:name      "getTrue" ;
-            j:code       ( [ nh:lineNumber  "5"^^xsd:int ;
-                             j:insn         jvm:iconst_1 ;
-                             j:partOf       <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean>
-                           ]
-                           [ j:insn    jvm:ireturn ;
-                             j:partOf  <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean>
-                           ]
-                         ) ;
+            j:code       _:b45 ;
             j:hasAccess  j:public ;
             j:hasFlag    j:static ;
             j:maxLocals  "0"^^xsd:int ;
             j:maxStack   "1"^^xsd:int ;
-            j:memberOf   <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory> ;
+            j:memberOf   <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory> ;
             j:rType      j:boolean ;
-            j:srcEnd     [ nh:lineNumber  "5"^^xsd:int ] ;
-            j:srcStart   [ nh:lineNumber  "5"^^xsd:int ] .
+            j:srcEnd     _:b43 ;
+            j:srcStart   _:b42 .
+    
+    _:b49   j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
     
     <java://org/a/factories/BoolFactory>
             a                 j:ref ;
-            rdfs:isDefinedBy  <https://db.nuthatchery.org/_/A/1.0.0/org/a/factories/BoolFactory> .
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory> .
+}
+
+B-1.1.1: {
+    _:b51   nh:lineNumber  "4"^^xsd:int .
+    
+    <maven://Client/B/1.1.1>
+            a            m:MavenCoordinate ;
+            m:dependsOn  <maven://API/A/2.0.0> .
+    
+    _:b52   j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.b---boolean> .
+    
+    <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.b---boolean>
+            a            nh:def ;
+            nh:defines   j:method ;
+            nh:idName    "org/b/main/Main.b:()Z" ;
+            nh:name      "b" ;
+            j:code       _:b53 ;
+            j:hasAccess  j:public ;
+            j:hasFlag    j:static ;
+            j:maxLocals  "0"^^xsd:int ;
+            j:maxStack   "1"^^xsd:int ;
+            j:memberOf   <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main> ;
+            j:rType      j:boolean ;
+            j:srcEnd     _:b54 ;
+            j:srcStart   _:b55 .
+    
+    _:b55   nh:lineNumber  "6"^^xsd:int .
+    
+    _:b56   nh:lineNumber  "4"^^xsd:int .
+    
+    <java://org/b/main/Main.b---boolean>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.b---boolean> .
+    
+    <maven://API/A/2.0.0>
+            a       m:MavenCoordinate .
+    
+    _:b54   nh:lineNumber  "6"^^xsd:int .
+    
+    <java://java/lang/Object>
+            a       j:ref .
+    
+    _:b57   rdf:first  _:b58 ;
+            rdf:rest   _:b59 .
+    
+    <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main>
+            a                   j:ref , nh:def ;
+            nh:defines          j:class ;
+            nh:idName           "org/b/main/Main" ;
+            nh:name             "org/b/main/Main" ;
+            j:classFileVersion  "49"^^xsd:int ;
+            j:extends           <java://java/lang/Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "Main.java" .
+    
+    _:b60   rdf:first  _:b52 ;
+            rdf:rest   () .
+    
+    <java://org/b/main/Main.--init-----void>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void> .
+    
+    _:b61   j:insn    jvm:return ;
+            j:partOf  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void> .
+    
+    _:b59   rdf:first  _:b61 ;
+            rdf:rest   () .
+    
+    <java://org/b/main/Main>
+            a                 j:ref ;
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main> .
+    
+    _:b62   nh:lineNumber    "6"^^xsd:int ;
+            j:insn           jvm:invokestatic ;
+            j:memberOperand  <java://org/a/factories/BoolFactory.getFalse---boolean> ;
+            j:partOf         <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.b---boolean> .
+    
+    B-1.1.1:  a              m:project ;
+            m:artifactId     "B" ;
+            m:groupId        "Client" ;
+            m:hasCoordinate  <maven://Client/B/1.1.1> ;
+            m:version        "1.1.1" .
+    
+    _:b63   rdf:value  "0"^^xsd:int ;
+            nh:idName  "this:Lorg/b/main/Main;" ;
+            nh:name    "this" ;
+            j:type     j:new-obj , <java://org/b/main/Main> .
+    
+    _:b53   rdf:first  _:b62 ;
+            rdf:rest   _:b60 .
+    
+    <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void>
+            a             nh:def ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org/b/main/Main.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        _:b64 ;
+            j:constructs  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main> ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main> ;
+            j:rType       j:void ;
+            j:srcEnd      _:b56 ;
+            j:srcStart    _:b51 .
+    
+    _:b58   j:insn           jvm:invokespecial ;
+            j:memberOperand  <java://java/lang/Object.--init-----void> ;
+            j:partOf         <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void> .
+    
+    _:b64   rdf:first  _:b65 ;
+            rdf:rest   _:b57 .
+    
+    _:b65   nh:lineNumber  "4"^^xsd:int ;
+            j:insn         jvm:aload ;
+            j:partOf       <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void> ;
+            j:varOperand   _:b63 .
+    
+    <java://org/a/factories/BoolFactory>
+            a       j:ref .
+}
+
+<http://annainferencemodel/> {
+    _:b24   rdf:first  _:b21 ;
+            rdf:rest   _:b28 .
+    
+    _:b58   j:insn           jvm:invokespecial ;
+            j:memberOperand  <java://java/lang/Object.--init-----void> ;
+            j:partOf         <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void> .
+    
+    _:b13   rdf:first  _:b16 ;
+            rdf:rest   _:b4 .
+    
+    _:b60   rdf:first  _:b52 ;
+            rdf:rest   () .
+    
+    <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main>
+            a                   j:ref , nh:def ;
+            <a>                 j:publicJavaElementYay ;
+            nh:defines          j:class ;
+            nh:idName           "org/b/main/Main" ;
+            nh:name             "org/b/main/Main" ;
+            j:classFileVersion  "49"^^xsd:int ;
+            j:extends           <java://java/lang/Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "Main.java" .
+    
+    _:b25   nh:lineNumber  "4"^^xsd:int .
+    
+    B-1.1.1:  a              m:project ;
+            m:artifactId     "B" ;
+            m:dependsOnYay   <maven://API/A/2.0.0> ;
+            m:groupId        "Client" ;
+            m:hasCoordinate  <maven://Client/B/1.1.1> ;
+            m:version        "1.1.1" .
+    
+    <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean>
+            a            nh:def ;
+            <a>          j:publicJavaElementYay ;
+            nh:defines   j:method ;
+            nh:idName    "org/a/factories/BoolFactory.getTrue:()Z" ;
+            nh:name      "getTrue" ;
+            j:code       _:b45 ;
+            j:hasAccess  j:public ;
+            j:hasFlag    j:static ;
+            j:maxLocals  "0"^^xsd:int ;
+            j:maxStack   "1"^^xsd:int ;
+            j:memberOf   <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory> ;
+            j:rType      j:boolean ;
+            j:srcEnd     _:b43 ;
+            j:srcStart   _:b42 .
+    
+    <java://org/a/factories/BoolFactory.getFalse---boolean>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean> .
+    
+    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void>
+            a             nh:def ;
+            <a>           j:publicJavaElementYay ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org/a/factories/BoolFactory.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        _:b11 ;
+            j:constructs  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> ;
+            j:rType       j:void ;
+            j:srcEnd      _:b10 ;
+            j:srcStart    _:b15 .
+    
+    _:b63   rdf:value  "0"^^xsd:int ;
+            nh:idName  "this:Lorg/b/main/Main;" ;
+            nh:name    "this" ;
+            j:type     <java://org/b/main/Main> , j:new-obj .
+    
+    _:b18   rdf:first  _:b6 ;
+            rdf:rest   _:b19 .
+    
+    _:b6    nh:lineNumber  "8"^^xsd:int ;
+            j:insn         jvm:iconst_0 ;
+            j:partOf       <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean> .
+    
+    _:b29   rdf:first  _:b23 ;
+            rdf:rest   () .
+    
+    _:b2    rdf:value  "0"^^xsd:int ;
+            nh:idName  "this:Lorg/a/factories/BoolFactory;" ;
+            nh:name    "this" ;
+            j:type     <java://org/a/factories/BoolFactory> , j:new-obj .
+    
+    _:b51   nh:lineNumber  "4"^^xsd:int .
+    
+    B-1.0.1:  a              m:project ;
+            m:artifactId     "B" ;
+            m:dependsOnYay   <maven://API/A/1.0.0> ;
+            m:groupId        "Client" ;
+            m:hasCoordinate  <maven://Client/B/1.0.1> ;
+            m:version        "1.0.1" .
+    
+    _:b17   nh:lineNumber  "8"^^xsd:int .
+    
+    <java://org/b/main/Main.b---boolean>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.b---boolean> , <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.b---boolean> .
+    
+    <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void>
+            a             nh:def ;
+            <a>           j:publicJavaElementYay ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org/b/main/Main.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        _:b64 ;
+            j:constructs  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main> ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main> ;
+            j:rType       j:void ;
+            j:srcEnd      _:b56 ;
+            j:srcStart    _:b51 .
+    
+    _:b64   rdf:first  _:b65 ;
+            rdf:rest   _:b57 .
+    
+    _:b48   j:insn    jvm:return ;
+            j:partOf  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void> .
+    
+    <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory>
+            a                   j:ref , nh:def ;
+            <a>                 j:publicJavaElementYay ;
+            nh:defines          j:class ;
+            nh:idName           "org/a/factories/BoolFactory" ;
+            nh:name             "org/a/factories/BoolFactory" ;
+            j:classFileVersion  "49"^^xsd:int ;
+            j:extends           <java://java/lang/Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "BoolFactory.java" .
+    
+    _:b26   nh:lineNumber  "4"^^xsd:int .
+    
+    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean>
+            a            nh:def ;
+            <a>          j:publicJavaElementYay ;
+            nh:defines   j:method ;
+            nh:idName    "org/a/factories/BoolFactory.getFalse:()Z" ;
+            nh:name      "getFalse" ;
+            j:code       _:b18 ;
+            j:hasAccess  j:public ;
+            j:hasFlag    j:static ;
+            j:maxLocals  "0"^^xsd:int ;
+            j:maxStack   "1"^^xsd:int ;
+            j:memberOf   <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> ;
+            j:rType      j:boolean ;
+            j:srcEnd     _:b14 ;
+            j:srcStart   _:b17 .
+    
+    <java://org/b/main/Main.--init-----void>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void> , <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void> .
+    
+    _:b59   rdf:first  _:b61 ;
+            rdf:rest   () .
+    
+    _:b8    nh:lineNumber  "5"^^xsd:int .
+    
+    <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.b---boolean>
+            a            nh:def ;
+            <a>          j:publicJavaElementYay ;
+            nh:defines   j:method ;
+            nh:idName    "org/b/main/Main.b:()Z" ;
+            nh:name      "b" ;
+            j:code       _:b30 ;
+            j:hasAccess  j:public ;
+            j:hasFlag    j:static ;
+            j:maxLocals  "0"^^xsd:int ;
+            j:maxStack   "1"^^xsd:int ;
+            j:memberOf   <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main> ;
+            j:rType      j:boolean ;
+            j:srcEnd     _:b27 ;
+            j:srcStart   _:b31 .
+    
+    _:b39   nh:lineNumber  "3"^^xsd:int ;
+            j:insn         jvm:aload ;
+            j:partOf       <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void> ;
+            j:varOperand   _:b47 .
+    
+    _:b12   nh:lineNumber  "3"^^xsd:int ;
+            j:insn         jvm:aload ;
+            j:partOf       <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void> ;
+            j:varOperand   _:b2 .
+    
+    <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void>
+            a             nh:def ;
+            <a>           j:publicJavaElementYay ;
+            nh:defines    j:field , j:constructor ;
+            nh:idName     "org/a/factories/BoolFactory.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        _:b38 ;
+            j:constructs  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory> ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory> ;
+            j:rType       j:void ;
+            j:srcEnd      _:b50 ;
+            j:srcStart    _:b37 .
+    
+    _:b23   j:insn    jvm:return ;
+            j:partOf  <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void> .
+    
+    <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.b---boolean>
+            a            nh:def ;
+            <a>          j:publicJavaElementYay ;
+            nh:defines   j:method ;
+            nh:idName    "org/b/main/Main.b:()Z" ;
+            nh:name      "b" ;
+            j:code       _:b53 ;
+            j:hasAccess  j:public ;
+            j:hasFlag    j:static ;
+            j:maxLocals  "0"^^xsd:int ;
+            j:maxStack   "1"^^xsd:int ;
+            j:memberOf   <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main> ;
+            j:rType      j:boolean ;
+            j:srcEnd     _:b54 ;
+            j:srcStart   _:b55 .
+    
+    _:b49   j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    _:b43   nh:lineNumber  "5"^^xsd:int .
+    
+    <maven://API/A/2.0.0>
+            a       m:MavenCoordinate .
+    
+    _:b3    j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean> .
+    
+    _:b55   nh:lineNumber  "6"^^xsd:int .
+    
+    _:b16   j:insn           jvm:invokespecial ;
+            j:memberOperand  <java://java/lang/Object.--init-----void> ;
+            j:partOf         <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void> .
+    
+    A-1.0.0:  a              m:project ;
+            m:artifactId     "A" ;
+            m:groupId        "API" ;
+            m:hasCoordinate  <maven://API/A/1.0.0> ;
+            m:version        "1.0.0" .
+    
+    _:b21   nh:lineNumber  "4"^^xsd:int ;
+            j:insn         jvm:aload ;
+            j:partOf       <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void> ;
+            j:varOperand   _:b22 .
+    
+    <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void>
+            a             nh:def ;
+            <a>           j:publicJavaElementYay ;
+            nh:defines    j:constructor , j:field ;
+            nh:idName     "org/b/main/Main.<init>:()V" ;
+            nh:name       "<init>" ;
+            j:code        _:b24 ;
+            j:constructs  <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main> ;
+            j:hasAccess   j:public ;
+            j:maxLocals   "1"^^xsd:int ;
+            j:maxStack    "1"^^xsd:int ;
+            j:memberOf    <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main> ;
+            j:rType       j:void ;
+            j:srcEnd      _:b25 ;
+            j:srcStart    _:b26 .
+    
+    _:b56   nh:lineNumber  "4"^^xsd:int .
+    
+    _:b9    nh:lineNumber  "5"^^xsd:int .
+    
+    _:b50   nh:lineNumber  "3"^^xsd:int .
+    
+    _:b1    j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    _:b34   rdf:first  _:b35 ;
+            rdf:rest   () .
+    
+    _:b41   nh:lineNumber  "5"^^xsd:int ;
+            j:insn         jvm:iconst_1 ;
+            j:partOf       <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    <maven://API/A/1.0.0>
+            a       m:MavenCoordinate .
+    
+    _:b46   rdf:first  _:b49 ;
+            rdf:rest   () .
+    
+    _:b54   nh:lineNumber  "6"^^xsd:int .
+    
+    _:b37   nh:lineNumber  "3"^^xsd:int .
+    
+    _:b57   rdf:first  _:b58 ;
+            rdf:rest   _:b59 .
+    
+    _:b36   j:insn           jvm:invokespecial ;
+            j:memberOperand  <java://java/lang/Object.--init-----void> ;
+            j:partOf         <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void> .
+    
+    _:b27   nh:lineNumber  "6"^^xsd:int .
+    
+    A-2.0.0:  a              m:project ;
+            m:artifactId     "A" ;
+            m:groupId        "API" ;
+            m:hasCoordinate  <maven://API/A/2.0.0> ;
+            m:version        "2.0.0" .
+    
+    _:b11   rdf:first  _:b12 ;
+            rdf:rest   _:b13 .
+    
+    _:b4    rdf:first  _:b5 ;
+            rdf:rest   () .
+    
+    _:b61   j:insn    jvm:return ;
+            j:partOf  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void> .
+    
+    _:b33   nh:lineNumber      "6"^^xsd:int ;
+            j:callsJavaMethod  <java://org/a/factories/BoolFactory.getTrue---boolean> ;
+            j:callsURIMethod   <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean> , <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean> ;
+            j:insn             jvm:invokestatic ;
+            j:memberOperand    <java://org/a/factories/BoolFactory.getTrue---boolean> ;
+            j:partOf           <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.b---boolean> .
+    
+    _:b14   nh:lineNumber  "8"^^xsd:int .
+    
+    <java://org/a/factories/BoolFactory.--init-----void>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.--init-----void> , <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void> .
+    
+    _:b20   nh:lineNumber  "5"^^xsd:int ;
+            j:insn         jvm:iconst_1 ;
+            j:partOf       <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    _:b31   nh:lineNumber  "6"^^xsd:int .
+    
+    _:b47   rdf:value  "0"^^xsd:int ;
+            nh:idName  "this:Lorg/a/factories/BoolFactory;" ;
+            nh:name    "this" ;
+            j:type     <java://org/a/factories/BoolFactory> , j:new-obj .
+    
+    _:b42   nh:lineNumber  "5"^^xsd:int .
+    
+    _:b15   nh:lineNumber  "3"^^xsd:int .
+    
+    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory>
+            a                   j:ref , nh:def ;
+            <a>                 j:publicJavaElementYay ;
+            nh:defines          j:class ;
+            nh:idName           "org/a/factories/BoolFactory" ;
+            nh:name             "org/a/factories/BoolFactory" ;
+            j:classFileVersion  "49"^^xsd:int ;
+            j:extends           <java://java/lang/Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "BoolFactory.java" .
+    
+    <java://org/a/factories/BoolFactory>
+            a                 j:ref ;
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory> , <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> .
+    
+    <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean>
+            a            nh:def ;
+            <a>          j:publicJavaElementYay ;
+            nh:defines   j:method ;
+            nh:idName    "org/a/factories/BoolFactory.getTrue:()Z" ;
+            nh:name      "getTrue" ;
+            j:code       _:b7 ;
+            j:hasAccess  j:public ;
+            j:hasFlag    j:static ;
+            j:maxLocals  "0"^^xsd:int ;
+            j:maxStack   "1"^^xsd:int ;
+            j:memberOf   <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory> ;
+            j:rType      j:boolean ;
+            j:srcEnd     _:b8 ;
+            j:srcStart   _:b9 .
+    
+    <java://java/lang/Object>
+            a       j:ref .
+    
+    _:b19   rdf:first  _:b3 ;
+            rdf:rest   () .
+    
+    <maven://Client/B/1.1.1>
+            a                  m:MavenCoordinate ;
+            m:dependsOn        <maven://API/A/2.0.0> ;
+            m:inferredRuleYay  <maven://API/A/2.0.0> .
+    
+    _:b65   nh:lineNumber  "4"^^xsd:int ;
+            j:insn         jvm:aload ;
+            j:partOf       <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.--init-----void> ;
+            j:varOperand   _:b63 .
+    
+    _:b28   rdf:first  _:b32 ;
+            rdf:rest   _:b29 .
+    
+    _:b7    rdf:first  _:b20 ;
+            rdf:rest   _:b0 .
+    
+    <maven://Client/B/1.0.1>
+            a                  m:MavenCoordinate ;
+            m:dependsOn        <maven://API/A/1.0.0> ;
+            m:inferredRuleYay  <maven://API/A/1.0.0> .
+    
+    _:b10   nh:lineNumber  "3"^^xsd:int .
+    
+    <java://org/b/main/Main>
+            a                 j:ref ;
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main> , <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main> .
+    
+    _:b32   j:insn           jvm:invokespecial ;
+            j:memberOperand  <java://java/lang/Object.--init-----void> ;
+            j:partOf         <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.--init-----void> .
+    
+    _:b5    j:insn    jvm:return ;
+            j:partOf  <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.--init-----void> .
+    
+    _:b45   rdf:first  _:b41 ;
+            rdf:rest   _:b46 .
+    
+    _:b38   rdf:first  _:b39 ;
+            rdf:rest   _:b40 .
+    
+    <java://org/a/factories/BoolFactory.getTrue---boolean>
+            rdfs:isDefinedBy  <https://db.nuthatchery.org/API/A/1.0.0/org/a/factories/BoolFactory.getTrue---boolean> , <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getTrue---boolean> .
+    
+    <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main>
+            a                   j:ref , nh:def ;
+            <a>                 j:publicJavaElementYay ;
+            nh:defines          j:class ;
+            nh:idName           "org/b/main/Main" ;
+            nh:name             "org/b/main/Main" ;
+            j:classFileVersion  "49"^^xsd:int ;
+            j:extends           <java://java/lang/Object> ;
+            j:hasAccess         j:public ;
+            j:sourceFile        "Main.java" .
+    
+    _:b62   nh:lineNumber      "6"^^xsd:int ;
+            j:callsJavaMethod  <java://org/a/factories/BoolFactory.getFalse---boolean> ;
+            j:callsURIMethod   <https://db.nuthatchery.org/API/A/2.0.0/org/a/factories/BoolFactory.getFalse---boolean> ;
+            j:insn             jvm:invokestatic ;
+            j:memberOperand    <java://org/a/factories/BoolFactory.getFalse---boolean> ;
+            j:partOf           <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.b---boolean> .
+    
+    _:b40   rdf:first  _:b36 ;
+            rdf:rest   _:b44 .
+    
+    _:b52   j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/Client/B/1.1.1/org/b/main/Main.b---boolean> .
+    
+    _:b53   rdf:first  _:b62 ;
+            rdf:rest   _:b60 .
+    
+    _:b30   rdf:first  _:b33 ;
+            rdf:rest   _:b34 .
+    
+    _:b22   rdf:value  "0"^^xsd:int ;
+            nh:idName  "this:Lorg/b/main/Main;" ;
+            nh:name    "this" ;
+            j:type     <java://org/b/main/Main> , j:new-obj .
+    
+    _:b0    rdf:first  _:b1 ;
+            rdf:rest   () .
+    
+    _:b35   j:insn    jvm:ireturn ;
+            j:partOf  <https://db.nuthatchery.org/Client/B/1.0.1/org/b/main/Main.b---boolean> .
+    
+    _:b44   rdf:first  _:b48 ;
+            rdf:rest   () .
 }
