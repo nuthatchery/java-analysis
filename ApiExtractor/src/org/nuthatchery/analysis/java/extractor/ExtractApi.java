@@ -170,7 +170,7 @@ public class ExtractApi {
 			BuiltinRegistry.theRegistry.register(new StringLessThan());
 			Reasoner reasoner = new GenericRuleReasoner(Rule.rulesFromURL("rules.txt"));
 			infModel = ModelFactory.createInfModel(reasoner, dataset.getUnionModel());
-			dataset.addNamedModel("http://annainferencemodel/", infModel.getDeductionsModel());
+			dataset.addNamedModel("http://annasdeduction/", infModel.getDeductionsModel());
 
 			Reasoner mavenReasoner = new GenericRuleReasoner(Rule.rulesFromURL("mavenrules.txt"));
 			InfModel mavenInfModel = ModelFactory.createInfModel(mavenReasoner, dataset.getDefaultModel());
