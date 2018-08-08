@@ -106,6 +106,11 @@ public class ExtractApi {
 				Resource mvnCoord = model.createResource(pomContext.getMavenUri(), MavenFacts.MavenCoordinate);
 				modelId.addProperty(RDF.type, MavenFacts.MavenProject);
 				modelId.addProperty(MavenFacts.hasCoord, mvnCoord);
+
+				Resource id = JavaFacts.Types.object(model, model.getNsPrefixURI(""), mName); // TODO bug: mName gets repeated: rdfs:isDefinedBy <https://db.nuthatchery.org/Client/B/1.1.1/https://db.nuthatchery.org/Client/B/1.1.1/>
+				System.out.println("created id from modelname: " + mName);
+				modelId.addProperty(RDFS.isDefinedBy, id);
+
 				for (Dependency d : pomContext.getDependencies()) {
 					String depUri = PomContext.getMavenUri(d);
 					mvnCoord.addProperty(MavenFacts.dependsOn,
