@@ -107,7 +107,6 @@ public class ExtractApi {
 				modelId.addProperty(RDF.type, MavenFacts.MavenProject);
 				modelId.addProperty(MavenFacts.hasCoord, mvnCoord);
 				for (Dependency d : pomContext.getDependencies()) {
-					// TODO intention is to bind dependency property directly to the other node
 					String depUri = PomContext.getMavenUri(d);
 					mvnCoord.addProperty(MavenFacts.dependsOn,
 							model.createResource(depUri, MavenFacts.MavenCoordinate));
@@ -149,13 +148,14 @@ public class ExtractApi {
 		if (addInference) {
 			// Register custom primitive
 			BuiltinRegistry.theRegistry.register(new StringLessThan());
+
 			Reasoner reasoner = new GenericRuleReasoner(Rule.rulesFromURL("rules.txt"));
 			infModel = ModelFactory.createInfModel(reasoner, dataset.getUnionModel());
-			dataset.addNamedModel("http://annasdeduction/", infModel.getDeductionsModel());
+			dataset.addNamedModel("http://annasdeductionmodels/", infModel.getDeductionsModel());
 
 			Reasoner mavenReasoner = new GenericRuleReasoner(Rule.rulesFromURL("mavenrules.txt"));
 			InfModel mavenInfModel = ModelFactory.createInfModel(mavenReasoner, dataset.getDefaultModel());
-			dataset.addNamedModel("http://maveninferencemodel/", mavenInfModel.getDeductionsModel());
+			dataset.addNamedModel("http://defaultmodelinference/", mavenInfModel.getDeductionsModel());
 			// StmtIterator it = infModel.listStatements();
 			//
 			// while (it.hasNext()) {
