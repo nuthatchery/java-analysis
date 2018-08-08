@@ -321,9 +321,7 @@ public class ExtractApi {
 		if (addOntologyToDataset) {
 			List<String> list = new ArrayList<>();
 			Model defaultModel = dataset.getDefaultModel();
-			for (Iterator<String> it = dataset.listNames(); it.hasNext(); list.add(it.next())) {
-				;
-			}
+			dataset.listNames().forEachRemaining(name -> list.add(name));
 			for (String s : list) {
 				System.out.println("setup: " + s);
 				defaultModel.add(defaultModel.createResource(s), RDFS.isDefinedBy, defaultModel.createResource(s));
