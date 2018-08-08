@@ -177,6 +177,7 @@ public class ClassFactExtractor extends ClassVisitor {
 		classJnStack.push(javaName);
 		if (!className.contains("$")) {
 			id.addProperty(CommonVocabulary.P_NAME, model.createTypedLiteral(className));
+			model.add(JavaFacts.Types.object(model, model.getNsPrefixURI(""), ""), CommonVocabulary.P_DECLARES, id);
 		}
 		id.addProperty(CommonVocabulary.P_IDNAME, model.createTypedLiteral(className));
 		id.addProperty(RDF.type, CommonVocabulary.C_DEF);
