@@ -17,7 +17,6 @@
 -> 
 (?m j:callsURIMethod ?uri)]
 
-
 // Maven rules
 [isNewerVersion: 
 (?jar1 m:groupId ?gid), 
