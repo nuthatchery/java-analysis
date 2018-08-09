@@ -45,7 +45,7 @@ import org.nuthatchery.ontology.basic.CommonVocabulary;
 import org.nuthatchery.reasoning.StringLessThan;
 import org.objectweb.asm.ClassReader;
 
-import net.rootdev.jenajung.JenaJungJFrame;
+//import net.rootdev.jenajung.JenaJungJFrame;
 
 public class ExtractApi {
 	private static final String DB_PREFIX = "https://db.nuthatchery.org/";
