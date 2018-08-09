@@ -120,7 +120,7 @@ public class ExtractApi {
 					System.out.println(pomContext.getMavenUri() + " depends on " + depUri);
 				}
 				synchronized (dataset) {
-					dataset.getDefaultModel().add(mvnCoord.listProperties());
+					dataset.getDefaultModel().add(mvnCoord.listProperties());// copies info, maybe it should be changed
 				}
 			}
 			synchronized (dataset) {
