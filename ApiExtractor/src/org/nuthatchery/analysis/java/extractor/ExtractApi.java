@@ -175,12 +175,9 @@ public class ExtractApi {
 			// System.out.println(subject.toString() + " " + predicate.toString() + " " + object.toString());
 			// }
 
-			JenaJungJFrame.makeJFrame(dataset.getNamedModel("https://db.nuthatchery.org/Client/B/1.1.1/"));
 			// TODO let you pick which graph to visualise
-			JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://annasdeductionmodels/"));
-			// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar"));
-			// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
-			// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/java/"));
+			// JenaJungJFrame.makeJFrame(dataset.getNamedModel("https://db.nuthatchery.org/Client/B/1.1.1/"));
+			// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://annasdeductionmodels/"));
 		}
 	}
 
