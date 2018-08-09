@@ -9,6 +9,7 @@
 //[testInsideGraphs: (?a j:hasAccess j:public) -> (?a a j:publicJavaElementYay)]
 //[testAcrossdepths: (?a m:dependsOn ?b), (?jname m:hasCoordinate ?a) -> (?jname m:dependsOnYay ?b)] 
 //[callsJavaMethod: (?x j:insn jvm:invokestatic), (?x j:memberOperand ?accesspoint), -> (?x j:callsJavaMethod ?accesspoint)]
+
 [callsURIMethod: 
 (?x j:insn jvm:invokestatic), 
 (?x j:memberOperand ?accesspoint), 
@@ -17,14 +18,5 @@
 -> 
 (?m j:callsURIMethod ?uri)]
 
-// Maven rules
-[isNewerVersion: 
-(?jar1 m:groupId ?gid), 
-(?jar2 m:groupId ?gid), 
-(?jar1 m:artifactId ?aid), 
-(?jar2 m:artifactId ?aid), 
-(?jar1 m:version ?x), 
-(?jar2 m:version ?y),
-StringLessThan(?x, ?y) 
--> 
-(?jar1 m:update ?jar2)]
+
+//[transitivebefore: (?a m:before ?b), (b? m:before ?c) -> (?a m:before ?c)]
