@@ -45,6 +45,8 @@ import org.nuthatchery.ontology.basic.CommonVocabulary;
 import org.nuthatchery.reasoning.StringLessThan;
 import org.objectweb.asm.ClassReader;
 
+import net.rootdev.jenajung.JenaJungJFrame;
+
 public class ExtractApi {
 	private static final String DB_PREFIX = "https://db.nuthatchery.org/";
 	private static final List<String> DEFAULT_CLASSES = Arrays.asList("-m", "demo", "..", "../../../../../Test.class",
@@ -150,7 +152,7 @@ public class ExtractApi {
 		// TODO Anna do reasoning here outside of streams
 		boolean addInference = true;
 		InfModel infModel = null;
-		if (addInference) {
+		if (!artifacts.isEmpty() && addInference) {
 			// Register custom primitive
 			BuiltinRegistry.theRegistry.register(new StringLessThan());
 
@@ -172,6 +174,13 @@ public class ExtractApi {
 			//
 			// System.out.println(subject.toString() + " " + predicate.toString() + " " + object.toString());
 			// }
+
+			JenaJungJFrame.makeJFrame(dataset.getNamedModel("https://db.nuthatchery.org/Client/B/1.1.1/"));
+			// TODO let you pick which graph to visualise
+			JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://annasdeductionmodels/"));
+			// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://db.nuthatchery.org/java/jvm-fact-extractor-0.0.1-SNAPSHOT.jar"));
+			// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/maven/project/"));
+			// JenaJungJFrame.makeJFrame(dataset.getNamedModel("http://model.nuthatchery.org/java/"));
 		}
 	}
 
