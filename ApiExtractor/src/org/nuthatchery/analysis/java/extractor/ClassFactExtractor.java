@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;

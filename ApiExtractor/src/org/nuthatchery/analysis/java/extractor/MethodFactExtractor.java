@@ -261,7 +261,7 @@ class MethodFactExtractor extends AnalyzerAdapter {
 		} else {
 			operand = model.createTypedLiteral(cst);
 		}
-		putInstruction(Opcodes.LDC);// , JavaFacts.P_OPERAND_CONSTANT, operand);
+		putInstruction(Opcodes.LDC, JavaFacts.P_OPERAND_CONSTANT, operand);
 		super.visitLdcInsn(cst);
 	}
 
@@ -449,6 +449,8 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 	@Override
 	public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
+		// System.err.printf("visitTryCatchBlock(%s, %s, %s, %s)%n", start, end,
+		// handler, type);
 		ListBuilder list = new ListBuilder(model);
 
 		Resource node = model.createResource();
@@ -461,7 +463,11 @@ class MethodFactExtractor extends AnalyzerAdapter {
 
 		node = model.createResource();
 		model.add(node, JavaFacts.P_OPERAND_LABEL, model.createResource(AnonId.create(handler.toString())));
-		model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, JavaFacts.JN, type));
+		if (type != null) {
+			model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.object(model, JavaFacts.JN, type));
+		} else { // a handler with no exception type is used to implement 'finally'
+			model.add(node, JavaFacts.P_OPERAND_TYPE, JavaFacts.Types.ANY);
+		}
 		list.add(node);
 
 		model.add(currentMethodId, JavaFacts.P_TRY_CATCH_BLOCK, list.build());

@@ -1,6 +1,6 @@
 package org.nuthatchery.analysis.java.extractor;
 
-import java.util.HashMap;
+
 
 //import org.apache.commons.rdf.api.BlankNode;
 //import org.apache.commons.rdf.api.BlankNodeOrIRI;
@@ -282,8 +282,15 @@ public abstract class JavaFacts {
 		public static final Resource LONG = javaTypesModel.createResource(JT + "long");
 		public static final Resource SHORT = javaTypesModel.createResource(JT + "short");
 		public static final Resource TOP = javaTypesModel.createResource(JT + "top-half");
+		/**
+		 * The type of 'this' in constructors
+		 */
 		public static final Resource UNINITIALIZED_THIS = javaTypesModel.createResource(JT + "new-obj");
 		public static final Resource VOID = javaTypesModel.createResource(JT + "void");
+		/**
+		 * Used in 'finally' blocks
+		 */
+		public static final Resource ANY = javaTypesModel.createResource(JT + "any");
 
 		static {
 			javaTypesModel.add(JAVA_TYPE, RDFS.subClassOf, CommonVocabulary.C_TYPE); // all JAVA_TYPEs
